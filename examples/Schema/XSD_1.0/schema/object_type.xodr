@@ -1,0 +1,100 @@
+<?xml version="1.0" standalone="yes"?>
+<OpenDRIVE>
+    <header revMajor="1" revMinor="7" name="" version="1.00" date="Sun Jul 25 20:57:26 2021" north="0.0000000000000000e+00" south="0.0000000000000000e+00" east="0.0000000000000000e+00" west="0.0000000000000000e+00">
+    </header>
+    <road name="" length="2.4029964744272874e+02" id="1" junction="-1" rule="RHT">
+        <link>
+        </link>
+        <planView>
+            <geometry s="0.0000000000000000e+00" x="-6.1799307958477513e+01" y="-3.2041522491349482e+01" hdg="6.0752290039137335e-01" length="6.4489966284590494e+01">
+                <line/>
+            </geometry>
+            <geometry s="6.4489966284590494e+01" x="-8.8488827168706905e+00" y="4.7716302956725301e+00" hdg="6.0752290039137335e-01" length="4.3761996673368408e+01">
+                <spiral curvStart="0.0000000000000000e+00" curvEnd="1.2728864992566343e-02"/>
+            </geometry>
+            <geometry s="1.0825196295795891e+02" x="2.4498398439823646e+01" y="3.2876872529453422e+01" hdg="8.8604317412035360e-01" length="8.4923032948964959e+01">
+                <arc curvature="1.2728864992566343e-02"/>
+            </geometry>
+            <geometry s="1.9317499590692387e+02" x="3.6121662300629211e+01" y="1.1288529466526727e+02" hdg="1.9670169952869925e+00" length="4.3761996673368408e+01">
+                 <spiral curvStart="1.2728864992566343e-02" curvEnd="0.0000000000000000e+00"/>
+            </geometry>
+            <geometry s="2.3693699258029227e+02" x="1.2150100201270007e+01" y="1.4931756074992029e+02" hdg="2.2455372690184592e+00" length="3.3626548624364689e+00">
+                <line/>
+            </geometry>
+        </planView>
+        <elevationProfile>
+            <elevation s="0.0000000000000000e+00" a="0.0000000000000000e+00" b="0.0000000000000000e+00" c="0.0000000000000000e+00" d="0.0000000000000000e+00"/>
+        </elevationProfile>
+        <lateralProfile>
+        </lateralProfile>
+        <lanes>
+            <laneSection s="0.0000000000000000e+00">
+                <left>
+                    <lane id="3" type="border" level="false">
+                        <link>
+                        </link>
+                        <width sOffset="0.0000000000000000e+00" a="6.0000000000000000e+00" b="0.0000000000000000e+00" c="0.0000000000000000e+00" d="0.0000000000000000e+00"/>
+                    </lane>
+                    <lane id="2" type="border" level="false">
+                        <link>
+                        </link>
+                        <width sOffset="0.0000000000000000e+00" a="1.6799999999999999e+00" b="0.0000000000000000e+00" c="0.0000000000000000e+00" d="0.0000000000000000e+00"/>
+                    </lane>
+                    <lane id="1" type="driving" level="false">
+                        <link>
+                        </link>
+                        <width sOffset="0.0000000000000000e+00" a="3.5699999999999998e+00" b="0.0000000000000000e+00" c="0.0000000000000000e+00" d="0.0000000000000000e+00"/>
+                        <roadMark sOffset="0.0000000000000000e+00" type="solid" weight="standard" color="standard" width="1.2000000000000000e-01" laneChange="none" height="1.9999999552965164e-02">
+                            <type name="solid" width="1.2000000000000000e-01">
+                                <line length="0.0000000000000000e+00" space="0.0000000000000000e+00" tOffset="0.0000000000000000e+00" sOffset="0.0000000000000000e+00" rule="no passing" width="1.2000000000000000e-01"/>
+                            </type>
+                        </roadMark>
+                    </lane>
+                </left>
+                <center>
+                    <lane id="0" type="driving" level="false">
+                        <link>
+                        </link>
+                        <roadMark sOffset="0.0000000000000000e+00" type="broken" weight="standard" color="standard" width="1.2000000000000000e-01" laneChange="both" height="1.9999999552965164e-02">
+                            <type name="broken" width="1.2000000000000000e-01">
+                                <line length="4.0000000000000000e+00" space="8.0000000000000000e+00" tOffset="0.0000000000000000e+00" sOffset="0.0000000000000000e+00" rule="caution" width="1.2000000000000000e-01"/>
+                            </type>
+                        </roadMark>
+                    </lane>
+                </center>
+                <right>
+                    <lane id="-1" type="driving" level="false">
+                        <link>
+                        </link>
+                        <width sOffset="0.0000000000000000e+00" a="3.5699999999999998e+00" b="0.0000000000000000e+00" c="0.0000000000000000e+00" d="0.0000000000000000e+00"/>
+                        <roadMark sOffset="0.0000000000000000e+00" type="solid" weight="standard" color="standard" width="1.2000000000000000e-01" laneChange="none" height="1.9999999552965164e-02">
+                            <type name="solid" width="1.2000000000000000e-01">
+                                <line length="0.0000000000000000e+00" space="0.0000000000000000e+00" tOffset="0.0000000000000000e+00" sOffset="0.0000000000000000e+00" rule="no passing" width="1.2000000000000000e-01"/>
+                            </type>
+                        </roadMark>
+                    </lane>
+                    <lane id="-2" type="border" level="false">
+                        <link>
+                        </link>
+                        <width sOffset="0.0000000000000000e+00" a="1.6799999999999999e+00" b="0.0000000000000000e+00" c="0.0000000000000000e+00" d="0.0000000000000000e+00"/>
+                    </lane>
+                    <lane id="-3" type="border" level="false">
+                        <link>
+                        </link>
+                        <width sOffset="0.0000000000000000e+00" a="6.0000000000000000e+00" b="0.0000000000000000e+00" c="0.0000000000000000e+00" d="0.0000000000000000e+00"/>
+                    </lane>
+                </right>
+            </laneSection>
+        </lanes>
+        <objects>
+            <object type="blabal" name="pothole" id="0" s="1.4377428281057618e+02" t="-1.9987489808037218e+00" zOffset="0.0000000000000000e+00" orientation="none" length="2.000000000000e-01" width="3.000000000000e-01" height="1.50000000000e-02" hdg="5.8231426820571039e+00" perpToRoad="true">
+            </object>
+            <object name="pothole" id="1" s="1.4377428281057618e+02" t="-1.9987489808037218e+00" zOffset="0.0000000000000000e+00" orientation="none" length="2.000000000000e-01" width="3.000000000000e-01" height="1.50000000000e-02" hdg="5.8231426820571039e+00" perpToRoad="true">
+            </object>
+        </objects>
+        <signals>
+        </signals>
+        <surface>
+        </surface>
+    </road>
+</OpenDRIVE>
