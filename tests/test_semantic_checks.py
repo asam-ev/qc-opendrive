@@ -1,5 +1,6 @@
 import os
 import sys
+import pytest
 
 from src import main
 
@@ -15,20 +16,37 @@ def _compare_reports(src_report_path: str, target_report_path: str) -> None:
     assert output_xml_text == example_xml_text
 
 
-def test_road_lane_access_no_mix_of_deny_or_allow_17_invalid(monkeypatch) -> None:
+@pytest.mark.parametrize(
+    "target_file", ["17_invalid", "17_valid", "18_invalid", "18_valid"]
+)
+def test_road_lane_access_no_mix_of_deny_or_allow(
+    target_file: str, monkeypatch
+) -> None:
+    configs_path = "tests/data/road_lane_access_no_mix_of_deny_or_allow/configs/"
+    config_file = f"road_lane_access_no_mix_of_deny_or_allow_{target_file}_config.xml"
+
+    target_config = os.path.join(configs_path, config_file)
+
     monkeypatch.setattr(
         sys,
         "argv",
         [
             "main.py",
             "-c",
-            "tests/data/road_lane_access_no_mix_of_deny_or_allow/configs/road_lane_access_no_mix_of_deny_or_allow_17_invalid_config.xml",
+            target_config,
         ],
     )
     main.main()
 
+    expected_outputs_path = (
+        "tests/data/road_lane_access_no_mix_of_deny_or_allow/expected/"
+    )
+    expected_file = f"road_lane_access_no_mix_of_deny_or_allow_{target_file}.xqar"
+
+    target_expected_output = os.path.join(expected_outputs_path, expected_file)
+
     _compare_reports(
-        "tests/data/road_lane_access_no_mix_of_deny_or_allow/expected/road_lane_access_no_mix_of_deny_or_allow_17_invalid.xqar",
+        target_expected_output,
         "xodrBundleReport.xqar",
     )
 
