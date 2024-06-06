@@ -31,9 +31,11 @@ def test_road_lane_access_no_mix_of_deny_or_allow(
 
     test_config = Configuration()
     test_config.set_config_param(name="XodrFile", value=target_file_path)
-    test_config.register_checker_bundle(checker_bundle_name="xodrBundle")
+    test_config.register_checker_bundle(checker_bundle_name=constants.BUNDLE_NAME)
     test_config.set_checker_bundle_param(
-        checker_bundle_name="xodrBundle", name="resultFile", value=REPORT_FILE_PATH
+        checker_bundle_name=constants.BUNDLE_NAME,
+        name="resultFile",
+        value=REPORT_FILE_PATH,
     )
     print(test_config._configuration.to_xml())
     test_config.write_to_file(CONFIG_FILE_PATH)
