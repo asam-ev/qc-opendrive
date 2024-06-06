@@ -21,7 +21,7 @@ This will install the needed dependencies to your local Python.
 The checker can be used as a Python script:
 
 ```
-python src/main.py --help
+python main.py --help
 
 usage: QC OpenDrive Checker [-h] (-d | -c CONFIG_PATH)
 
@@ -39,8 +39,8 @@ options:
 - No issues found
 
 ```
-$ python python src/main.py \
-    -c tests/data/road_lane_access_no_mix_of_deny_or_allow/configs/road_lane_access_no_mix_of_deny_or_allow_18_valid_config.xml
+$ python python main.py \
+    -c example_config/config.xml
 2024-06-05 18:29:23,551 - Initializing checks
 2024-06-05 18:29:23,551 - Executing semantic checks
 2024-06-05 18:29:23,552 - Executing road.lane.access.no_mix_of_deny_or_allow check
@@ -51,16 +51,14 @@ $ python python src/main.py \
 - Issues found on file
 
 ```
-python src/main.py -c tests/data/road_lane_access_no_mix_of_deny_or_allow/configs/road_lane_access_no_mix_of_deny_or_allow_18_invalid_config.xml
+python main.py \
+    -c example_config/config.xml
 2024-06-05 18:29:53,950 - Initializing checks
 2024-06-05 18:29:53,950 - Executing semantic checks
 2024-06-05 18:29:53,951 - Executing road.lane.access.no_mix_of_deny_or_allow check
 2024-06-05 18:29:53,951 - Issues found - 1
 2024-06-05 18:29:53,951 - Done
 ```
-
-The module will output the report to the defined `resultFile` in the
-configuration. For the examples above, it would be `xodrBundleReport.xqar`.
 
 ## Tests
 

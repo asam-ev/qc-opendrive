@@ -1,10 +1,10 @@
 import argparse
 import logging
 
-from qc_baselib import Configuration, Report
+from qc_baselib import Configuration, Result
 
-import constants
-from checks import semantic
+from qc_opendrive import constants
+from qc_opendrive.checks import semantic
 
 logging.basicConfig(format="%(asctime)s - %(message)s", level=logging.INFO)
 
@@ -33,21 +33,21 @@ def main():
         config = Configuration()
         config.load_from_file(xml_file_path=args.config_path)
 
-        report = Report()
-        report.register_checker_bundle(
+        result = Result()
+        result.register_checker_bundle(
             name=constants.BUNDLE_NAME,
             build_date="2024-06-05",
             description="OpenDrive checker bundle",
             version=constants.BUNDLE_VERSION,
             summary="",
         )
-        report.set_results_version(version=constants.BUNDLE_VERSION)
+        result.set_result_version(version=constants.BUNDLE_VERSION)
 
-        semantic.run_checks(config=config, report=report)
+        semantic.run_checks(config=config, result=result)
 
-        report.write_to_file(
+        result.write_to_file(
             config.get_checker_bundle_param(
-                application=constants.BUNDLE_NAME, param_name="resultFile"
+                checker_bundle_name=constants.BUNDLE_NAME, param_name="resultFile"
             )
         )
 

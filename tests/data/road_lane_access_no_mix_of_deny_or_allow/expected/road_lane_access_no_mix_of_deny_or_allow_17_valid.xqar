@@ -1,6 +1,0 @@
-<?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<CheckerResults version="0.1.0">
-  <CheckerBundle build_date="2024-06-05" description="OpenDrive checker bundle" name="xodrBundle" version="0.1.0" summary="">
-    <Checker checkerId="semantic_xodr" description="Evaluates elements in the file and their semantics to guarantee they are in conformity with the standard." summary=""/>
-  </CheckerBundle>
-</CheckerResults>

@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-
-<Config>
-  <Param name="XodrFile" value="tests/data/road_lane_access_no_mix_of_deny_or_allow/examples/road_lane_access_no_mix_of_deny_or_allow_18_valid.xodr"/>
-  <CheckerBundle application="xodrBundle">
-    <Param name="resultFile" value="xodrBundleReport.xqar"/>
-  </CheckerBundle>
-</Config>
