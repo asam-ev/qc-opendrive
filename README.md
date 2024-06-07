@@ -1,10 +1,6 @@
 # qc-opendrive
 
-This project implements the OpenDrive Python checker for the ASAM Quality Checker
-framework.
-
-In this project, several checks are implemented in order to guarantee the sanity
-of OpenDrive (.xodr) files.
+This project implements the OpenDrive Checker for the ASAM Quality Checker project.
 
 ## Installation
 
