@@ -37,7 +37,7 @@ def test_road_lane_access_no_mix_of_deny_or_allow(
         name="resultFile",
         value=REPORT_FILE_PATH,
     )
-    print(test_config._configuration.to_xml())
+
     test_config.write_to_file(CONFIG_FILE_PATH)
 
     monkeypatch.setattr(
