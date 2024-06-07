@@ -1,0 +1,2 @@
+lxml==5.2.2
+qc_baselib @ git+https://github.com/asam-ev/qc-baselib-py@develop
