@@ -70,7 +70,7 @@ pip install -r requirements-tests.txt
 Execute tests:
 
 ```
-pytest -vv
+python -m pytest -vv
 ```
 
 They should output something similar to:
