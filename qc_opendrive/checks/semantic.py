@@ -33,7 +33,7 @@ def check_invalid_road_lane_access_no_mix_of_deny_or_allow(
     logging.info("Executing road.lane.access.no_mix_of_deny_or_allow check")
 
     lanes = utils.get_lanes(root=root)
-    issue_count = 0
+
     lane: etree._Element
     for lane in lanes:
         access_s_offset_info: List[SOffsetInfo] = []
@@ -51,10 +51,9 @@ def check_invalid_road_lane_access_no_mix_of_deny_or_allow(
                         abs(s_offset_info.s_offset - s_offset) <= 1e-6
                         and rule != s_offset_info.rule
                     ):
-                        result.register_issue(
+                        issue_id = result.register_issue(
                             checker_bundle_name=constants.BUNDLE_NAME,
                             checker_id=CHECKER_ID,
-                            issue_id=issue_count,
                             description="At a given s-position, either only deny or only allow values shall be given, not mixed.",
                             level=IssueSeverity.ERROR,
                         )
@@ -67,12 +66,10 @@ def check_invalid_road_lane_access_no_mix_of_deny_or_allow(
                         result.add_xml_location(
                             checker_bundle_name=constants.BUNDLE_NAME,
                             checker_id=CHECKER_ID,
-                            issue_id=issue_count,
+                            issue_id=issue_id,
                             xpath=path,
                             description=f"First encounter of {current_rule} having {previous_rule} before.",
                         )
-
-                        issue_count += 1
 
                 access_s_offset_info.append(
                     SOffsetInfo(
@@ -81,7 +78,9 @@ def check_invalid_road_lane_access_no_mix_of_deny_or_allow(
                     )
                 )
 
-    logging.info(f"Issues found - {issue_count}")
+    logging.info(
+        f"Issues found - {result.get_checker_issue_count(checker_bundle_name=constants.BUNDLE_NAME, checker_id=CHECKER_ID)}"
+    )
 
 
 def run_checks(config: Configuration, result: Result) -> None:
