@@ -7,6 +7,7 @@ from typing import List
 import main
 
 from qc_opendrive import constants, checks
+from qc_opendrive.checks.semantic import semantic_constants
 
 from qc_baselib import Configuration, Result, IssueSeverity
 
@@ -32,10 +33,11 @@ def check_issues_xpath_match(issues_count: int, issue_xpath: List[int]):
     result.load_from_file(REPORT_FILE_PATH)
 
     checker = result.get_checker_result(
-        checker_bundle_name=constants.BUNDLE_NAME, checker_id=checks.semantic.CHECKER_ID
+        checker_bundle_name=constants.BUNDLE_NAME,
+        checker_id=semantic_constants.CHECKER_ID,
     )
 
-    assert checker.checker_id == checks.semantic.CHECKER_ID
+    assert checker.checker_id == semantic_constants.CHECKER_ID
     assert len(checker.issues) == issues_count
 
     if len(issue_xpath) > 0:
@@ -50,10 +52,11 @@ def check_issues_severity_match(issues_count: int, issue_severity: List[IssueSev
     result.load_from_file(REPORT_FILE_PATH)
 
     checker = result.get_checker_result(
-        checker_bundle_name=constants.BUNDLE_NAME, checker_id=checks.semantic.CHECKER_ID
+        checker_bundle_name=constants.BUNDLE_NAME,
+        checker_id=semantic_constants.CHECKER_ID,
     )
 
-    assert checker.checker_id == checks.semantic.CHECKER_ID
+    assert checker.checker_id == semantic_constants.CHECKER_ID
     assert len(checker.issues) == issues_count
 
     if len(issue_severity) > 0:
