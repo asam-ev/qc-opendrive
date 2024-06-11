@@ -1,7 +1,7 @@
 import logging
 
 from dataclasses import dataclass
-from typing import Union, Dict, Set, List
+from typing import List
 
 from lxml import etree
 
@@ -10,7 +10,7 @@ from qc_baselib import Configuration, Result, IssueSeverity
 from qc_opendrive import constants
 from qc_opendrive.checks import utils
 
-CHECKER_ID = "semantic_xodr"
+from qc_opendrive.checks.semantic import semantic_constants
 
 
 @dataclass
@@ -20,9 +20,7 @@ class SOffsetInfo:
 
 
 # TODO: Add logic to handle that this rule only applied to xord 1.7 and 1.8
-def check_invalid_road_lane_access_no_mix_of_deny_or_allow(
-    root: etree._ElementTree, config: Configuration, result: Result
-) -> None:
+def check_rule(root: etree._ElementTree, config: Configuration, result: Result) -> None:
     """
     Implements a rule to check if there is mixed content on access rules for
     the same sOffset on lanes.
@@ -53,7 +51,7 @@ def check_invalid_road_lane_access_no_mix_of_deny_or_allow(
                     ):
                         issue_id = result.register_issue(
                             checker_bundle_name=constants.BUNDLE_NAME,
-                            checker_id=CHECKER_ID,
+                            checker_id=semantic_constants.CHECKER_ID,
                             description="At a given s-position, either only deny or only allow values shall be given, not mixed.",
                             level=IssueSeverity.ERROR,
                         )
@@ -65,7 +63,7 @@ def check_invalid_road_lane_access_no_mix_of_deny_or_allow(
 
                         result.add_xml_location(
                             checker_bundle_name=constants.BUNDLE_NAME,
-                            checker_id=CHECKER_ID,
+                            checker_id=semantic_constants.CHECKER_ID,
                             issue_id=issue_id,
                             xpath=path,
                             description=f"First encounter of {current_rule} having {previous_rule} before.",
@@ -77,24 +75,3 @@ def check_invalid_road_lane_access_no_mix_of_deny_or_allow(
                         rule=access_attr["rule"],
                     )
                 )
-
-    logging.info(
-        f"Issues found - {result.get_checker_issue_count(checker_bundle_name=constants.BUNDLE_NAME, checker_id=CHECKER_ID)}"
-    )
-
-
-def run_checks(config: Configuration, result: Result) -> None:
-    logging.info("Executing semantic checks")
-
-    root = etree.parse(config.get_config_param("XodrFile"))
-
-    result.register_checker(
-        checker_bundle_name=constants.BUNDLE_NAME,
-        checker_id=CHECKER_ID,
-        description="Evaluates elements in the file and their semantics to guarantee they are in conformity with the standard.",
-        summary="",
-    )
-
-    check_invalid_road_lane_access_no_mix_of_deny_or_allow(
-        root=root, config=config, result=result
-    )
