@@ -25,12 +25,12 @@ def run_checks(config: Configuration, result: Result) -> None:
         summary="",
     )
 
-    rules_list = [
+    rule_list = [
         road_lane_level_true_one_side.check_rule,
         road_lane_access_no_mix_of_deny_or_allow.check_rule,
     ]
 
-    for rule in rules_list:
+    for rule in rule_list:
         rule(root=root, config=config, result=result)
 
     logging.info(
