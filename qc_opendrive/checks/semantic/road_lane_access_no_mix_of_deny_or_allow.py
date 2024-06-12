@@ -30,6 +30,15 @@ def check_rule(root: etree._ElementTree, config: Configuration, result: Result) 
     """
     logging.info("Executing road.lane.access.no_mix_of_deny_or_allow check")
 
+    rule_uid = result.register_rule(
+        checker_bundle_name=constants.BUNDLE_NAME,
+        checker_id=semantic_constants.CHECKER_ID,
+        emanating_entity="asam.net",
+        standard="xodr",
+        definition_setting="1.8.0",
+        rule_full_name="road.lane.access.no_mix_of_deny_or_allow",
+    )
+
     lanes = utils.get_lanes(root=root)
 
     lane: etree._Element
@@ -54,6 +63,7 @@ def check_rule(root: etree._ElementTree, config: Configuration, result: Result) 
                             checker_id=semantic_constants.CHECKER_ID,
                             description="At a given s-position, either only deny or only allow values shall be given, not mixed.",
                             level=IssueSeverity.ERROR,
+                            rule_uid=rule_uid,
                         )
 
                         path = root.getpath(access)
