@@ -22,7 +22,7 @@ class SOffsetInfo:
 RULE_SUPPORTED_SCHEMA_VERSIONS = set(["1.7.0", "1.8.0"])
 
 
-def check_rule(rule_input: models.RuleInput) -> None:
+def check_rule(checker_data: models.CheckerData) -> None:
     """
     Implements a rule to check if there is mixed content on access rules for
     the same sOffset on lanes.
@@ -32,22 +32,22 @@ def check_rule(rule_input: models.RuleInput) -> None:
     """
     logging.info("Executing road.lane.access.no_mix_of_deny_or_allow check")
 
-    if rule_input.schema_version not in RULE_SUPPORTED_SCHEMA_VERSIONS:
+    if checker_data.schema_version not in RULE_SUPPORTED_SCHEMA_VERSIONS:
         logging.info(
-            f"Schema version {rule_input.schema_version} not supported. Skipping rule."
+            f"Schema version {checker_data.schema_version} not supported. Skipping rule."
         )
         return
 
-    rule_uid = rule_input.result.register_rule(
+    rule_uid = checker_data.result.register_rule(
         checker_bundle_name=constants.BUNDLE_NAME,
         checker_id=semantic_constants.CHECKER_ID,
         emanating_entity="asam.net",
         standard="xodr",
-        definition_setting=rule_input.schema_version,
+        definition_setting=checker_data.schema_version,
         rule_full_name="road.lane.access.no_mix_of_deny_or_allow",
     )
 
-    lanes = utils.get_lanes(root=rule_input.input_file_xml_root)
+    lanes = utils.get_lanes(root=checker_data.input_file_xml_root)
 
     lane: etree._Element
     for lane in lanes:
@@ -66,7 +66,7 @@ def check_rule(rule_input: models.RuleInput) -> None:
                         abs(s_offset_info.s_offset - s_offset) <= 1e-6
                         and rule != s_offset_info.rule
                     ):
-                        issue_id = rule_input.result.register_issue(
+                        issue_id = checker_data.result.register_issue(
                             checker_bundle_name=constants.BUNDLE_NAME,
                             checker_id=semantic_constants.CHECKER_ID,
                             description="At a given s-position, either only deny or only allow values shall be given, not mixed.",
@@ -74,12 +74,12 @@ def check_rule(rule_input: models.RuleInput) -> None:
                             rule_uid=rule_uid,
                         )
 
-                        path = rule_input.input_file_xml_root.getpath(access)
+                        path = checker_data.input_file_xml_root.getpath(access)
 
                         previous_rule = s_offset_info.rule
                         current_rule = access_attr["rule"]
 
-                        rule_input.result.add_xml_location(
+                        checker_data.result.add_xml_location(
                             checker_bundle_name=constants.BUNDLE_NAME,
                             checker_id=semantic_constants.CHECKER_ID,
                             issue_id=issue_id,

@@ -68,7 +68,7 @@ def _check_level_change_between_lane_sections(
     return
 
 
-def check_rule(rule_input: models.RuleInput) -> None:
+def check_rule(checker_data: models.CheckerData) -> None:
     """
     Implements a rule to check if there is any @Level=False after true until
     the lane border.
@@ -78,22 +78,22 @@ def check_rule(rule_input: models.RuleInput) -> None:
     """
     logging.info("Executing road.lane.level.true.one_side check")
 
-    if rule_input.schema_version not in RULE_SUPPORTED_SCHEMA_VERSIONS:
+    if checker_data.schema_version not in RULE_SUPPORTED_SCHEMA_VERSIONS:
         logging.info(
-            f"Schema version {rule_input.schema_version} not supported. Skipping rule."
+            f"Schema version {checker_data.schema_version} not supported. Skipping rule."
         )
         return
 
-    rule_uid = rule_input.result.register_rule(
+    rule_uid = checker_data.result.register_rule(
         checker_bundle_name=constants.BUNDLE_NAME,
         checker_id=semantic_constants.CHECKER_ID,
         emanating_entity="asam.net",
         standard="xodr",
-        definition_setting=rule_input.schema_version,
+        definition_setting=checker_data.schema_version,
         rule_full_name="road.lane.level.true.one_side",
     )
 
-    lane_sections = utils.get_lane_sections(rule_input.input_file_xml_root)
+    lane_sections = utils.get_lane_sections(checker_data.input_file_xml_root)
 
     # Sort by s attribute to guarantee order
     sorted_lane_sections = sorted(
@@ -122,9 +122,9 @@ def check_rule(rule_input: models.RuleInput) -> None:
         )
 
         _check_true_level_on_side(
-            rule_input.input_file_xml_root,
+            checker_data.input_file_xml_root,
             sorted_left_lane,
-            rule_input.result,
+            checker_data.result,
             rule_uid,
         )
 
@@ -135,9 +135,9 @@ def check_rule(rule_input: models.RuleInput) -> None:
         )
 
         _check_true_level_on_side(
-            rule_input.input_file_xml_root,
+            checker_data.input_file_xml_root,
             sorted_right_lane,
-            rule_input.result,
+            checker_data.result,
             rule_uid,
         )
 

@@ -5,7 +5,7 @@ from qc_baselib import Configuration, Result
 
 
 @dataclass
-class RuleInput:
+class CheckerData:
     input_file_xml_root: etree._ElementTree
     config: Configuration
     result: Result

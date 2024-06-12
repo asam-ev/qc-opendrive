@@ -33,7 +33,7 @@ def run_checks(config: Configuration, result: Result) -> None:
         road_lane_access_no_mix_of_deny_or_allow.check_rule,
     ]
 
-    rule_input = models.RuleInput(
+    checker_data = models.CheckerData(
         input_file_xml_root=root,
         config=config,
         result=result,
@@ -41,7 +41,7 @@ def run_checks(config: Configuration, result: Result) -> None:
     )
 
     for rule in rule_list:
-        rule(rule_input=rule_input)
+        rule(checker_data=checker_data)
 
     logging.info(
         f"Issues found - {result.get_checker_issue_count(checker_bundle_name=constants.BUNDLE_NAME, checker_id=semantic_constants.CHECKER_ID)}"
