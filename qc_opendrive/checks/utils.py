@@ -21,6 +21,15 @@ def get_lane_sections(root: etree._ElementTree) -> List[etree._ElementTree]:
     return lane_sections
 
 
+def get_roads(root: etree._ElementTree) -> List[etree._ElementTree]:
+    roads = []
+
+    for road in root.iter("road"):
+        roads.append(road)
+
+    return roads
+
+
 def xml_string_to_bool(value: str):
     return value.lower() in ("true",)
 
