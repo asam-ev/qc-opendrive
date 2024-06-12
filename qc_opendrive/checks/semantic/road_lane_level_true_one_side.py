@@ -10,6 +10,8 @@ from qc_opendrive import constants
 from qc_opendrive.checks import utils
 from qc_opendrive.checks.semantic import semantic_constants
 
+RULE_SUPPORTED_SCHEMA_VERSIONS = set(["1.7.0", "1.8.0"])
+
 
 def _check_true_level_on_side(
     root: etree._ElementTree,
@@ -66,7 +68,9 @@ def _check_level_change_between_lane_sections(
     return
 
 
-def check_rule(root: etree._ElementTree, config: Configuration, result: Result) -> None:
+def check_rule(
+    root: etree._ElementTree, config: Configuration, result: Result, schema_version: str
+) -> None:
     """
     Implements a rule to check if there is any @Level=False after true until
     the lane border.
@@ -75,6 +79,10 @@ def check_rule(root: etree._ElementTree, config: Configuration, result: Result) 
         - https://github.com/asam-ev/qc-opendrive/issues/2
     """
     logging.info("Executing road.lane.level.true.one_side check")
+
+    if schema_version not in RULE_SUPPORTED_SCHEMA_VERSIONS:
+        logging.info(f"Schema version {schema_version} not supported. Skipping rule.")
+        return
 
     rule_uid = result.register_rule(
         checker_bundle_name=constants.BUNDLE_NAME,

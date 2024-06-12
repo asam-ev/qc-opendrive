@@ -19,8 +19,13 @@ class SOffsetInfo:
     rule: str
 
 
+RULE_SUPPORTED_SCHEMA_VERSIONS = set(["1.7.0", "1.8.0"])
+
+
 # TODO: Add logic to handle that this rule only applied to xord 1.7 and 1.8
-def check_rule(root: etree._ElementTree, config: Configuration, result: Result) -> None:
+def check_rule(
+    root: etree._ElementTree, config: Configuration, result: Result, schema_version: str
+) -> None:
     """
     Implements a rule to check if there is mixed content on access rules for
     the same sOffset on lanes.
@@ -30,12 +35,16 @@ def check_rule(root: etree._ElementTree, config: Configuration, result: Result) 
     """
     logging.info("Executing road.lane.access.no_mix_of_deny_or_allow check")
 
+    if schema_version not in RULE_SUPPORTED_SCHEMA_VERSIONS:
+        logging.info(f"Schema version {schema_version} not supported. Skipping rule.")
+        return
+
     rule_uid = result.register_rule(
         checker_bundle_name=constants.BUNDLE_NAME,
         checker_id=semantic_constants.CHECKER_ID,
         emanating_entity="asam.net",
         standard="xodr",
-        definition_setting="1.8.0",
+        definition_setting=schema_version,
         rule_full_name="road.lane.access.no_mix_of_deny_or_allow",
     )
 

@@ -23,3 +23,10 @@ def get_lane_sections(root: etree._ElementTree) -> List[etree._ElementTree]:
 
 def xml_string_to_bool(value: str):
     return value.lower() in ("true",)
+
+
+def get_standard_schema_version(root: etree._ElementTree) -> str:
+    header = root.find("header")
+    header_attrib = header.attrib
+    version = f"{header_attrib['revMajor']}.{header_attrib['revMinor']}.0"
+    return version
