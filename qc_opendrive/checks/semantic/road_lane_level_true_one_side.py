@@ -93,7 +93,7 @@ def check_rule(rule_input: models.RuleInput) -> None:
         rule_full_name="road.lane.level.true.one_side",
     )
 
-    lane_sections = utils.get_lane_sections(rule_input.root)
+    lane_sections = utils.get_lane_sections(rule_input.input_file_xml_root)
 
     # Sort by s attribute to guarantee order
     sorted_lane_sections = sorted(
@@ -122,7 +122,10 @@ def check_rule(rule_input: models.RuleInput) -> None:
         )
 
         _check_true_level_on_side(
-            rule_input.root, sorted_left_lane, rule_input.result, rule_uid
+            rule_input.input_file_xml_root,
+            sorted_left_lane,
+            rule_input.result,
+            rule_uid,
         )
 
         # sort by lane abs(id) to guarantee order while checking level
@@ -132,7 +135,10 @@ def check_rule(rule_input: models.RuleInput) -> None:
         )
 
         _check_true_level_on_side(
-            rule_input.root, sorted_right_lane, rule_input.result, rule_uid
+            rule_input.input_file_xml_root,
+            sorted_right_lane,
+            rule_input.result,
+            rule_uid,
         )
 
         # check for lane level changing in between consecutive lane sections

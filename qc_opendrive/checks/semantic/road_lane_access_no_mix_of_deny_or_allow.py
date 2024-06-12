@@ -47,7 +47,7 @@ def check_rule(rule_input: models.RuleInput) -> None:
         rule_full_name="road.lane.access.no_mix_of_deny_or_allow",
     )
 
-    lanes = utils.get_lanes(root=rule_input.root)
+    lanes = utils.get_lanes(root=rule_input.input_file_xml_root)
 
     lane: etree._Element
     for lane in lanes:
@@ -74,7 +74,7 @@ def check_rule(rule_input: models.RuleInput) -> None:
                             rule_uid=rule_uid,
                         )
 
-                        path = rule_input.root.getpath(access)
+                        path = rule_input.input_file_xml_root.getpath(access)
 
                         previous_rule = s_offset_info.rule
                         current_rule = access_attr["rule"]

@@ -34,7 +34,10 @@ def run_checks(config: Configuration, result: Result) -> None:
     ]
 
     rule_input = models.RuleInput(
-        root=root, config=config, result=result, schema_version=odr_schema_version
+        input_file_xml_root=root,
+        config=config,
+        result=result,
+        schema_version=odr_schema_version,
     )
 
     for rule in rule_list:
