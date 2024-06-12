@@ -7,7 +7,7 @@ from lxml import etree
 from qc_baselib import Configuration, Result, IssueSeverity
 
 from qc_opendrive import constants
-from qc_opendrive.checks import utils
+from qc_opendrive.checks import utils, models
 from qc_opendrive.checks.semantic import semantic_constants
 
 RULE_SUPPORTED_SCHEMA_VERSIONS = set(["1.7.0", "1.8.0"])
@@ -68,9 +68,7 @@ def _check_level_change_between_lane_sections(
     return
 
 
-def check_rule(
-    root: etree._ElementTree, config: Configuration, result: Result, schema_version: str
-) -> None:
+def check_rule(rule_input: models.RuleInput) -> None:
     """
     Implements a rule to check if there is any @Level=False after true until
     the lane border.
@@ -80,20 +78,22 @@ def check_rule(
     """
     logging.info("Executing road.lane.level.true.one_side check")
 
-    if schema_version not in RULE_SUPPORTED_SCHEMA_VERSIONS:
-        logging.info(f"Schema version {schema_version} not supported. Skipping rule.")
+    if rule_input.schema_version not in RULE_SUPPORTED_SCHEMA_VERSIONS:
+        logging.info(
+            f"Schema version {rule_input.schema_version} not supported. Skipping rule."
+        )
         return
 
-    rule_uid = result.register_rule(
+    rule_uid = rule_input.result.register_rule(
         checker_bundle_name=constants.BUNDLE_NAME,
         checker_id=semantic_constants.CHECKER_ID,
         emanating_entity="asam.net",
         standard="xodr",
-        definition_setting="1.8.0",
+        definition_setting=rule_input.schema_version,
         rule_full_name="road.lane.level.true.one_side",
     )
 
-    lane_sections = utils.get_lane_sections(root)
+    lane_sections = utils.get_lane_sections(rule_input.root)
 
     # Sort by s attribute to guarantee order
     sorted_lane_sections = sorted(
@@ -121,7 +121,9 @@ def check_rule(
             left_lanes_list, key=lambda lane: int(lane.attrib["id"])
         )
 
-        _check_true_level_on_side(root, sorted_left_lane, result, rule_uid)
+        _check_true_level_on_side(
+            rule_input.root, sorted_left_lane, rule_input.result, rule_uid
+        )
 
         # sort by lane abs(id) to guarantee order while checking level
         # right ids goes monotonic decreasing from -1
@@ -129,7 +131,9 @@ def check_rule(
             right_lanes_list, key=lambda lane: abs(int(lane.attrib["id"]))
         )
 
-        _check_true_level_on_side(root, sorted_right_lane, result, rule_uid)
+        _check_true_level_on_side(
+            rule_input.root, sorted_right_lane, rule_input.result, rule_uid
+        )
 
         # check for lane level changing in between consecutive lane sections
         _check_level_change_between_lane_sections(
