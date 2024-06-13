@@ -11,7 +11,7 @@ from qc_opendrive import constants
 from qc_opendrive.checks import utils, models
 from qc_opendrive.checks.semantic import semantic_constants
 
-RULE_SUPPORTED_SCHEMA_VERSIONS = set(["1.7.0", "1.8.0"])
+RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.7.0"
 
 
 def _check_true_level_on_side(
@@ -159,7 +159,7 @@ def check_rule(checker_data: models.CheckerData) -> None:
     """
     logging.info("Executing road.lane.level.true.one_side check")
 
-    if checker_data.schema_version not in RULE_SUPPORTED_SCHEMA_VERSIONS:
+    if checker_data.schema_version < RULE_INITIAL_SUPPORTED_SCHEMA_VERSION:
         logging.info(
             f"Schema version {checker_data.schema_version} not supported. Skipping rule."
         )
