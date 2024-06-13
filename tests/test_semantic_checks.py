@@ -186,3 +186,68 @@ def test_road_lane_true_level_one_side(
     check_issues_severity_match(issues_count, issue_severity)
 
     cleanup_files()
+
+
+@pytest.mark.parametrize(
+    "target_file,issues_count,issue_xpath,issue_severity",
+    [
+        ("valid", 0, [], []),
+        (
+            "invalid",
+            8,
+            [
+                "/OpenDRIVE/road/lanes/laneSection[1]/left/lane[1]",
+                "/OpenDRIVE/road/lanes/laneSection[1]/left/lane[2]",
+                "/OpenDRIVE/road/lanes/laneSection[2]/left/lane[1]",
+                "/OpenDRIVE/road/lanes/laneSection[2]/left/lane[2]",
+                "/OpenDRIVE/road/lanes/laneSection[1]/right/lane[2]",
+                "/OpenDRIVE/road/lanes/laneSection[1]/right/lane[3]",
+                "/OpenDRIVE/road/lanes/laneSection[2]/right/lane[2]",
+                "/OpenDRIVE/road/lanes/laneSection[2]/right/lane[3]",
+            ],
+            [
+                IssueSeverity.WARNING,
+                IssueSeverity.WARNING,
+                IssueSeverity.WARNING,
+                IssueSeverity.WARNING,
+                IssueSeverity.WARNING,
+                IssueSeverity.WARNING,
+                IssueSeverity.WARNING,
+                IssueSeverity.WARNING,
+            ],
+        ),
+        ("valid_wrong_predecessor", 0, [], []),
+        (
+            "invalid_wrong_predecessor",
+            2,
+            [
+                "/OpenDRIVE/road/lanes/laneSection[1]/left/lane[1]",
+                "/OpenDRIVE/road/lanes/laneSection[1]/left/lane[2]",
+            ],
+            [
+                IssueSeverity.WARNING,
+                IssueSeverity.WARNING,
+            ],
+        ),
+    ],
+)
+def test_road_lane_true_level_one_side_lane_section(
+    target_file: str,
+    issues_count: int,
+    issue_xpath: List[str],
+    issue_severity: List[IssueSeverity],
+    monkeypatch,
+) -> None:
+    base_path = "tests/data/road_lane_level_true_one_side_lanesection/"
+    target_file_name = f"road_lane_level_true_one_side_lanesection_{target_file}.xodr"
+
+    target_file_path = os.path.join(base_path, target_file_name)
+
+    create_test_config(target_file_path)
+
+    launch_main(monkeypatch)
+
+    check_issues_xpath_match(issues_count, issue_xpath)
+    check_issues_severity_match(issues_count, issue_severity)
+
+    cleanup_files()
