@@ -170,7 +170,7 @@ def check_rule(checker_data: models.CheckerData) -> None:
         checker_id=semantic_constants.CHECKER_ID,
         emanating_entity="asam.net",
         standard="xodr",
-        definition_setting=checker_data.schema_version,
+        definition_setting=RULE_INITIAL_SUPPORTED_SCHEMA_VERSION,
         rule_full_name="road.lane.level.true.one_side",
     )
 
