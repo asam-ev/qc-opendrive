@@ -96,6 +96,7 @@ def cleanup_files():
         ("17_valid", 0, []),
         ("18_invalid", 1, ["/OpenDRIVE/road/lanes/laneSection/left/lane[1]/access[2]"]),
         ("18_valid", 0, []),
+        ("17_invalid_older_schema_version", 0, []),
     ],
 )
 def test_road_lane_access_no_mix_of_deny_or_allow_examples(
@@ -164,6 +165,7 @@ def test_road_lane_access_no_mix_of_deny_or_allow_close_match(
             ],
             [IssueSeverity.ERROR, IssueSeverity.ERROR],
         ),
+        ("invalid_older_schema_version", 0, [], []),
     ],
 )
 def test_road_lane_true_level_one_side(

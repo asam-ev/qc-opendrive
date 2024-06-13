@@ -19,7 +19,7 @@ class SOffsetInfo:
     rule: str
 
 
-RULE_SUPPORTED_SCHEMA_VERSIONS = set(["1.7.0", "1.8.0"])
+RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.7.0"
 
 
 def check_rule(checker_data: models.CheckerData) -> None:
@@ -32,7 +32,7 @@ def check_rule(checker_data: models.CheckerData) -> None:
     """
     logging.info("Executing road.lane.access.no_mix_of_deny_or_allow check")
 
-    if checker_data.schema_version not in RULE_SUPPORTED_SCHEMA_VERSIONS:
+    if checker_data.schema_version < RULE_INITIAL_SUPPORTED_SCHEMA_VERSION:
         logging.info(
             f"Schema version {checker_data.schema_version} not supported. Skipping rule."
         )
@@ -43,7 +43,7 @@ def check_rule(checker_data: models.CheckerData) -> None:
         checker_id=semantic_constants.CHECKER_ID,
         emanating_entity="asam.net",
         standard="xodr",
-        definition_setting=checker_data.schema_version,
+        definition_setting=RULE_INITIAL_SUPPORTED_SCHEMA_VERSION,
         rule_full_name="road.lane.access.no_mix_of_deny_or_allow",
     )
 
