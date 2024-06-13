@@ -176,9 +176,6 @@ def check_rule(checker_data: models.CheckerData) -> None:
 
     roads = utils.get_roads(checker_data.input_file_xml_root)
 
-    road_previous_left_lane: List[etree._Element] = []
-    road_previous_right_lane: List[etree._Element] = []
-
     for road in roads:
         lane_sections = utils.get_lane_sections(road)
 
@@ -204,7 +201,7 @@ def check_rule(checker_data: models.CheckerData) -> None:
                 right_lanes_list = []
 
             # sort by lane id to guarantee order while checking level
-            # right ids goes monotonic increasing from 1
+            # left ids goes monotonic increasing from 1
             sorted_left_lane = sorted(
                 left_lanes_list, key=lambda lane: int(lane.attrib["id"])
             )
@@ -248,21 +245,4 @@ def check_rule(checker_data: models.CheckerData) -> None:
             previous_left_lane = sorted_left_lane
             previous_right_lane = sorted_right_lane
 
-    # Test lane section level continuity in between roads.
-    _check_level_change_between_lane_sections(
-        root=checker_data.input_file_xml_root,
-        current_lanes=previous_left_lane,
-        previous_lanes=road_previous_left_lane,
-        result=checker_data.result,
-        rule_uid=rule_uid,
-    )
-    _check_level_change_between_lane_sections(
-        root=checker_data.input_file_xml_root,
-        current_lanes=previous_right_lane,
-        previous_lanes=road_previous_right_lane,
-        result=checker_data.result,
-        rule_uid=rule_uid,
-    )
-
-    road_previous_left_lane = previous_left_lane
-    road_previous_right_lane = previous_right_lane
+    # TODO: Add inter road lane level validation
