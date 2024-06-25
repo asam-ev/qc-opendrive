@@ -282,3 +282,53 @@ def test_road_lane_true_level_one_side_junction(
     launch_main(monkeypatch)
     check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
     cleanup_files()
+
+
+@pytest.mark.parametrize(
+    "target_file,issue_count,issue_xpath",
+    [
+        ("valid", 0, []),
+        # 3 issues for invalid predecessors + 3 issues for missing successors
+        (
+            "invalid_no_predecessor_road",
+            6,
+            [
+                "/OpenDRIVE/road/lanes/laneSection[1]/right/lane[1]/link/predecessor",
+                "/OpenDRIVE/road/lanes/laneSection[1]/right/lane[2]/link/predecessor",
+                "/OpenDRIVE/road/lanes/laneSection[1]/right/lane[3]/link/predecessor",
+                "/OpenDRIVE/road/lanes/laneSection[1]/right/lane[1]",
+                "/OpenDRIVE/road/lanes/laneSection[1]/right/lane[2]",
+                "/OpenDRIVE/road/lanes/laneSection[1]/right/lane[3]",
+            ],
+        ),
+        # 2 no link issues + 2 invalid link issues + 2 no link from the previous invalid link issues
+        (
+            "invalid",
+            6,
+            [
+                "/OpenDRIVE/road/lanes/laneSection[2]/left/lane[2]",
+                "/OpenDRIVE/road/lanes/laneSection[2]/right/lane[2]",
+                "/OpenDRIVE/road/lanes/laneSection[2]/left/lane[1]/link/predecessor",
+                "/OpenDRIVE/road/lanes/laneSection[2]/right/lane[3]/link/predecessor",
+                "/OpenDRIVE/road/lanes/laneSection[2]/left/lane[1]",
+                "/OpenDRIVE/road/lanes/laneSection[2]/right/lane[3]",
+            ],
+        ),
+    ],
+)
+def test_road_lane_link_lanes_across_lane_sections(
+    target_file: str,
+    issue_count: int,
+    issue_xpath: List[str],
+    monkeypatch,
+) -> None:
+    base_path = "tests/data/road_lane_link_lanes_across_lane_sections/"
+    target_file_name = f"road_lane_link_lanes_across_lane_sections_{target_file}.xodr"
+    rule_uid = "asam.net:xodr:1.4.0:road.lane.link.lanes_across_lane_sections"
+    issue_severity = IssueSeverity.ERROR
+
+    target_file_path = os.path.join(base_path, target_file_name)
+    create_test_config(target_file_path)
+    launch_main(monkeypatch)
+    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
+    cleanup_files()
