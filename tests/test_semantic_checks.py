@@ -28,40 +28,27 @@ def create_test_config(target_file_path: str):
     test_config.write_to_file(CONFIG_FILE_PATH)
 
 
-def check_issues_xpath_match(issues_count: int, issue_xpath: List[int]):
+def check_issues(
+    rule_uid: str, issue_count: int, issue_xpath: List[str], severity: IssueSeverity
+):
     result = Result()
     result.load_from_file(REPORT_FILE_PATH)
 
-    checker = result.get_checker_result(
-        checker_bundle_name=constants.BUNDLE_NAME,
-        checker_id=semantic_constants.CHECKER_ID,
-    )
+    issues = result.get_issues_by_rule_uid(rule_uid)
 
-    assert checker.checker_id == semantic_constants.CHECKER_ID
-    assert len(checker.issues) == issues_count
+    assert len(issues) == issue_count
 
-    if len(issue_xpath) > 0:
-        for index, xpath in enumerate(issue_xpath):
-            assert len(checker.issues[index].locations) == 1
-            assert len(checker.issues[index].locations[0].xml_location) == 1
-            assert checker.issues[index].locations[0].xml_location[0].xpath == xpath
+    locations = set()
+    for issue in issues:
+        for issue_location in issue.locations:
+            for xml_location in issue_location.xml_location:
+                locations.add(xml_location.xpath)
 
+    for xpath in issue_xpath:
+        assert xpath in locations
 
-def check_issues_severity_match(issues_count: int, issue_severity: List[IssueSeverity]):
-    result = Result()
-    result.load_from_file(REPORT_FILE_PATH)
-
-    checker = result.get_checker_result(
-        checker_bundle_name=constants.BUNDLE_NAME,
-        checker_id=semantic_constants.CHECKER_ID,
-    )
-
-    assert checker.checker_id == semantic_constants.CHECKER_ID
-    assert len(checker.issues) == issues_count
-
-    if len(issue_severity) > 0:
-        for index, severity in enumerate(issue_severity):
-            assert checker.issues[index].level == severity
+    for issue in issues:
+        assert issue.level == severity
 
 
 def launch_main(monkeypatch):
@@ -83,7 +70,7 @@ def cleanup_files():
 
 
 @pytest.mark.parametrize(
-    "target_file,issues_count,issue_xpath",
+    "target_file,issue_count,issue_xpath",
     [
         (
             "17_invalid",
@@ -100,24 +87,25 @@ def cleanup_files():
     ],
 )
 def test_road_lane_access_no_mix_of_deny_or_allow_examples(
-    target_file: str, issues_count: int, issue_xpath: List[str], monkeypatch
+    target_file: str,
+    issue_count: int,
+    issue_xpath: List[str],
+    monkeypatch,
 ) -> None:
     base_path = "tests/data/road_lane_access_no_mix_of_deny_or_allow/"
     target_file_name = f"road_lane_access_no_mix_of_deny_or_allow_{target_file}.xodr"
+    rule_uid = "asam.net:xodr:1.7.0:road.lane.access.no_mix_of_deny_or_allow"
+    issue_severity = IssueSeverity.ERROR
 
     target_file_path = os.path.join(base_path, target_file_name)
-
     create_test_config(target_file_path)
-
     launch_main(monkeypatch)
-
-    check_issues_xpath_match(issues_count, issue_xpath)
-
+    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
     cleanup_files()
 
 
 @pytest.mark.parametrize(
-    "target_file,issues_count,issue_xpath",
+    "target_file,issue_count,issue_xpath",
     [
         (
             "single_issue",
@@ -136,26 +124,24 @@ def test_road_lane_access_no_mix_of_deny_or_allow_examples(
     ],
 )
 def test_road_lane_access_no_mix_of_deny_or_allow_close_match(
-    target_file: str, issues_count: int, issue_xpath: List[str], monkeypatch
+    target_file: str, issue_count: int, issue_xpath: List[str], monkeypatch
 ) -> None:
     base_path = "tests/data/road_lane_access_no_mix_of_deny_or_allow/"
     target_file_name = f"close_match_{target_file}.xodr"
+    rule_uid = "asam.net:xodr:1.7.0:road.lane.access.no_mix_of_deny_or_allow"
+    issue_severity = IssueSeverity.ERROR
 
     target_file_path = os.path.join(base_path, target_file_name)
-
     create_test_config(target_file_path)
-
     launch_main(monkeypatch)
-
-    check_issues_xpath_match(issues_count, issue_xpath)
-
+    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
     cleanup_files()
 
 
 @pytest.mark.parametrize(
-    "target_file,issues_count,issue_xpath,issue_severity",
+    "target_file,issue_count,issue_xpath",
     [
-        ("valid", 0, [], []),
+        ("valid", 0, []),
         (
             "invalid",
             2,
@@ -163,37 +149,32 @@ def test_road_lane_access_no_mix_of_deny_or_allow_close_match(
                 "/OpenDRIVE/road/lanes/laneSection/left/lane[1]",
                 "/OpenDRIVE/road/lanes/laneSection/right/lane[3]",
             ],
-            [IssueSeverity.ERROR, IssueSeverity.ERROR],
         ),
-        ("invalid_older_schema_version", 0, [], []),
+        ("invalid_older_schema_version", 0, []),
     ],
 )
 def test_road_lane_true_level_one_side(
     target_file: str,
-    issues_count: int,
+    issue_count: int,
     issue_xpath: List[str],
-    issue_severity: List[IssueSeverity],
     monkeypatch,
 ) -> None:
     base_path = "tests/data/road_lane_level_true_one_side/"
     target_file_name = f"road_lane_level_true_one_side_{target_file}.xodr"
+    rule_uid = "asam.net:xodr:1.7.0:road.lane.level_true_one_side"
+    issue_severity = IssueSeverity.ERROR
 
     target_file_path = os.path.join(base_path, target_file_name)
-
     create_test_config(target_file_path)
-
     launch_main(monkeypatch)
-
-    check_issues_xpath_match(issues_count, issue_xpath)
-    check_issues_severity_match(issues_count, issue_severity)
-
+    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
     cleanup_files()
 
 
 @pytest.mark.parametrize(
-    "target_file,issues_count,issue_xpath,issue_severity",
+    "target_file,issue_count,issue_xpath",
     [
-        ("valid", 0, [], []),
+        ("valid", 0, []),
         (
             "invalid",
             8,
@@ -207,18 +188,8 @@ def test_road_lane_true_level_one_side(
                 "/OpenDRIVE/road/lanes/laneSection[2]/right/lane[2]",
                 "/OpenDRIVE/road/lanes/laneSection[2]/right/lane[3]",
             ],
-            [
-                IssueSeverity.WARNING,
-                IssueSeverity.WARNING,
-                IssueSeverity.WARNING,
-                IssueSeverity.WARNING,
-                IssueSeverity.WARNING,
-                IssueSeverity.WARNING,
-                IssueSeverity.WARNING,
-                IssueSeverity.WARNING,
-            ],
         ),
-        ("valid_wrong_predecessor", 0, [], []),
+        ("valid_wrong_predecessor", 0, []),
         (
             "invalid_wrong_predecessor",
             2,
@@ -226,30 +197,88 @@ def test_road_lane_true_level_one_side(
                 "/OpenDRIVE/road/lanes/laneSection[1]/left/lane[1]",
                 "/OpenDRIVE/road/lanes/laneSection[1]/left/lane[2]",
             ],
-            [
-                IssueSeverity.WARNING,
-                IssueSeverity.WARNING,
-            ],
         ),
     ],
 )
 def test_road_lane_true_level_one_side_lane_section(
     target_file: str,
-    issues_count: int,
+    issue_count: int,
     issue_xpath: List[str],
-    issue_severity: List[IssueSeverity],
     monkeypatch,
 ) -> None:
     base_path = "tests/data/road_lane_level_true_one_side_lanesection/"
     target_file_name = f"road_lane_level_true_one_side_lanesection_{target_file}.xodr"
+    rule_uid = "asam.net:xodr:1.7.0:road.lane.level_true_one_side"
+    issue_severity = IssueSeverity.WARNING
 
     target_file_path = os.path.join(base_path, target_file_name)
-
     create_test_config(target_file_path)
-
     launch_main(monkeypatch)
+    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
+    cleanup_files()
 
-    check_issues_xpath_match(issues_count, issue_xpath)
-    check_issues_severity_match(issues_count, issue_severity)
 
+@pytest.mark.parametrize(
+    "target_file,issue_count,issue_xpath",
+    [
+        ("valid", 0, []),
+        (
+            "invalid",
+            4,
+            [
+                "/OpenDRIVE/road[1]/lanes/laneSection[1]/left/lane[1]",
+                "/OpenDRIVE/road[1]/lanes/laneSection[2]/left/lane[1]",
+                "/OpenDRIVE/road[1]/lanes/laneSection[2]/left/lane[1]",
+                "/OpenDRIVE/road[2]/lanes/laneSection/left/lane[1]",
+            ],
+        ),
+    ],
+)
+def test_road_lane_true_level_one_side_road(
+    target_file: str,
+    issue_count: int,
+    issue_xpath: List[str],
+    monkeypatch,
+) -> None:
+    base_path = "tests/data/road_lane_level_true_one_side_road/"
+    target_file_name = f"road_lane_level_true_one_side_road_{target_file}.xodr"
+    rule_uid = "asam.net:xodr:1.7.0:road.lane.level_true_one_side"
+    issue_severity = IssueSeverity.WARNING
+
+    target_file_path = os.path.join(base_path, target_file_name)
+    create_test_config(target_file_path)
+    launch_main(monkeypatch)
+    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
+    cleanup_files()
+
+
+@pytest.mark.parametrize(
+    "target_file,issue_count,issue_xpath",
+    [
+        ("valid", 0, []),
+        (
+            "invalid_incoming",
+            3,  # Two issues raised in junction, one issue raised in road
+            [
+                "/OpenDRIVE/road[1]/lanes/laneSection/right/lane",
+                "/OpenDRIVE/road[2]/lanes/laneSection/right/lane",
+            ],
+        ),
+    ],
+)
+def test_road_lane_true_level_one_side_junction(
+    target_file: str,
+    issue_count: int,
+    issue_xpath: List[str],
+    monkeypatch,
+) -> None:
+    base_path = "tests/data/road_lane_level_true_one_side_junction/"
+    target_file_name = f"road_lane_level_true_one_side_junction_{target_file}.xodr"
+    rule_uid = "asam.net:xodr:1.7.0:road.lane.level_true_one_side"
+    issue_severity = IssueSeverity.WARNING
+
+    target_file_path = os.path.join(base_path, target_file_name)
+    create_test_config(target_file_path)
+    launch_main(monkeypatch)
+    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
     cleanup_files()
