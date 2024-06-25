@@ -294,8 +294,8 @@ def _check_level_among_junctions(
     road_id_map: Dict[int, etree._ElementTree],
     rule_uid: str,
 ) -> None:
-    for junction in checker_data.input_file_xml_root.iter("junction"):
-        for connection in junction.iter("connection"):
+    for junction in utils.get_junctions(checker_data.input_file_xml_root):
+        for connection in utils.get_connections_from_junction(junction):
             connection_road_id = connection.get("connectingRoad")
             incoming_road_id = connection.get("incomingRoad")
             connection_road = road_id_map.get(int(connection_road_id))
@@ -323,7 +323,7 @@ def _check_level_among_junctions(
             else:
                 continue
 
-            for lane_link in connection.iter("laneLink"):
+            for lane_link in utils.get_lane_links_from_connection(connection):
                 incoming_lane_id = lane_link.get("from")
                 connection_lane_id = lane_link.get("to")
 
