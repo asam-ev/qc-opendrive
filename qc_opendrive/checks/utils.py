@@ -292,3 +292,11 @@ def get_road_link_element(
         return None
     else:
         return None
+
+
+def road_belongs_to_junction(road: etree._Element) -> bool:
+    road_junction_id = get_road_junction_id(road)
+    if road_junction_id is None or road_junction_id == -1:
+        return False
+    else:
+        return True
