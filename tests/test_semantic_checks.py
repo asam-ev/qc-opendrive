@@ -332,3 +332,35 @@ def test_road_lane_link_lanes_across_lane_sections(
     launch_main(monkeypatch)
     check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
     cleanup_files()
+
+
+@pytest.mark.parametrize(
+    "target_file,issue_count,issue_xpath",
+    [
+        ("valid", 0, []),
+        (
+            "invalid",
+            1,
+            [
+                "/OpenDRIVE/road[2]/link/predecessor",
+                "/OpenDRIVE/road[3]/link/predecessor",
+            ],
+        ),
+    ],
+)
+def test_road_linkage_is_junction_needed(
+    target_file: str,
+    issue_count: int,
+    issue_xpath: List[str],
+    monkeypatch,
+) -> None:
+    base_path = "tests/data/road_linkage_is_junction_needed/"
+    target_file_name = f"road_linkage_is_junction_needed_{target_file}.xodr"
+    rule_uid = "asam.net:xodr:1.4.0:road.linkage.is_junction_needed"
+    issue_severity = IssueSeverity.ERROR
+
+    target_file_path = os.path.join(base_path, target_file_name)
+    create_test_config(target_file_path)
+    launch_main(monkeypatch)
+    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
+    cleanup_files()
