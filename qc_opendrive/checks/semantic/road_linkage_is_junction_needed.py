@@ -20,7 +20,7 @@ def _raise_road_linkage_is_junction_issue(
     issue_id = checker_data.result.register_issue(
         checker_bundle_name=constants.BUNDLE_NAME,
         checker_id=semantic_constants.CHECKER_ID,
-        description=f"Road cannot have ambiguous {linkage_tag.value}",
+        description=f"Road cannot have ambiguous {linkage_tag.value} a junction is needed.",
         level=IssueSeverity.ERROR,
         rule_uid=rule_uid,
     )
@@ -48,8 +48,9 @@ def _check_road_linkage_is_junction_needed(
     for road in roads:
         road_junction_id = utils.get_road_junction_id(road)
 
-        # Verify if road is part of junction, connecting roads can have multiple
-        # successors point to them and be predecessor of multiple roads.
+        # Verify if road is not part of a junction to proceed.
+        # Junction connecting roads can share common successors or predecessors
+        # and they are used to distinguish ambiguity.
         # We don't need to verify this rule for junction roads.
         if road_junction_id is None or road_junction_id == -1:
             road_predecessor_linkage = utils.get_road_linkage(
