@@ -11,6 +11,7 @@ from qc_opendrive.checks.semantic import (
     semantic_constants,
     road_lane_level_true_one_side,
     road_lane_access_no_mix_of_deny_or_allow,
+    road_lane_link_lanes_across_lane_sections,
 )
 
 
@@ -31,6 +32,7 @@ def run_checks(config: Configuration, result: Result) -> None:
     rule_list = [
         road_lane_level_true_one_side.check_rule,
         road_lane_access_no_mix_of_deny_or_allow.check_rule,
+        road_lane_link_lanes_across_lane_sections.check_rule,
     ]
 
     checker_data = models.CheckerData(
