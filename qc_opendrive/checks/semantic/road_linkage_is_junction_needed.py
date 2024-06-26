@@ -73,8 +73,6 @@ def _check_road_linkage_is_junction_needed(
             )
 
             if road_successor_linkage is not None:
-                # in case another road use the same successor the linkage is
-                # unclear
                 successor_link = utils.get_road_link_element(
                     road, road_successor_linkage.id, models.LinkageTag.SUCCESSOR
                 )
