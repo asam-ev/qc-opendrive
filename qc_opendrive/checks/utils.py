@@ -258,3 +258,37 @@ def get_lane_id(lane: etree._ElementTree) -> Union[None, int]:
         return None
     else:
         return int(lane_id)
+
+
+def get_road_junction_id(road: etree._ElementTree) -> Union[None, int]:
+    junction_id = road.get("junction")
+    if junction_id is None:
+        return None
+    else:
+        return int(junction_id)
+
+
+def get_road_link_element(
+    road: etree._ElementTree, link_id: int, linkage_tag: models.LinkageTag
+) -> Union[None, etree._ElementTree]:
+    links = road.findall("link")
+    if linkage_tag == models.LinkageTag.PREDECESSOR:
+        for link in links:
+            linkages = link.findall("predecessor")
+            for linkage in linkages:
+                predecessor_id = linkage.get("elementId")
+                if predecessor_id is not None and link_id == int(predecessor_id):
+                    return linkage
+
+        return None
+    elif linkage_tag == models.LinkageTag.SUCCESSOR:
+        for link in links:
+            linkages = link.findall("successor")
+            for linkage in linkages:
+                successor_id = linkage.get("elementId")
+                if successor_id is not None and link_id == int(successor_id):
+                    return linkage
+
+        return None
+    else:
+        return None
