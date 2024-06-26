@@ -44,8 +44,8 @@ def _check_road_linkage_is_junction_needed(
     if len(roads) < 2:
         return
 
-    road_linkage_successor_map: Dict[int, Set] = {}
-    road_linkage_predecessor_map: Dict[int, Set] = {}
+    road_linkage_successor_map: Dict[int, List[etree._Element]] = {}
+    road_linkage_predecessor_map: Dict[int, List[etree._Element]] = {}
 
     for road in roads:
         # Verify if road is not part of a junction to proceed.
@@ -62,9 +62,9 @@ def _check_road_linkage_is_junction_needed(
                     road, road_predecessor_linkage.id, models.LinkageTag.PREDECESSOR
                 )
                 if road_predecessor_linkage.id not in road_linkage_predecessor_map:
-                    road_linkage_predecessor_map[road_predecessor_linkage.id] = set()
+                    road_linkage_predecessor_map[road_predecessor_linkage.id] = []
 
-                road_linkage_predecessor_map[road_predecessor_linkage.id].add(
+                road_linkage_predecessor_map[road_predecessor_linkage.id].append(
                     predecessor_link
                 )
 
@@ -77,9 +77,9 @@ def _check_road_linkage_is_junction_needed(
                     road, road_successor_linkage.id, models.LinkageTag.SUCCESSOR
                 )
                 if road_successor_linkage.id not in road_linkage_successor_map:
-                    road_linkage_successor_map[road_successor_linkage.id] = set()
+                    road_linkage_successor_map[road_successor_linkage.id] = []
 
-                road_linkage_successor_map[road_successor_linkage.id].add(
+                road_linkage_successor_map[road_successor_linkage.id].append(
                     successor_link
                 )
 
@@ -90,7 +90,7 @@ def _check_road_linkage_is_junction_needed(
             _raise_road_linkage_is_junction_needed_issue(
                 checker_data,
                 rule_uid,
-                list(predecessor_elements),
+                predecessor_elements,
                 models.LinkageTag.PREDECESSOR,
             )
 
@@ -101,7 +101,7 @@ def _check_road_linkage_is_junction_needed(
             _raise_road_linkage_is_junction_needed_issue(
                 checker_data,
                 rule_uid,
-                list(successor_elements),
+                successor_elements,
                 models.LinkageTag.SUCCESSOR,
             )
 
