@@ -11,7 +11,7 @@ from qc_opendrive.checks.semantic import semantic_constants
 RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.7.0"
 
 
-def _raise_road_linkage_is_junction_issue(
+def _raise_road_linkage_is_junction_needed_issue(
     checker_data: models.CheckerData,
     rule_uid: str,
     road_linkage_element: etree._Element,
@@ -64,7 +64,7 @@ def _check_road_linkage_is_junction_needed(
                     predecessor_link = utils.get_road_link_element(
                         road, road_predecessor_linkage.id, models.LinkageTag.PREDECESSOR
                     )
-                    _raise_road_linkage_is_junction_issue(
+                    _raise_road_linkage_is_junction_needed_issue(
                         checker_data,
                         rule_uid,
                         predecessor_link,
@@ -84,7 +84,7 @@ def _check_road_linkage_is_junction_needed(
                     successor_link = utils.get_road_link_element(
                         road, road_successor_linkage.id, models.LinkageTag.SUCCESSOR
                     )
-                    _raise_road_linkage_is_junction_issue(
+                    _raise_road_linkage_is_junction_needed_issue(
                         checker_data,
                         rule_uid,
                         successor_link,
