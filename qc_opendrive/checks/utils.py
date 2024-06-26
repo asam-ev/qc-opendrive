@@ -149,6 +149,22 @@ def get_road_linkage(
         return None
 
 
+def get_predecessor_road_id(road: etree._ElementTree) -> Union[None, int]:
+    linkage = get_road_linkage(road, models.LinkageTag.PREDECESSOR)
+    if linkage is None:
+        return None
+    else:
+        return linkage.id
+
+
+def get_successor_road_id(road: etree._ElementTree) -> Union[None, int]:
+    linkage = get_road_linkage(road, models.LinkageTag.SUCCESSOR)
+    if linkage is None:
+        return None
+    else:
+        return linkage.id
+
+
 def get_predecessor_lane_ids(lane: etree._ElementTree) -> List[int]:
     links = lane.findall("link")
 
@@ -175,6 +191,32 @@ def get_successor_lane_ids(lane: etree._ElementTree) -> List[int]:
                 successors.append(int(successor_id))
 
     return successors
+
+
+def get_lane_link_element(
+    lane: etree._ElementTree, link_id: int, linkage_tag: models.LinkageTag
+) -> Union[None, etree._ElementTree]:
+    links = lane.findall("link")
+    if linkage_tag == models.LinkageTag.PREDECESSOR:
+        for link in links:
+            linkages = link.findall("predecessor")
+            for linkage in linkages:
+                predecessor_id = linkage.get("id")
+                if predecessor_id is not None and link_id == int(predecessor_id):
+                    return linkage
+
+        return None
+    elif linkage_tag == models.LinkageTag.SUCCESSOR:
+        for link in links:
+            linkages = link.findall("successor")
+            for linkage in linkages:
+                successor_id = linkage.get("id")
+                if successor_id is not None and link_id == int(successor_id):
+                    return linkage
+
+        return None
+    else:
+        return None
 
 
 def get_lane_from_lane_section(
@@ -208,3 +250,11 @@ def get_connections_from_junction(
     junction: etree._ElementTree,
 ) -> List[etree._ElementTree]:
     return list(junction.iter("connection"))
+
+
+def get_lane_id(lane: etree._ElementTree) -> Union[None, int]:
+    lane_id = lane.get("id")
+    if lane_id is None:
+        return None
+    else:
+        return int(lane_id)
