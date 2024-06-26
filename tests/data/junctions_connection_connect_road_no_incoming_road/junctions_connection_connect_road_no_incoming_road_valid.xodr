@@ -169,7 +169,7 @@
 		</lanes>
 	</road>
 
-    <road name="F" length="9.75242055555372e+00" id="6" junction="-1">
+    <road name="F" length="9.75242055555372e+00" id="6" junction="101">
 		<link>
             <predecessor elementType="road" elementId="5" contactPoint="end" />
 			<successor elementType="road" elementId="8" contactPoint="start"/>
@@ -202,7 +202,7 @@
 		</lanes>
 	</road>
 
-    <road name="G" length="9.75242055555372e+00" id="7" junction="-1">
+    <road name="G" length="9.75242055555372e+00" id="7" junction="101">
 		<link>
             <predecessor elementType="road" elementId="5" contactPoint="end" />
 			<successor elementType="road" elementId="9" contactPoint="start"/>
@@ -267,7 +267,7 @@
 		</lanes>
 	</road>
 
-    <road name="I" length="9.75242055555372e+00" id="8" junction="-1">
+    <road name="I" length="9.75242055555372e+00" id="9" junction="-1">
 		<link>
             <predecessor elementType="junction" elementId="101"/>
         </link>
