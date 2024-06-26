@@ -50,7 +50,7 @@ def _check_road_linkage_is_junction_needed(
         # Junction connecting roads can share common successors or predecessors
         # and they are used to distinguish ambiguity.
         # We don't need to verify this rule for junction roads.
-        if utils.road_belongs_to_junction(road):
+        if not utils.road_belongs_to_junction(road):
             road_predecessor_linkage = utils.get_road_linkage(
                 road, models.LinkageTag.PREDECESSOR
             )
