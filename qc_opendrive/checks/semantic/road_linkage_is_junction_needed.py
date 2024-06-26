@@ -42,12 +42,13 @@ def _check_road_linkage_is_junction_needed(
     if len(roads) < 2:
         return
 
-    road_linkage_map = {"successor": set(), "predecessor": set()}
+    road_linkage_successor_set = set()
+    road_linkage_predecessor_set = set()
 
     for road in roads:
         road_junction_id = utils.get_road_junction_id(road)
 
-        # Verify if road is part of junction, junction roads can have multiple
+        # Verify if road is part of junction, connecting roads can have multiple
         # successors point to them and be predecessor of multiple roads.
         # We don't need to verify this rule for junction roads.
         if road_junction_id is None or road_junction_id == -1:
@@ -56,7 +57,9 @@ def _check_road_linkage_is_junction_needed(
             )
 
             if road_predecessor_linkage is not None:
-                if road_predecessor_linkage.id in road_linkage_map["predecessor"]:
+                # in case another road use the same predecessor the linkage is
+                # unclear
+                if road_predecessor_linkage.id in road_linkage_predecessor_set:
                     predecessor_link = utils.get_road_link_element(
                         road, road_predecessor_linkage.id, models.LinkageTag.PREDECESSOR
                     )
@@ -67,14 +70,16 @@ def _check_road_linkage_is_junction_needed(
                         models.LinkageTag.PREDECESSOR,
                     )
                 else:
-                    road_linkage_map["predecessor"].add(road_predecessor_linkage.id)
+                    road_linkage_predecessor_set.add(road_predecessor_linkage.id)
 
             road_successor_linkage = utils.get_road_linkage(
                 road, models.LinkageTag.SUCCESSOR
             )
 
             if road_successor_linkage is not None:
-                if road_successor_linkage.id in road_linkage_map["successor"]:
+                # in case another road use the same successor the linkage is
+                # unclear
+                if road_successor_linkage.id in road_linkage_successor_set:
                     successor_link = utils.get_road_link_element(
                         road, road_successor_linkage.id, models.LinkageTag.SUCCESSOR
                     )
@@ -85,7 +90,7 @@ def _check_road_linkage_is_junction_needed(
                         models.LinkageTag.SUCCESSOR,
                     )
                 else:
-                    road_linkage_map["successor"].add(road_successor_linkage.id)
+                    road_linkage_successor_set.add(road_successor_linkage.id)
 
 
 def check_rule(checker_data: models.CheckerData) -> None:
