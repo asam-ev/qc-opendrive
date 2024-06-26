@@ -44,8 +44,8 @@ def _check_road_linkage_is_junction_needed(
     if len(roads) < 2:
         return
 
-    road_linkage_successor_map: Dict[int, List[etree._Element]] = {}
-    road_linkage_predecessor_map: Dict[int, List[etree._Element]] = {}
+    road_linkage_successor_map: Dict[int, List[etree._ElementTree]] = {}
+    road_linkage_predecessor_map: Dict[int, List[etree._ElementTree]] = {}
 
     for road in roads:
         # Verify if road is not part of a junction to proceed.
