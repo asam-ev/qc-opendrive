@@ -8,7 +8,7 @@ from qc_opendrive import constants
 from qc_opendrive.checks import utils, models
 from qc_opendrive.checks.semantic import semantic_constants
 
-RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.7.0"
+RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.4.0"
 
 
 def _raise_road_linkage_is_junction_needed_issue(
@@ -38,7 +38,7 @@ def _check_road_linkage_is_junction_needed(
     checker_data: models.CheckerData, rule_uid: str
 ) -> None:
     roads = utils.get_roads(checker_data.input_file_xml_root)
-
+    print("-" * 20)
     if len(roads) < 2:
         return
 

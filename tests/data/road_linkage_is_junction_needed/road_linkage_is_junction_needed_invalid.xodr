@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <OpenDRIVE>
-	<header revMajor="1" revMinor="7" name="created by Trian3DBuilder v8.0.0 r13880 - road_linkage_is_junction_needed_invalid" version="1.00" date="03.06.2024 06:54:46" north="3.50860889879943e+01" south="-1.49139110120057e+01" east="3.67393953684785e+01" west="-1.32606046315215e+01" vendor="TrianGraphics GmbH">
+	<header revMajor="1" revMinor="5" name="created by Trian3DBuilder v8.0.0 r13880 - road_linkage_is_junction_needed_invalid" version="1.00" date="03.06.2024 06:54:46" north="3.50860889879943e+01" south="-1.49139110120057e+01" east="3.67393953684785e+01" west="-1.32606046315215e+01" vendor="TrianGraphics GmbH">
 		<userData code="settings" value=" UseVecIDsFromTrian3D" />
 	</header>
 	<road name="A" length="10.0" id="1" junction="-1">

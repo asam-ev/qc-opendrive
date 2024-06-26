@@ -355,7 +355,7 @@ def test_road_linkage_is_junction_needed(
 ) -> None:
     base_path = "tests/data/road_linkage_is_junction_needed/"
     target_file_name = f"road_linkage_is_junction_needed_{target_file}.xodr"
-    rule_uid = "asam.net:xodr:1.7.0:road.linkage.is_junction_needed"
+    rule_uid = "asam.net:xodr:1.4.0:road.linkage.is_junction_needed"
     issue_severity = IssueSeverity.ERROR
 
     target_file_path = os.path.join(base_path, target_file_name)
