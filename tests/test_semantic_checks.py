@@ -342,6 +342,7 @@ def test_road_lane_link_lanes_across_lane_sections(
             "invalid",
             1,
             [
+                "/OpenDRIVE/road[2]/link/predecessor",
                 "/OpenDRIVE/road[3]/link/predecessor",
             ],
         ),

@@ -1,5 +1,6 @@
 import logging
 
+from typing import Dict, Set, List
 from lxml import etree
 
 from qc_baselib import IssueSeverity
@@ -14,7 +15,7 @@ RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.4.0"
 def _raise_road_linkage_is_junction_needed_issue(
     checker_data: models.CheckerData,
     rule_uid: str,
-    road_linkage_element: etree._Element,
+    road_linkage_elements: List[etree._Element],
     linkage_tag: models.LinkageTag,
 ) -> None:
     issue_id = checker_data.result.register_issue(
@@ -25,13 +26,14 @@ def _raise_road_linkage_is_junction_needed_issue(
         rule_uid=rule_uid,
     )
 
-    checker_data.result.add_xml_location(
-        checker_bundle_name=constants.BUNDLE_NAME,
-        checker_id=semantic_constants.CHECKER_ID,
-        issue_id=issue_id,
-        xpath=checker_data.input_file_xml_root.getpath(road_linkage_element),
-        description="",
-    )
+    for element in road_linkage_elements:
+        checker_data.result.add_xml_location(
+            checker_bundle_name=constants.BUNDLE_NAME,
+            checker_id=semantic_constants.CHECKER_ID,
+            issue_id=issue_id,
+            xpath=checker_data.input_file_xml_root.getpath(element),
+            description="",
+        )
 
 
 def _check_road_linkage_is_junction_needed(
@@ -42,8 +44,8 @@ def _check_road_linkage_is_junction_needed(
     if len(roads) < 2:
         return
 
-    road_linkage_successor_set = set()
-    road_linkage_predecessor_set = set()
+    road_linkage_successor_map: Dict[int, Set] = {}
+    road_linkage_predecessor_map: Dict[int, Set] = {}
 
     for road in roads:
         # Verify if road is not part of a junction to proceed.
@@ -56,20 +58,15 @@ def _check_road_linkage_is_junction_needed(
             )
 
             if road_predecessor_linkage is not None:
-                # in case another road use the same predecessor the linkage is
-                # unclear
-                if road_predecessor_linkage.id in road_linkage_predecessor_set:
-                    predecessor_link = utils.get_road_link_element(
-                        road, road_predecessor_linkage.id, models.LinkageTag.PREDECESSOR
-                    )
-                    _raise_road_linkage_is_junction_needed_issue(
-                        checker_data,
-                        rule_uid,
-                        predecessor_link,
-                        models.LinkageTag.PREDECESSOR,
-                    )
-                else:
-                    road_linkage_predecessor_set.add(road_predecessor_linkage.id)
+                predecessor_link = utils.get_road_link_element(
+                    road, road_predecessor_linkage.id, models.LinkageTag.PREDECESSOR
+                )
+                if road_predecessor_linkage.id not in road_linkage_predecessor_map:
+                    road_linkage_predecessor_map[road_predecessor_linkage.id] = set()
+
+                road_linkage_predecessor_map[road_predecessor_linkage.id].add(
+                    predecessor_link
+                )
 
             road_successor_linkage = utils.get_road_linkage(
                 road, models.LinkageTag.SUCCESSOR
@@ -78,18 +75,37 @@ def _check_road_linkage_is_junction_needed(
             if road_successor_linkage is not None:
                 # in case another road use the same successor the linkage is
                 # unclear
-                if road_successor_linkage.id in road_linkage_successor_set:
-                    successor_link = utils.get_road_link_element(
-                        road, road_successor_linkage.id, models.LinkageTag.SUCCESSOR
-                    )
-                    _raise_road_linkage_is_junction_needed_issue(
-                        checker_data,
-                        rule_uid,
-                        successor_link,
-                        models.LinkageTag.SUCCESSOR,
-                    )
-                else:
-                    road_linkage_successor_set.add(road_successor_linkage.id)
+                successor_link = utils.get_road_link_element(
+                    road, road_successor_linkage.id, models.LinkageTag.SUCCESSOR
+                )
+                if road_successor_linkage.id not in road_linkage_successor_map:
+                    road_linkage_successor_map[road_successor_linkage.id] = set()
+
+                road_linkage_successor_map[road_successor_linkage.id].add(
+                    successor_link
+                )
+
+    for predecessor_elements in road_linkage_predecessor_map.values():
+        # in case two roads use the same predecessor the linkage is
+        # unclear
+        if len(predecessor_elements) > 1:
+            _raise_road_linkage_is_junction_needed_issue(
+                checker_data,
+                rule_uid,
+                list(predecessor_elements),
+                models.LinkageTag.PREDECESSOR,
+            )
+
+    for successor_elements in road_linkage_successor_map.values():
+        # in case two roads road use the same successor the linkage is
+        # unclear
+        if len(successor_elements) > 1:
+            _raise_road_linkage_is_junction_needed_issue(
+                checker_data,
+                rule_uid,
+                list(predecessor_elements),
+                models.LinkageTag.SUCCESSOR,
+            )
 
 
 def check_rule(checker_data: models.CheckerData) -> None:
