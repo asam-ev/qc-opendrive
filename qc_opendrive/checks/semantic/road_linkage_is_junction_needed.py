@@ -103,7 +103,7 @@ def _check_road_linkage_is_junction_needed(
             _raise_road_linkage_is_junction_needed_issue(
                 checker_data,
                 rule_uid,
-                list(predecessor_elements),
+                list(successor_elements),
                 models.LinkageTag.SUCCESSOR,
             )
 
