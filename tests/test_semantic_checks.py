@@ -288,30 +288,38 @@ def test_road_lane_true_level_one_side_junction(
     "target_file,issue_count,issue_xpath",
     [
         ("valid", 0, []),
-        # 3 issues for invalid predecessors + 3 issues for missing successors
+        # 3 issues for missing successors
         (
             "invalid_no_predecessor_road",
-            6,
+            3,
             [
-                "/OpenDRIVE/road/lanes/laneSection[1]/right/lane[1]/link/predecessor",
-                "/OpenDRIVE/road/lanes/laneSection[1]/right/lane[2]/link/predecessor",
-                "/OpenDRIVE/road/lanes/laneSection[1]/right/lane[3]/link/predecessor",
                 "/OpenDRIVE/road/lanes/laneSection[1]/right/lane[1]",
                 "/OpenDRIVE/road/lanes/laneSection[1]/right/lane[2]",
                 "/OpenDRIVE/road/lanes/laneSection[1]/right/lane[3]",
             ],
         ),
-        # 2 no link issues + 2 invalid link issues + 2 no link from the previous invalid link issues
+        # 2 no link issues + 2 missing successors
         (
-            "invalid",
-            6,
+            "invalid_non_existing_lanes",
+            4,
             [
                 "/OpenDRIVE/road/lanes/laneSection[2]/left/lane[2]",
                 "/OpenDRIVE/road/lanes/laneSection[2]/right/lane[2]",
-                "/OpenDRIVE/road/lanes/laneSection[2]/left/lane[1]/link/predecessor",
-                "/OpenDRIVE/road/lanes/laneSection[2]/right/lane[3]/link/predecessor",
                 "/OpenDRIVE/road/lanes/laneSection[2]/left/lane[1]",
                 "/OpenDRIVE/road/lanes/laneSection[2]/right/lane[3]",
+            ],
+        ),
+        # 2 no lane link + 2 missing successors + 2 missing predecessors
+        (
+            "invalid_wrong_id",
+            6,
+            [
+                "/OpenDRIVE/road/lanes/laneSection[1]/left/lane[2]",
+                "/OpenDRIVE/road/lanes/laneSection[1]/right/lane[2]",
+                "/OpenDRIVE/road/lanes/laneSection[1]/right/lane[3]",
+                "/OpenDRIVE/road/lanes/laneSection[2]/left/lane[1]",
+                "/OpenDRIVE/road/lanes/laneSection[2]/left/lane[2]",
+                "/OpenDRIVE/road/lanes/laneSection[2]/right/lane[2]",
             ],
         ),
     ],
