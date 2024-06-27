@@ -302,7 +302,9 @@ def road_belongs_to_junction(road: etree._Element) -> bool:
         return True
 
 
-def get_connection_incoming_roa_id(connection: etree._Element) -> Union[None, int]:
+def get_incoming_road_id_from_connection(
+    connection: etree._Element,
+) -> Union[None, int]:
     incoming_road_id = connection.get("incomingRoad")
     if incoming_road_id is None:
         return None
@@ -310,7 +312,9 @@ def get_connection_incoming_roa_id(connection: etree._Element) -> Union[None, in
         return int(incoming_road_id)
 
 
-def get_connection_connecting_roa_id(connection: etree._Element) -> Union[None, int]:
+def get_connecting_road_id_from_connection(
+    connection: etree._Element,
+) -> Union[None, int]:
     connecting_roa_id = connection.get("connectingRoad")
     if connecting_roa_id is None:
         return None

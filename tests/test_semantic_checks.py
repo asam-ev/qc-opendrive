@@ -373,7 +373,7 @@ def test_road_linkage_is_junction_needed(
         ("valid", 0, []),
         (
             "invalid",
-            1,
+            2,
             [
                 "/OpenDRIVE/junction[2]/connection[1]",
                 "/OpenDRIVE/junction[2]/connection[2]",
