@@ -32,14 +32,14 @@ def _check_junctions_connection_one_connection_element(
 
             connecting_road_id_connections_map[connecting_road_id].append(connection)
 
-    for connections in connecting_road_id_connections_map.values():
+    for connecting_road_id, connections in connecting_road_id_connections_map.items():
         # connecting road id cannot be appear in more than 1 <connection> element
         if len(connections) > 1:
             # we raise 1 issue with all repeated locations for each repeated id
             issue_id = checker_data.result.register_issue(
                 checker_bundle_name=constants.BUNDLE_NAME,
                 checker_id=semantic_constants.CHECKER_ID,
-                description=f"Connecting roads shall be represented by only one <connection> element.",
+                description=f"Connecting road {connecting_road_id} shall be represented by only one <connection> element.",
                 level=IssueSeverity.ERROR,
                 rule_uid=rule_uid,
             )
@@ -72,7 +72,7 @@ def check_rule(checker_data: models.CheckerData) -> None:
         rule_full_name="junctions.connection.one_connection_element",
     )
 
-    if checker_data.schema_version == RULE_INITIAL_SUPPORTED_SCHEMA_VERSION:
+    if checker_data.schema_version != RULE_INITIAL_SUPPORTED_SCHEMA_VERSION:
         logging.info(
             f"Schema version {checker_data.schema_version} not supported. Skipping rule."
         )
