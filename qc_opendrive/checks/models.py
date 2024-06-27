@@ -27,3 +27,23 @@ class ContactPoint(str, Enum):
 class RoadLinkage:
     id: int
     contact_point: ContactPoint
+
+
+@dataclass
+class Poly3:
+    a: float
+    b: float
+    c: float
+    d: float
+
+
+class ParamPoly3Range(str, Enum):
+    ARC_LENGTH = "arcLength"
+    NORMALIZED = "normalized"
+
+
+@dataclass
+class ParamPoly3:
+    u: Poly3
+    v: Poly3
+    range: ParamPoly3Range
