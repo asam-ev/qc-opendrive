@@ -15,60 +15,6 @@ from qc_opendrive.checks.semantic import semantic_constants
 RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.4.0"
 
 
-def _raise_predecessor_issues(
-    checker_data: models.CheckerData, rule_uid: str, lane_section: etree._ElementTree
-) -> None:
-    for lane in utils.get_left_and_right_lanes_from_lane_section(lane_section):
-        predecessor_lane_ids = utils.get_predecessor_lane_ids(lane)
-        for lane_id in predecessor_lane_ids:
-            issue_id = checker_data.result.register_issue(
-                checker_bundle_name=constants.BUNDLE_NAME,
-                checker_id=semantic_constants.CHECKER_ID,
-                description="Invalid predecessor lane id.",
-                level=IssueSeverity.ERROR,
-                rule_uid=rule_uid,
-            )
-
-            link = utils.get_lane_link_element(
-                lane, lane_id, models.LinkageTag.PREDECESSOR
-            )
-
-            checker_data.result.add_xml_location(
-                checker_bundle_name=constants.BUNDLE_NAME,
-                checker_id=semantic_constants.CHECKER_ID,
-                issue_id=issue_id,
-                xpath=checker_data.input_file_xml_root.getpath(link),
-                description="",
-            )
-
-
-def _raise_successor_issues(
-    checker_data: models.CheckerData, rule_uid: str, lane_section: etree._ElementTree
-) -> None:
-    for lane in utils.get_left_and_right_lanes_from_lane_section(lane_section):
-        successor_lane_ids = utils.get_successor_lane_ids(lane)
-        for lane_id in successor_lane_ids:
-            issue_id = checker_data.result.register_issue(
-                checker_bundle_name=constants.BUNDLE_NAME,
-                checker_id=semantic_constants.CHECKER_ID,
-                description="Invalid successor lane id.",
-                level=IssueSeverity.ERROR,
-                rule_uid=rule_uid,
-            )
-
-            link = utils.get_lane_link_element(
-                lane, lane_id, models.LinkageTag.SUCCESSOR
-            )
-
-            checker_data.result.add_xml_location(
-                checker_bundle_name=constants.BUNDLE_NAME,
-                checker_id=semantic_constants.CHECKER_ID,
-                issue_id=issue_id,
-                xpath=checker_data.input_file_xml_root.getpath(link),
-                description="",
-            )
-
-
 def _check_two_lane_sections(
     checker_data: models.CheckerData,
     rule_uid: str,
@@ -86,26 +32,6 @@ def _check_two_lane_sections(
             )
 
             if predecessor_lane is None:
-                issue_id = checker_data.result.register_issue(
-                    checker_bundle_name=constants.BUNDLE_NAME,
-                    checker_id=semantic_constants.CHECKER_ID,
-                    description="Invalid predecessor lane id.",
-                    level=IssueSeverity.ERROR,
-                    rule_uid=rule_uid,
-                )
-
-                link = utils.get_lane_link_element(
-                    lane, predecessor_lane_id, models.LinkageTag.PREDECESSOR
-                )
-
-                checker_data.result.add_xml_location(
-                    checker_bundle_name=constants.BUNDLE_NAME,
-                    checker_id=semantic_constants.CHECKER_ID,
-                    issue_id=issue_id,
-                    xpath=checker_data.input_file_xml_root.getpath(link),
-                    description="",
-                )
-
                 continue
 
             successor_ids_of_predecessor_lane = utils.get_successor_lane_ids(
@@ -140,26 +66,6 @@ def _check_two_lane_sections(
             )
 
             if successor_lane is None:
-                issue_id = checker_data.result.register_issue(
-                    checker_bundle_name=constants.BUNDLE_NAME,
-                    checker_id=semantic_constants.CHECKER_ID,
-                    description="Invalid successor lane id.",
-                    level=IssueSeverity.ERROR,
-                    rule_uid=rule_uid,
-                )
-
-                link = utils.get_lane_link_element(
-                    lane, successor_lane_id, models.LinkageTag.SUCCESSOR
-                )
-
-                checker_data.result.add_xml_location(
-                    checker_bundle_name=constants.BUNDLE_NAME,
-                    checker_id=semantic_constants.CHECKER_ID,
-                    issue_id=issue_id,
-                    xpath=checker_data.input_file_xml_root.getpath(link),
-                    description="",
-                )
-
                 continue
 
             predecessor_ids_of_successor_lane = utils.get_predecessor_lane_ids(
@@ -213,7 +119,6 @@ def _check_first_lane_section(
     predecessor_road_id = utils.get_predecessor_road_id(road)
     predecessor_road = road_id_map.get(predecessor_road_id)
     if predecessor_road is None:
-        _raise_predecessor_issues(checker_data, rule_uid, first_lane_section)
         return
 
     last_lane_section_of_predecessor_road = utils.get_last_lane_section(
@@ -221,7 +126,6 @@ def _check_first_lane_section(
     )
 
     if last_lane_section_of_predecessor_road is None:
-        _raise_predecessor_issues(checker_data, rule_uid, first_lane_section)
         return
 
     _check_two_lane_sections(
@@ -245,13 +149,11 @@ def _check_last_lane_section(
     successor_road_id = utils.get_successor_road_id(road)
     successor_road = road_id_map.get(successor_road_id)
     if successor_road is None:
-        _raise_successor_issues(checker_data, rule_uid, last_lane_section)
         return
 
     first_lane_section_of_successor_road = utils.get_first_lane_section(successor_road)
 
     if first_lane_section_of_successor_road is None:
-        _raise_successor_issues(checker_data, rule_uid, last_lane_section)
         return
 
     _check_two_lane_sections(
