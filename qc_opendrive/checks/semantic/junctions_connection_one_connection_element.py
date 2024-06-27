@@ -60,6 +60,17 @@ def check_rule(checker_data: models.CheckerData) -> None:
 
     More info at
         - https://github.com/asam-ev/qc-opendrive/issues/6
+
+    Rule ID: junctions.connection.one_connection_element
+
+    Description: Each connecting road shall be represented by exactly one
+    element. A connecting road may contain as many lanes as required.
+
+    Severity: ERROR
+
+    Version range: From 1.7.0 to 1.7.0
+
+    Rule Version: 0.1
     """
     logging.info("Executing junctions.connection.one_connection_element check")
 
