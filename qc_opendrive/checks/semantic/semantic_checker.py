@@ -14,6 +14,7 @@ from qc_opendrive.checks.semantic import (
     road_lane_link_lanes_across_lane_sections,
     road_linkage_is_junction_needed,
     junctions_connection_connect_road_no_incoming_road,
+    junctions_connection_one_connection_element,
 )
 
 
@@ -37,6 +38,7 @@ def run_checks(config: Configuration, result: Result) -> None:
         road_lane_link_lanes_across_lane_sections.check_rule,
         road_linkage_is_junction_needed.check_rule,
         junctions_connection_connect_road_no_incoming_road.check_rule,
+        junctions_connection_one_connection_element.check_rule,
     ]
 
     checker_data = models.CheckerData(
