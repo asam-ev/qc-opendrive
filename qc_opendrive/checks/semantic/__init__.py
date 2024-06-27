@@ -8,3 +8,7 @@ from . import road_linkage_is_junction_needed as road_linkage_is_junction_needed
 from . import (
     road_lane_link_lanes_across_lane_sections as road_lane_link_lanes_across_lane_sections,
 )
+
+from . import (
+    junctions_connection_one_connection_element as junctions_connection_one_connection_element,
+)
