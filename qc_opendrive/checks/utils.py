@@ -2,6 +2,7 @@ from typing import List, Dict, Union
 
 from lxml import etree
 from qc_opendrive.checks import models
+import numpy as np
 
 
 def get_lanes(root: etree._ElementTree) -> List[etree._ElementTree]:
@@ -315,8 +316,51 @@ def get_incoming_road_id_from_connection(
 def get_connecting_road_id_from_connection(
     connection: etree._Element,
 ) -> Union[None, int]:
-    connecting_roa_id = connection.get("connectingRoad")
-    if connecting_roa_id is None:
+    connecting_road_id = connection.get("connectingRoad")
+    if connecting_road_id is None:
         return None
     else:
-        return int(connecting_roa_id)
+        return int(connecting_road_id)
+
+
+def get_length_from_geometry(geometry: etree._ElementTree) -> Union[None, float]:
+    length = geometry.get("length")
+    if length is None:
+        return None
+    else:
+        return float(length)
+
+
+def get_normalized_param_poly3_from_geometry(
+    geometry: etree._ElementTree,
+) -> Union[None, models.ParamPoly3]:
+    param_poly3 = None
+
+    for element in geometry.iter("paramPoly3"):
+        param_poly3 = element
+
+    if param_poly3 is None:
+        return None
+
+    if param_poly3.get("pRange") != models.ParamPoly3Range.NORMALIZED:
+        return None
+
+    return models.ParamPoly3(
+        u=models.Poly3(
+            a=float(param_poly3.get("aU")),
+            b=float(param_poly3.get("bU")),
+            c=float(param_poly3.get("cU")),
+            d=float(param_poly3.get("dU")),
+        ),
+        v=models.Poly3(
+            a=float(param_poly3.get("aV")),
+            b=float(param_poly3.get("bV")),
+            c=float(param_poly3.get("cV")),
+            d=float(param_poly3.get("dV")),
+        ),
+        range=models.ParamPoly3Range.NORMALIZED,
+    )
+
+
+def poly3_to_polynomial(poly3: models.Poly3) -> np.polynomial.Polynomial:
+    return np.polynomial.Polynomial([poly3.a, poly3.b, poly3.c, poly3.d])

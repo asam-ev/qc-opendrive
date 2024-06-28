@@ -5,6 +5,7 @@ from qc_baselib import Configuration, Result
 
 from qc_opendrive import constants
 from qc_opendrive.checks.semantic import semantic_checker
+from qc_opendrive.checks.geometry import geometry_checker
 
 logging.basicConfig(format="%(asctime)s - %(message)s", level=logging.INFO)
 
@@ -44,6 +45,7 @@ def main():
         result.set_result_version(version=constants.BUNDLE_VERSION)
 
         semantic_checker.run_checks(config=config, result=result)
+        geometry_checker.run_checks(config=config, result=result)
 
         result.write_to_file(
             config.get_checker_bundle_param(
