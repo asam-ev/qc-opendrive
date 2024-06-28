@@ -331,7 +331,7 @@ def get_length_from_geometry(geometry: etree._ElementTree) -> Union[None, float]
         return float(length)
 
 
-def get_param_poly3_from_geometry(
+def get_normalized_param_poly3_from_geometry(
     geometry: etree._ElementTree,
 ) -> Union[None, models.ParamPoly3]:
     param_poly3 = None

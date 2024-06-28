@@ -19,16 +19,31 @@ RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.7.0"
 TOLERANCE_THRESHOLD = 0.001
 
 
-def _integrand(t, du, dv):
+def _integrand(t, du, dv) -> float:
+    """
+    The equation to calculate the length of a parametric curve represented by u(t), v(t)
+    is integral of sqrt(du^2 + dv^2) dt.
+
+    More info at
+        - https://en.wikipedia.org/wiki/Arc_length
+    """
     return np.sqrt(du(t) ** 2 + dv(t) ** 2)
 
 
 def check_rule(checker_data: models.CheckerData) -> None:
     """
-    Rule: The actual curve length, as determined by numerical integration over the parameter range, should match '@Length'.
+    Rule ID: asam.net:xodr:1.7.0:road.geometry.param_poly3.length_match
 
-    This check currently relies on the accuracy of the scipy.integrate.quad method.
-    The estimated absolute error of the numerical integration is included in the issue description message.
+    Description: he actual curve length, as determined by numerical integration over
+        the parameter range, should match '@Length'.
+
+    Severity: WARNING
+
+    Version range: [1.7.0, )
+
+    Remark:
+        This check currently relies on the accuracy of the scipy.integrate.quad method.
+        The estimated absolute error of the numerical integration is included in the issue description message.
 
     More info at
         - https://github.com/asam-ev/qc-opendrive/issues/5
@@ -57,7 +72,7 @@ def check_rule(checker_data: models.CheckerData) -> None:
         if length is None:
             continue
 
-        param_poly3 = utils.get_param_poly3_from_geometry(geometry)
+        param_poly3 = utils.get_normalized_param_poly3_from_geometry(geometry)
 
         if param_poly3 is None:
             continue
