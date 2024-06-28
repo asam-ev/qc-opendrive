@@ -320,3 +320,21 @@ def get_connecting_road_id_from_connection(
         return None
     else:
         return int(connecting_roa_id)
+
+
+def get_contact_point_from_connection(
+    connection: etree._Element,
+) -> Union[None, models.ContactPoint]:
+    contact_point_str = connection.get("contactPoint")
+    if contact_point_str is None:
+        return None
+    else:
+        return models.ContactPoint(contact_point_str)
+
+
+def get_from_attribute_from_lane_link(lane_link: etree._Element) -> str:
+    return int(lane_link.get("from"))
+
+
+def get_to_attribute_from_lane_link(lane_link: etree._Element):
+    return int(lane_link.get("to"))
