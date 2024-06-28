@@ -34,7 +34,7 @@ def check_rule(checker_data: models.CheckerData) -> None:
     """
     Rule ID: asam.net:xodr:1.7.0:road.geometry.param_poly3.length_match
 
-    Description: he actual curve length, as determined by numerical integration over
+    Description: The actual curve length, as determined by numerical integration over
         the parameter range, should match '@Length'.
 
     Severity: WARNING
