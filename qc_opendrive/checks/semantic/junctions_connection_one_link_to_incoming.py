@@ -20,43 +20,68 @@ def _check_connection_lane_link_same_direction(
 ) -> None:
     contact_point = utils.get_contact_point_from_connection(connection)
 
-    # if not explicitly added we assume start as default
     if contact_point is None:
-        contact_point = models.ContactPoint.START
+        return
 
     incoming_road_id = utils.get_incoming_road_id_from_connection(connection)
     connecting_road_id = utils.get_connecting_road_id_from_connection(connection)
 
-    incoming_road_last_lane_section = utils.get_last_lane_section(
-        road_id_map[incoming_road_id]
+    if incoming_road_id is None or connecting_road_id is None:
+        return
+
+    incoming_road = road_id_map[incoming_road_id]
+    connecting_road = road_id_map[connecting_road_id]
+
+    # Get connecting road target lane section based on connection contact point
+    connection_lane_section = None
+    if contact_point == models.ContactPoint.START:
+        connection_lane_section = utils.get_first_lane_section(connecting_road)
+    elif contact_point == models.ContactPoint.END:
+        connection_lane_section = utils.get_last_lane_section(connecting_road)
+    else:
+        return
+
+    # The linkage from the incoming to the connecting road is defined in the
+    # connecting road linkage, there is the information if the connecting
+    # road connects to the end or start of the incoming road.
+
+    # Check if predecessor is the linkage, otherwise tries with the successor
+    incoming_linkage = utils.get_road_linkage(
+        connecting_road, models.LinkageTag.PREDECESSOR
     )
-    connecting_road_id_first_lane_section = utils.get_first_lane_section(
-        road_id_map[connecting_road_id]
-    )
+    if incoming_linkage is None or (
+        incoming_linkage is not None and incoming_linkage.id != incoming_road_id
+    ):
+        incoming_linkage = utils.get_road_linkage(
+            connecting_road, models.LinkageTag.SUCCESSOR
+        )
+
+    if incoming_linkage is None or (
+        incoming_linkage is not None and incoming_linkage.id != incoming_road_id
+    ):
+        return
+
+    incoming_lane_section = None
+    if incoming_linkage.contact_point == models.ContactPoint.START:
+        incoming_lane_section = utils.get_first_lane_section(incoming_road)
+    elif incoming_linkage.contact_point == models.ContactPoint.END:
+        incoming_lane_section = utils.get_last_lane_section(incoming_road)
+    else:
+        return
 
     lane_links = utils.get_lane_links_from_connection(connection)
+
+    if connection_lane_section is None or incoming_lane_section is None:
+        return
 
     for lane_link in lane_links:
         from_lane_id = utils.get_from_attribute_from_lane_link(lane_link)
         to_lane_id = utils.get_to_attribute_from_lane_link(lane_link)
 
-        from_lane = None
-        to_lane = None
-        if contact_point == models.ContactPoint.START:
-            from_lane = utils.get_lane_from_lane_section(
-                incoming_road_last_lane_section, from_lane_id
-            )
-            to_lane = utils.get_lane_from_lane_section(
-                connecting_road_id_first_lane_section, to_lane_id
-            )
-
-        else:
-            from_lane = utils.get_lane_from_lane_section(
-                connecting_road_id_first_lane_section, from_lane_id
-            )
-            to_lane = utils.get_lane_from_lane_section(
-                incoming_road_last_lane_section, to_lane_id
-            )
+        from_lane = utils.get_lane_from_lane_section(
+            incoming_lane_section, from_lane_id
+        )
+        to_lane = utils.get_lane_from_lane_section(connection_lane_section, to_lane_id)
 
         if from_lane is None or to_lane is None:
             # raise one issue if a lane link is found in the opposite direction
@@ -133,14 +158,7 @@ def _check_junctions_connection_one_link_to_incoming(
 
 def check_rule(checker_data: models.CheckerData) -> None:
     """
-    Implements a rule to check if a junction connecting roads are linked to
-    the same incoming road more than once, and if their lane links follow the
-    proper direction.
-
-    More info at
-        - https://github.com/asam-ev/qc-opendrive/issues/10
-
-    Rule ID: junctions.connection.one_link_to_incoming
+    Rule ID: asam.net:xodr:1.7.0:junctions.connection.one_link_to_incoming
 
     Description: Each connecting road shall be associated with at most one
     <connection> element per incoming road. A connecting road shall only have
@@ -148,9 +166,13 @@ def check_rule(checker_data: models.CheckerData) -> None:
 
     Severity: ERROR
 
-    Version range: From 1.8.0
+    Version range: [1.8.0, )
 
-    Rule Version: 0.1
+    Remark:
+        None
+
+    More info at
+        - https://github.com/asam-ev/qc-opendrive/issues/10
     """
     logging.info("Executing junctions.connection.one_link_to_incoming check")
 

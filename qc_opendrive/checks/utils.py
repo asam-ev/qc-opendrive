@@ -333,8 +333,16 @@ def get_contact_point_from_connection(
 
 
 def get_from_attribute_from_lane_link(lane_link: etree._Element) -> str:
-    return int(lane_link.get("from"))
+    from_attribute = lane_link.get("from")
+    if from_attribute is None:
+        return None
+    else:
+        return int(from_attribute)
 
 
 def get_to_attribute_from_lane_link(lane_link: etree._Element):
-    return int(lane_link.get("to"))
+    to_attribute = lane_link.get("to")
+    if to_attribute is None:
+        return None
+    else:
+        return int(to_attribute)

@@ -44,6 +44,10 @@
 		</lanes>
 	</road>
     <road name="B" length="10.0" id="2" junction="100">
+		<link>
+			<predecessor elementType="road" elementId="1" contactPoint="end"/>
+			<successor elementType="road" elementId="3" contactPoint="start"/>
+		</link>
 		<planView>
 			<geometry s="0.00000000000000e+00" x="0.03" y="-0.05" hdg="1.57080404096212e+00" length="10.0">
 				<line />
