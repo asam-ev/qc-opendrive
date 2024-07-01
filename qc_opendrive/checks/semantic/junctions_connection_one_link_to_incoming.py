@@ -158,7 +158,7 @@ def _check_junctions_connection_one_link_to_incoming(
 
 def check_rule(checker_data: models.CheckerData) -> None:
     """
-    Rule ID: asam.net:xodr:1.7.0:junctions.connection.one_link_to_incoming
+    Rule ID: asam.net:xodr:1.8.0:junctions.connection.one_link_to_incoming
 
     Description: Each connecting road shall be associated with at most one
     <connection> element per incoming road. A connecting road shall only have
