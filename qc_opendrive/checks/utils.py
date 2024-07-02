@@ -512,5 +512,62 @@ def get_connecting_lane_ids(
         return []
 
 
+def get_poly3_from_width(
+    width: etree._ElementTree,
+) -> models.WidthPoly3:
+    return models.WidthPoly3(
+        poly3=models.Poly3(
+            a=float(width.get("a")),
+            b=float(width.get("b")),
+            c=float(width.get("c")),
+            d=float(width.get("d")),
+        ),
+        s_offset=float(width.get("sOffset")),
+    )
+
+
+def get_lane_width_poly3_list(lane: etree._Element) -> List[models.WidthPoly3]:
+    width_poly3 = []
+    for width in lane.iter("width"):
+        width_poly3.append(get_poly3_from_width(width))
+    return width_poly3
+
+
 def evaluate_lane_width(lane: etree._Element, ds: float) -> Union[None, float]:
-    return 0.0
+    # This function follows the assumption that the width elements for a given
+    # lane follow the standard rules for width elements.
+    #
+    # Standard width rules:
+    # - The width of a lane shall remain valid until a new <width> element is
+    #   defined or the lane section ends.
+    # - A new <width> element shall be defined when the variables of the
+    #   polynomial function change.
+    # - <width> elements shall be defined in ascending order according to the
+    #   s-coordinate.
+    # - Width (ds) shall be greater than or equal to zero.
+    #
+
+    lane_id = get_lane_id(lane)
+
+    if lane_id == 0:
+        return 0.0
+
+    lane_width_poly3_list = get_lane_width_poly3_list(lane)
+
+    if len(lane_width_poly3_list) == 0:
+        return None
+
+    current_s_offset = lane_width_poly3_list[0].s_offset
+    index = 0
+    while ds >= current_s_offset and index < len(lane_width_poly3_list):
+        current_s_offset = lane_width_poly3_list[index].s_offset
+        index += 1
+
+    if index > 0:
+        index -= 1
+    else:
+        return None
+
+    poly3_to_eval = poly3_to_polynomial(lane_width_poly3_list[index].poly3)
+
+    return poly3_to_eval(ds)

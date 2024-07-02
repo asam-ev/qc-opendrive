@@ -11,7 +11,30 @@ from qc_opendrive.checks.semantic import semantic_constants
 
 RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.7.0"
 
-FLOAT_COMPARISON_THRESHOLD = 1e-3
+FLOAT_COMPARISON_THRESHOLD = 1e-6
+
+
+def _raise_issue(
+    checker_data: models.CheckerData,
+    rule_uid: str,
+    lane: etree._Element,
+    issue_severity: IssueSeverity,
+) -> None:
+    issue_id = checker_data.result.register_issue(
+        checker_bundle_name=constants.BUNDLE_NAME,
+        checker_id=semantic_constants.CHECKER_ID,
+        description=f" Lanes that have a width of zero at the beginning of the lane section shall have no predecessor element.",
+        level=issue_severity,
+        rule_uid=rule_uid,
+    )
+
+    checker_data.result.add_xml_location(
+        checker_bundle_name=constants.BUNDLE_NAME,
+        checker_id=semantic_constants.CHECKER_ID,
+        issue_id=issue_id,
+        xpath=checker_data.input_file_xml_root.getpath(lane),
+        description="Lane with width zero and predecessors.",
+    )
 
 
 def _check_road_lane_link_zero_width_at_start(
@@ -26,7 +49,11 @@ def _check_road_lane_link_zero_width_at_start(
             lanes = utils.get_left_and_right_lanes_from_lane_section(section)
 
             for lane in lanes:
-                if utils.evaluate_lane_width(lane, 0.0) < FLOAT_COMPARISON_THRESHOLD:
+                lane_start_width = utils.evaluate_lane_width(lane, 0.0)
+                if lane_start_width is None:
+                    continue
+
+                if lane_start_width < FLOAT_COMPARISON_THRESHOLD:
                     # This rule only evaluate explicit predecessor.
                     # Other rules verify if any implicit predecessor was not
                     # properly registered.
@@ -35,9 +62,13 @@ def _check_road_lane_link_zero_width_at_start(
                     if len(predecessor_lane_ids) > 0:
                         lane_id = utils.get_lane_id(lane)
                         if lane_id == 0:
-                            print("warning")
+                            _raise_issue(
+                                checker_data, rule_uid, lane, IssueSeverity.WARNING
+                            )
                         else:
-                            print("error")
+                            _raise_issue(
+                                checker_data, rule_uid, lane, IssueSeverity.ERROR
+                            )
 
 
 def _check_junction_road_lane_link_zero_width_at_start(
@@ -47,7 +78,7 @@ def _check_junction_road_lane_link_zero_width_at_start(
     junction_id_map = utils.get_junction_id_map(checker_data.input_file_xml_root)
 
     for road in roads:
-        # Connecting roads should not have road linkage to other junctions, it
+        # Connecting roads should not have road linkage to other junctions, this
         # is checked by other rules.
         if utils.road_belongs_to_junction(road):
             continue
@@ -66,7 +97,11 @@ def _check_junction_road_lane_link_zero_width_at_start(
         lanes = utils.get_left_and_right_lanes_from_lane_section(first_lane_section)
 
         for lane in lanes:
-            if utils.evaluate_lane_width(lane, 0.0) < FLOAT_COMPARISON_THRESHOLD:
+            lane_start_width = utils.evaluate_lane_width(lane, 0.0)
+            if lane_start_width is None:
+                continue
+
+            if lane_start_width < FLOAT_COMPARISON_THRESHOLD:
                 lane_id = utils.get_lane_id(lane)
                 if lane_id is None:
                     continue
@@ -83,7 +118,14 @@ def _check_junction_road_lane_link_zero_width_at_start(
                             continue
 
                         if from_lane_id == lane_id:
-                            print("error - junction")
+                            if lane_id == 0:
+                                _raise_issue(
+                                    checker_data, rule_uid, lane, IssueSeverity.WARNING
+                                )
+                            else:
+                                _raise_issue(
+                                    checker_data, rule_uid, lane, IssueSeverity.ERROR
+                                )
 
 
 def check_rule(checker_data: models.CheckerData) -> None:
@@ -124,3 +166,4 @@ def check_rule(checker_data: models.CheckerData) -> None:
         return
 
     _check_road_lane_link_zero_width_at_start(checker_data, rule_uid)
+    _check_junction_road_lane_link_zero_width_at_start(checker_data, rule_uid)
