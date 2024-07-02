@@ -150,6 +150,28 @@ def get_road_linkage(
         return None
 
 
+def get_road_junction_linkage(
+    road: etree._ElementTree, linkage_tag: models.LinkageTag
+) -> Union[None, int]:
+    road_link = road.find("link")
+    if road_link is None:
+        return None
+
+    linkage = road_link.find(linkage_tag.value)
+
+    if linkage is None:
+        return None
+    elif linkage.get("elementType") == "junction":
+        junction_id = linkage.get("elementId")
+        contact_point = linkage.get("contactPoint")
+        if junction_id is None or contact_point is None:
+            return None
+        else:
+            return int(junction_id)
+    else:
+        return None
+
+
 def get_predecessor_road_id(road: etree._ElementTree) -> Union[None, int]:
     linkage = get_road_linkage(road, models.LinkageTag.PREDECESSOR)
     if linkage is None:
@@ -333,7 +355,7 @@ def get_contact_point_from_connection(
         return models.ContactPoint(contact_point_str)
 
 
-def get_from_attribute_from_lane_link(lane_link: etree._Element) -> str:
+def get_from_attribute_from_lane_link(lane_link: etree._Element) -> Union[int, None]:
     from_attribute = lane_link.get("from")
     if from_attribute is None:
         return None
@@ -341,7 +363,7 @@ def get_from_attribute_from_lane_link(lane_link: etree._Element) -> str:
         return int(from_attribute)
 
 
-def get_to_attribute_from_lane_link(lane_link: etree._Element):
+def get_to_attribute_from_lane_link(lane_link: etree._Element) -> Union[int, None]:
     to_attribute = lane_link.get("to")
     if to_attribute is None:
         return None
@@ -488,3 +510,7 @@ def get_connecting_lane_ids(
         return get_successor_lane_ids(lane)
     else:
         return []
+
+
+def evaluate_lane_width(lane: etree._Element, ds: float) -> Union[None, float]:
+    return 0.0
