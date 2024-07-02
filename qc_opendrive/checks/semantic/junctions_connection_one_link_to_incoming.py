@@ -39,62 +39,11 @@ def _check_connection_lane_link_same_direction(
     connection: etree._Element,
     rule_uid: str,
 ) -> None:
-    contact_point = utils.get_contact_point_from_connection(connection)
+    contact_lane_sections = utils.get_incoming_and_connection_contacting_lane_sections(
+        connection, road_id_map
+    )
 
-    if contact_point is None:
-        return
-
-    incoming_road_id = utils.get_incoming_road_id_from_connection(connection)
-    connecting_road_id = utils.get_connecting_road_id_from_connection(connection)
-
-    if incoming_road_id is None or connecting_road_id is None:
-        return
-
-    incoming_road = road_id_map[incoming_road_id]
-    connecting_road = road_id_map[connecting_road_id]
-
-    # Get connecting road target lane section based on connection contact point
-    connection_lane_section = None
-    if contact_point == models.ContactPoint.START:
-        connection_lane_section = utils.get_first_lane_section(connecting_road)
-    elif contact_point == models.ContactPoint.END:
-        connection_lane_section = utils.get_last_lane_section(connecting_road)
-    else:
-        return
-
-    if connection_lane_section is None:
-        return
-
-    # The linkage from the incoming to the connecting road is defined in the
-    # connecting road linkage, there is the information if the connecting
-    # road connects to the end or start of the incoming road.
-
-    # If the connection contact point is start we get the incoming road from
-    # predecessor, otherwise we can get from the successor.
-    connecting_road_linkage = None
-    if contact_point == models.ContactPoint.START:
-        connecting_road_linkage = utils.get_road_linkage(
-            connecting_road, models.LinkageTag.PREDECESSOR
-        )
-    elif contact_point == models.ContactPoint.END:
-        connecting_road_linkage = utils.get_road_linkage(
-            connecting_road, models.LinkageTag.SUCCESSOR
-        )
-    else:
-        return
-
-    if connecting_road_linkage is None:
-        return
-
-    incoming_lane_section = None
-    if connecting_road_linkage.contact_point == models.ContactPoint.START:
-        incoming_lane_section = utils.get_first_lane_section(incoming_road)
-    elif connecting_road_linkage.contact_point == models.ContactPoint.END:
-        incoming_lane_section = utils.get_last_lane_section(incoming_road)
-    else:
-        return
-
-    if incoming_lane_section is None:
+    if contact_lane_sections is None:
         return
 
     lane_links = utils.get_lane_links_from_connection(connection)
@@ -104,9 +53,11 @@ def _check_connection_lane_link_same_direction(
         to_lane_id = utils.get_to_attribute_from_lane_link(lane_link)
 
         from_lane = utils.get_lane_from_lane_section(
-            incoming_lane_section, from_lane_id
+            contact_lane_sections.incoming, from_lane_id
         )
-        to_lane = utils.get_lane_from_lane_section(connection_lane_section, to_lane_id)
+        to_lane = utils.get_lane_from_lane_section(
+            contact_lane_sections.connection, to_lane_id
+        )
 
         if from_lane is None:
             _raise_lane_linkage_issue(checker_data, rule_uid, lane_link)
