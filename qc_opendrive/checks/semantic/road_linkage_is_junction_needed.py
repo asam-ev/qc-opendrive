@@ -111,7 +111,7 @@ def _check_road_linkage_is_junction_needed(
             elif road_linkage.contact_point == models.ContactPoint.START:
                 linkage_tag = models.LinkageTag.PREDECESSOR
             else:
-                return
+                continue
 
             _raise_road_linkage_is_junction_needed_issue(
                 checker_data,
