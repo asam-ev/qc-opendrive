@@ -123,8 +123,18 @@ def _check_road_linkage_is_junction_needed(
 
 def check_rule(checker_data: models.CheckerData) -> None:
     """
-    Implements a rule to check if a junction is needed in roads linkage in case
-    of ambiguity.
+    Rule ID: asam.net:xodr:1.4.0:road.linkage.is_junction_needed
+
+    Description: Two roads shall only be linked directly, if the linkage is clear.
+    If the relationship to successor or predecessor is ambiguous, junctions
+    shall be used.
+
+    Severity: ERROR
+
+    Version range: [1.4.0, )
+
+    Remark:
+        None
 
     More info at
         - https://github.com/asam-ev/qc-opendrive/issues/4
