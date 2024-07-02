@@ -99,8 +99,8 @@ def _check_road_linkage_is_junction_needed(
                 road_contact_point_map[contact_point_id].append(successor_link)
 
     for contact_point_id, elements in road_contact_point_map.items():
-        # in case two roads use the same predecessor the linkage is
-        # unclear
+        # in case two roads use the same contact point for a "target" road the
+        # linkage is unclear
         if len(elements) > 1:
             road_linkage = _get_road_linkage_from_contact_point_id(contact_point_id)
 
