@@ -55,11 +55,11 @@ def _check_junctions_connection_one_connection_element(
 
 def check_rule(checker_data: models.CheckerData) -> None:
     """
-    Implements a rule to check if a junction connecting roads are also incoming
-    roads.
+    Implements a rule to check if a junction connecting roads are also used
+    more than once.
 
     More info at
-        - https://github.com/asam-ev/qc-opendrive/issues/6
+        - https://github.com/asam-ev/qc-opendrive/issues/9
 
     Rule ID: junctions.connection.one_connection_element
 
