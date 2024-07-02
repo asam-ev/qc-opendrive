@@ -390,3 +390,101 @@ def get_normalized_param_poly3_from_geometry(
 
 def poly3_to_polynomial(poly3: models.Poly3) -> np.polynomial.Polynomial:
     return np.polynomial.Polynomial([poly3.a, poly3.b, poly3.c, poly3.d])
+
+
+def get_contact_lane_section_from_linked_road(
+    linkage: etree._ElementTree, road_id_map: Dict[int, etree._ElementTree]
+) -> Union[None, models.ContactingLaneSection]:
+    linked_road = road_id_map.get(linkage.id)
+    if linked_road is None:
+        return
+
+    contact_lane_section = None
+
+    if linkage.contact_point == models.ContactPoint.START:
+        contact_lane_section = models.ContactingLaneSection(
+            lane_section=get_first_lane_section(linked_road),
+            linkage_tag=models.LinkageTag.PREDECESSOR,
+        )
+    elif linkage.contact_point == models.ContactPoint.END:
+        contact_lane_section = models.ContactingLaneSection(
+            lane_section=get_last_lane_section(linked_road),
+            linkage_tag=models.LinkageTag.SUCCESSOR,
+        )
+
+    return contact_lane_section
+
+
+def get_contact_lane_section_from_junction_connection_road(
+    connection_road: etree._ElementTree, contact_point: models.ContactPoint
+) -> Union[None, etree._ElementTree]:
+    contact_lane_section = None
+
+    if contact_point == models.ContactPoint.START:
+        contact_lane_section = get_first_lane_section(connection_road)
+    elif contact_point == models.ContactPoint.END:
+        contact_lane_section = get_last_lane_section(connection_road)
+
+    return contact_lane_section
+
+
+def get_incoming_and_connection_contacting_lane_sections(
+    connection: etree._ElementTree, road_id_map: Dict[int, etree._ElementTree]
+) -> Union[None, models.ContactingLaneSections]:
+    connection_road_id = get_connecting_road_id_from_connection(connection)
+    incoming_road_id = get_incoming_road_id_from_connection(connection)
+
+    if connection_road_id is None or incoming_road_id is None:
+        return None
+
+    connection_road = road_id_map.get(connection_road_id)
+    incoming_road = road_id_map.get(incoming_road_id)
+
+    if connection_road is None or incoming_road is None:
+        return None
+
+    connection_contact_point = get_contact_point_from_connection(connection)
+    connection_lane_section = get_contact_lane_section_from_junction_connection_road(
+        connection_road, connection_contact_point
+    )
+
+    if connection_lane_section is None:
+        return None
+
+    connection_road_linkage = None
+    if connection_contact_point == models.ContactPoint.START:
+        connection_road_linkage = get_road_linkage(
+            connection_road, models.LinkageTag.PREDECESSOR
+        )
+    elif connection_contact_point == models.ContactPoint.END:
+        connection_road_linkage = get_road_linkage(
+            connection_road, models.LinkageTag.SUCCESSOR
+        )
+
+    if connection_road_linkage is None:
+        return None
+
+    incoming_lane_section = None
+    if connection_road_linkage.contact_point == models.ContactPoint.START:
+        incoming_lane_section = get_first_lane_section(incoming_road)
+    elif connection_road_linkage.contact_point == models.ContactPoint.END:
+        incoming_lane_section = get_last_lane_section(incoming_road)
+
+    if incoming_lane_section is None:
+        return None
+
+    return models.ContactingLaneSections(
+        incoming=incoming_lane_section,
+        connection=connection_lane_section,
+    )
+
+
+def get_connecting_lane_ids(
+    lane: etree._ElementTree, linkage_tag: models.LinkageTag
+) -> List[int]:
+    if linkage_tag == models.LinkageTag.PREDECESSOR:
+        return get_predecessor_lane_ids(lane)
+    elif linkage_tag == models.LinkageTag.SUCCESSOR:
+        return get_successor_lane_ids(lane)
+    else:
+        return []

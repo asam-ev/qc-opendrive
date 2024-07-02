@@ -152,8 +152,10 @@ def _check_level_change_linkage_roads(
 ) -> None:
     if linkage_tag == models.LinkageTag.PREDECESSOR:
         current_lane_section = utils.get_first_lane_section(road)
-    else:
+    elif linkage_tag == models.LinkageTag.SUCCESSOR:
         current_lane_section = utils.get_last_lane_section(road)
+    else:
+        return
 
     all_lanes = utils.get_left_and_right_lanes_from_lane_section(current_lane_section)
 
@@ -161,15 +163,9 @@ def _check_level_change_linkage_roads(
     if linkage is None:
         return
 
-    linkage_road = road_id_map.get(linkage.id)
-    if linkage_road is None:
-        return
-
-    other_lane_section = None
-    if linkage.contact_point == models.ContactPoint.START:
-        other_lane_section = utils.get_first_lane_section(linkage_road)
-    elif linkage.contact_point == models.ContactPoint.END:
-        other_lane_section = utils.get_last_lane_section(linkage_road)
+    other_lane_section = utils.get_contact_lane_section_from_linked_road(
+        linkage, road_id_map
+    )
 
     if other_lane_section is None:
         return
@@ -183,7 +179,9 @@ def _check_level_change_linkage_roads(
             linkage_lane_ids = utils.get_successor_lane_ids(lane)
 
         for lane_id in linkage_lane_ids:
-            other_lane = utils.get_lane_from_lane_section(other_lane_section, lane_id)
+            other_lane = utils.get_lane_from_lane_section(
+                other_lane_section.lane_section, lane_id
+            )
             if other_lane is None:
                 continue
 
@@ -296,45 +294,27 @@ def _check_level_among_junctions(
 ) -> None:
     for junction in utils.get_junctions(checker_data.input_file_xml_root):
         for connection in utils.get_connections_from_junction(junction):
-            connection_road_id = connection.get("connectingRoad")
-            incoming_road_id = connection.get("incomingRoad")
-            connection_road = road_id_map.get(int(connection_road_id))
-            incoming_road = road_id_map.get(int(incoming_road_id))
+            contacting_lane_sections = (
+                utils.get_incoming_and_connection_contacting_lane_sections(
+                    connection, road_id_map
+                )
+            )
 
-            if connection_road is None or incoming_road is None:
-                continue
-
-            connection_lane_sections = utils.get_lane_sections(connection_road)
-            incoming_lane_sections = utils.get_lane_sections(incoming_road)
-
-            if len(connection_lane_sections) == 0 or len(incoming_lane_sections) == 0:
-                continue
-
-            contact_point = connection.get("contactPoint")
-            incoming_lane_section = None
-            connection_lane_section = None
-            if contact_point == "start":
-                incoming_lane_section = incoming_lane_sections[-1]
-                connection_lane_section = connection_lane_sections[0]
-            elif contact_point == "end":
-                # Case outgoing lane
-                incoming_lane_section = incoming_lane_sections[0]
-                connection_lane_section = connection_lane_sections[-1]
-            else:
+            if contacting_lane_sections is None:
                 continue
 
             for lane_link in utils.get_lane_links_from_connection(connection):
-                incoming_lane_id = lane_link.get("from")
-                connection_lane_id = lane_link.get("to")
+                incoming_lane_id = utils.get_from_attribute_from_lane_link(lane_link)
+                connection_lane_id = utils.get_to_attribute_from_lane_link(lane_link)
 
                 if incoming_lane_id is None or connection_lane_id is None:
                     continue
 
                 incoming_lane = utils.get_lane_from_lane_section(
-                    incoming_lane_section, int(incoming_lane_id)
+                    contacting_lane_sections.incoming, incoming_lane_id
                 )
                 connection_lane = utils.get_lane_from_lane_section(
-                    connection_lane_section, int(connection_lane_id)
+                    contacting_lane_sections.connection, connection_lane_id
                 )
 
                 if incoming_lane is None or connection_lane is None:

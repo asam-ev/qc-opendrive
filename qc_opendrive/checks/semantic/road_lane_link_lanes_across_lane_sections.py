@@ -15,79 +15,64 @@ from qc_opendrive.checks.semantic import semantic_constants
 RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.4.0"
 
 
+def _check_two_lane_sections_one_direction(
+    checker_data: models.CheckerData,
+    rule_uid: str,
+    first_lane_section: models.ContactingLaneSection,
+    second_lane_section: models.ContactingLaneSection,
+) -> None:
+    for lane in utils.get_left_and_right_lanes_from_lane_section(
+        first_lane_section.lane_section
+    ):
+        current_lane_id = utils.get_lane_id(lane)
+        if current_lane_id is None:
+            continue
+
+        connecting_lane_ids_of_first_lane = utils.get_connecting_lane_ids(
+            lane, first_lane_section.linkage_tag
+        )
+        for connecting_lane_id_of_first_lane in connecting_lane_ids_of_first_lane:
+            connecting_lane = utils.get_lane_from_lane_section(
+                second_lane_section.lane_section, connecting_lane_id_of_first_lane
+            )
+
+            if connecting_lane is None:
+                continue
+
+            connecting_lane_ids_of_second_lane = utils.get_connecting_lane_ids(
+                connecting_lane, second_lane_section.linkage_tag
+            )
+
+            if current_lane_id not in connecting_lane_ids_of_second_lane:
+                issue_id = checker_data.result.register_issue(
+                    checker_bundle_name=constants.BUNDLE_NAME,
+                    checker_id=semantic_constants.CHECKER_ID,
+                    description="Missing lane link.",
+                    level=IssueSeverity.ERROR,
+                    rule_uid=rule_uid,
+                )
+
+                checker_data.result.add_xml_location(
+                    checker_bundle_name=constants.BUNDLE_NAME,
+                    checker_id=semantic_constants.CHECKER_ID,
+                    issue_id=issue_id,
+                    xpath=checker_data.input_file_xml_root.getpath(connecting_lane),
+                    description="",
+                )
+
+
 def _check_two_lane_sections(
     checker_data: models.CheckerData,
     rule_uid: str,
-    predecessor_lane_section: etree._ElementTree,
-    successor_lane_section: etree._ElementTree,
+    first_lane_section: models.ContactingLaneSection,
+    second_lane_section: models.ContactingLaneSection,
 ) -> None:
-    for lane in utils.get_left_and_right_lanes_from_lane_section(
-        successor_lane_section
-    ):
-        current_lane_id = utils.get_lane_id(lane)
-        predecessor_lane_ids = utils.get_predecessor_lane_ids(lane)
-        for predecessor_lane_id in predecessor_lane_ids:
-            predecessor_lane = utils.get_lane_from_lane_section(
-                predecessor_lane_section, predecessor_lane_id
-            )
-
-            if predecessor_lane is None:
-                continue
-
-            successor_ids_of_predecessor_lane = utils.get_successor_lane_ids(
-                predecessor_lane
-            )
-
-            if current_lane_id not in successor_ids_of_predecessor_lane:
-                issue_id = checker_data.result.register_issue(
-                    checker_bundle_name=constants.BUNDLE_NAME,
-                    checker_id=semantic_constants.CHECKER_ID,
-                    description="Missing successor.",
-                    level=IssueSeverity.ERROR,
-                    rule_uid=rule_uid,
-                )
-
-                checker_data.result.add_xml_location(
-                    checker_bundle_name=constants.BUNDLE_NAME,
-                    checker_id=semantic_constants.CHECKER_ID,
-                    issue_id=issue_id,
-                    xpath=checker_data.input_file_xml_root.getpath(predecessor_lane),
-                    description="",
-                )
-
-    for lane in utils.get_left_and_right_lanes_from_lane_section(
-        predecessor_lane_section
-    ):
-        current_lane_id = utils.get_lane_id(lane)
-        successor_lane_ids = utils.get_successor_lane_ids(lane)
-        for successor_lane_id in successor_lane_ids:
-            successor_lane = utils.get_lane_from_lane_section(
-                successor_lane_section, successor_lane_id
-            )
-
-            if successor_lane is None:
-                continue
-
-            predecessor_ids_of_successor_lane = utils.get_predecessor_lane_ids(
-                successor_lane
-            )
-
-            if current_lane_id not in predecessor_ids_of_successor_lane:
-                issue_id = checker_data.result.register_issue(
-                    checker_bundle_name=constants.BUNDLE_NAME,
-                    checker_id=semantic_constants.CHECKER_ID,
-                    description="Missing predecessor.",
-                    level=IssueSeverity.ERROR,
-                    rule_uid=rule_uid,
-                )
-
-                checker_data.result.add_xml_location(
-                    checker_bundle_name=constants.BUNDLE_NAME,
-                    checker_id=semantic_constants.CHECKER_ID,
-                    issue_id=issue_id,
-                    xpath=checker_data.input_file_xml_root.getpath(successor_lane),
-                    description="",
-                )
+    _check_two_lane_sections_one_direction(
+        checker_data, rule_uid, first_lane_section, second_lane_section
+    )
+    _check_two_lane_sections_one_direction(
+        checker_data, rule_uid, second_lane_section, first_lane_section
+    )
 
 
 def _check_middle_lane_sections(
@@ -102,7 +87,16 @@ def _check_middle_lane_sections(
         current_lane_section = lane_sections[i]
         previous_lane_section = lane_sections[i - 1]
         _check_two_lane_sections(
-            checker_data, rule_uid, previous_lane_section, current_lane_section
+            checker_data,
+            rule_uid,
+            models.ContactingLaneSection(
+                lane_section=previous_lane_section,
+                linkage_tag=models.LinkageTag.SUCCESSOR,
+            ),
+            models.ContactingLaneSection(
+                lane_section=current_lane_section,
+                linkage_tag=models.LinkageTag.PREDECESSOR,
+            ),
         )
 
 
@@ -115,24 +109,26 @@ def _check_first_lane_section(
     first_lane_section = utils.get_first_lane_section(road)
     if first_lane_section is None:
         return
-
-    predecessor_road_id = utils.get_predecessor_road_id(road)
-    predecessor_road = road_id_map.get(predecessor_road_id)
-    if predecessor_road is None:
-        return
-
-    last_lane_section_of_predecessor_road = utils.get_last_lane_section(
-        predecessor_road
+    first_contacting_lane_section = models.ContactingLaneSection(
+        lane_section=first_lane_section, linkage_tag=models.LinkageTag.PREDECESSOR
     )
 
-    if last_lane_section_of_predecessor_road is None:
+    predecessor_linkage = utils.get_road_linkage(road, models.LinkageTag.PREDECESSOR)
+    if predecessor_linkage is None:
+        return
+
+    other_contacting_lane_section = utils.get_contact_lane_section_from_linked_road(
+        predecessor_linkage, road_id_map
+    )
+
+    if other_contacting_lane_section is None:
         return
 
     _check_two_lane_sections(
         checker_data,
         rule_uid,
-        last_lane_section_of_predecessor_road,
-        first_lane_section,
+        first_contacting_lane_section,
+        other_contacting_lane_section,
     )
 
 
@@ -146,21 +142,26 @@ def _check_last_lane_section(
     if last_lane_section is None:
         return
 
-    successor_road_id = utils.get_successor_road_id(road)
-    successor_road = road_id_map.get(successor_road_id)
-    if successor_road is None:
+    last_contacting_lane_section = models.ContactingLaneSection(
+        lane_section=last_lane_section, linkage_tag=models.LinkageTag.SUCCESSOR
+    )
+
+    successor_linkage = utils.get_road_linkage(road, models.LinkageTag.SUCCESSOR)
+    if successor_linkage is None:
         return
 
-    first_lane_section_of_successor_road = utils.get_first_lane_section(successor_road)
+    other_contacting_lane_section = utils.get_contact_lane_section_from_linked_road(
+        successor_linkage, road_id_map
+    )
 
-    if first_lane_section_of_successor_road is None:
+    if other_contacting_lane_section is None:
         return
 
     _check_two_lane_sections(
         checker_data,
         rule_uid,
-        last_lane_section,
-        first_lane_section_of_successor_road,
+        last_contacting_lane_section,
+        other_contacting_lane_section,
     )
 
 
