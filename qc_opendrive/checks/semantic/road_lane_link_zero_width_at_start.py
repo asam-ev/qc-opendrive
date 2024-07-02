@@ -74,10 +74,10 @@ def _check_road_lane_link_zero_width_at_start(
 def _check_junction_road_lane_link_zero_width_at_start(
     checker_data: models.CheckerData, rule_uid: str
 ) -> None:
-    roads = utils.get_roads(checker_data.input_file_xml_root)
+    road_id_map = utils.get_road_id_map(checker_data.input_file_xml_root)
     junction_id_map = utils.get_junction_id_map(checker_data.input_file_xml_root)
 
-    for road in roads:
+    for road_id, road in road_id_map.items():
         # Connecting roads should not have road linkage to other junctions, this
         # is checked by other rules.
         if utils.road_belongs_to_junction(road):
@@ -90,8 +90,13 @@ def _check_junction_road_lane_link_zero_width_at_start(
         if predecessor_junction_id is None:
             continue
 
-        predecessor_junction = junction_id_map[junction_id_map]
-        connections = utils.get_connections_from_junction(predecessor_junction)
+        predecessor_connections = utils.get_all_road_linkage_junction_connections(
+            road_id,
+            predecessor_junction_id,
+            road_id_map,
+            junction_id_map,
+            models.LinkageTag.PREDECESSOR,
+        )
 
         first_lane_section = utils.get_first_lane_section(road)
         lanes = utils.get_left_and_right_lanes_from_lane_section(first_lane_section)
@@ -106,7 +111,7 @@ def _check_junction_road_lane_link_zero_width_at_start(
                 if lane_id is None:
                     continue
 
-                for connection in connections:
+                for connection in predecessor_connections:
                     lane_links = utils.get_lane_links_from_connection(connection)
 
                     for lane_link in lane_links:
@@ -120,11 +125,17 @@ def _check_junction_road_lane_link_zero_width_at_start(
                         if from_lane_id == lane_id:
                             if lane_id == 0:
                                 _raise_issue(
-                                    checker_data, rule_uid, lane, IssueSeverity.WARNING
+                                    checker_data,
+                                    rule_uid,
+                                    lane,
+                                    IssueSeverity.WARNING,
                                 )
                             else:
                                 _raise_issue(
-                                    checker_data, rule_uid, lane, IssueSeverity.ERROR
+                                    checker_data,
+                                    rule_uid,
+                                    lane,
+                                    IssueSeverity.ERROR,
                                 )
 
 

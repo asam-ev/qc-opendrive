@@ -571,3 +571,45 @@ def evaluate_lane_width(lane: etree._Element, ds: float) -> Union[None, float]:
     poly3_to_eval = poly3_to_polynomial(lane_width_poly3_list[index].poly3)
 
     return poly3_to_eval(ds)
+
+
+def get_all_road_linkage_junction_connections(
+    road_id: int,
+    junction_id: int,
+    road_id_map: Dict[int, etree._ElementTree],
+    junction_id_map: Dict[int, etree._ElementTree],
+    linkage_tag: models.LinkageTag,
+):
+    linkage_connections = []
+    linkage_junction = junction_id_map[junction_id]
+    connections = get_connections_from_junction(linkage_junction)
+
+    for connection in connections:
+        incoming_road_id = get_incoming_road_id_from_connection(connection)
+        connecting_road_id = get_connecting_road_id_from_connection(connection)
+
+        if incoming_road_id is None or connecting_road_id is None:
+            continue
+
+        if incoming_road_id == road_id:
+            connecting_road = road_id_map[connecting_road_id]
+
+            connection_contact_point = get_contact_point_from_connection(connection)
+
+            connection_road_linkage = None
+            if connection_contact_point == models.ContactPoint.START:
+                connection_road_linkage = get_road_linkage(
+                    connecting_road, models.LinkageTag.PREDECESSOR
+                )
+            elif connection_contact_point == models.ContactPoint.END:
+                connection_road_linkage = get_road_linkage(
+                    connecting_road, models.LinkageTag.SUCCESSOR
+                )
+
+            if connection_road_linkage is None:
+                continue
+
+            if connection_road_linkage.contact_point == linkage_tag:
+                linkage_connections.append(connection)
+
+    return linkage_connections
