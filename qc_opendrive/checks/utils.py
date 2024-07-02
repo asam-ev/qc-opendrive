@@ -163,8 +163,7 @@ def get_road_junction_linkage(
         return None
     elif linkage.get("elementType") == "junction":
         junction_id = linkage.get("elementId")
-        contact_point = linkage.get("contactPoint")
-        if junction_id is None or contact_point is None:
+        if junction_id is None:
             return None
         else:
             return int(junction_id)
