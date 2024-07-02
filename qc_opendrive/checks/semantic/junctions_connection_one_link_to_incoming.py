@@ -12,6 +12,27 @@ from qc_opendrive.checks.semantic import semantic_constants
 RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.8.0"
 
 
+def _raise_lane_linkage_issue(
+    checker_data: models.CheckerData, rule_uid: str, lane_link: etree._Element
+):
+    # raise one issue if a lane link is found in the opposite direction
+    # of the connecting road
+    issue_id = checker_data.result.register_issue(
+        checker_bundle_name=constants.BUNDLE_NAME,
+        checker_id=semantic_constants.CHECKER_ID,
+        description=f"A connecting road shall only have the <laneLink> element for that direction.",
+        level=IssueSeverity.ERROR,
+        rule_uid=rule_uid,
+    )
+    checker_data.result.add_xml_location(
+        checker_bundle_name=constants.BUNDLE_NAME,
+        checker_id=semantic_constants.CHECKER_ID,
+        issue_id=issue_id,
+        xpath=checker_data.input_file_xml_root.getpath(lane_link),
+        description=f"Lane link in opposite direction.",
+    )
+
+
 def _check_connection_lane_link_same_direction(
     checker_data: models.CheckerData,
     road_id_map: Dict[int, etree._ElementTree],
@@ -41,24 +62,27 @@ def _check_connection_lane_link_same_direction(
     else:
         return
 
+    if connection_lane_section is None:
+        return
+
     # The linkage from the incoming to the connecting road is defined in the
     # connecting road linkage, there is the information if the connecting
     # road connects to the end or start of the incoming road.
 
-    # Check if predecessor is the linkage, otherwise tries with the successor
-    incoming_linkage = utils.get_road_linkage(
-        connecting_road, models.LinkageTag.PREDECESSOR
-    )
-    if incoming_linkage is None or (
-        incoming_linkage is not None and incoming_linkage.id != incoming_road_id
-    ):
+    # If the connection contact point is start we get the incoming road from
+    # predecessor, otherwise we can get from the successor.
+    if contact_point == models.ContactPoint.START:
+        incoming_linkage = utils.get_road_linkage(
+            connecting_road, models.LinkageTag.PREDECESSOR
+        )
+    elif contact_point == models.ContactPoint.END:
         incoming_linkage = utils.get_road_linkage(
             connecting_road, models.LinkageTag.SUCCESSOR
         )
+    else:
+        return
 
-    if incoming_linkage is None or (
-        incoming_linkage is not None and incoming_linkage.id != incoming_road_id
-    ):
+    if incoming_linkage is None:
         return
 
     incoming_lane_section = None
@@ -69,10 +93,10 @@ def _check_connection_lane_link_same_direction(
     else:
         return
 
-    lane_links = utils.get_lane_links_from_connection(connection)
-
-    if connection_lane_section is None or incoming_lane_section is None:
+    if incoming_lane_section is None:
         return
+
+    lane_links = utils.get_lane_links_from_connection(connection)
 
     for lane_link in lane_links:
         from_lane_id = utils.get_from_attribute_from_lane_link(lane_link)
@@ -83,23 +107,10 @@ def _check_connection_lane_link_same_direction(
         )
         to_lane = utils.get_lane_from_lane_section(connection_lane_section, to_lane_id)
 
-        if from_lane is None or to_lane is None:
-            # raise one issue if a lane link is found in the opposite direction
-            # of the connecting road
-            issue_id = checker_data.result.register_issue(
-                checker_bundle_name=constants.BUNDLE_NAME,
-                checker_id=semantic_constants.CHECKER_ID,
-                description=f"A connecting road shall only have the <laneLink> element for that direction.",
-                level=IssueSeverity.ERROR,
-                rule_uid=rule_uid,
-            )
-            checker_data.result.add_xml_location(
-                checker_bundle_name=constants.BUNDLE_NAME,
-                checker_id=semantic_constants.CHECKER_ID,
-                issue_id=issue_id,
-                xpath=checker_data.input_file_xml_root.getpath(lane_link),
-                description=f"Lane link in opposite direction.",
-            )
+        if from_lane is None:
+            _raise_lane_linkage_issue(checker_data, rule_uid, lane_link)
+        if to_lane is None:
+            _raise_lane_linkage_issue(checker_data, rule_uid, lane_link)
 
 
 def _check_junctions_connection_one_link_to_incoming(
