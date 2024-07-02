@@ -579,10 +579,18 @@ def get_all_road_linkage_junction_connections(
     road_id_map: Dict[int, etree._ElementTree],
     junction_id_map: Dict[int, etree._ElementTree],
     linkage_tag: models.LinkageTag,
-):
+) -> List[etree._Element]:
     linkage_connections = []
     linkage_junction = junction_id_map[junction_id]
     connections = get_connections_from_junction(linkage_junction)
+
+    target_contact_point = None
+    if linkage_tag == models.LinkageTag.PREDECESSOR:
+        target_contact_point = models.ContactPoint.START
+    elif linkage_tag == models.LinkageTag.SUCCESSOR:
+        target_contact_point = models.ContactPoint.END
+    else:
+        return []
 
     for connection in connections:
         incoming_road_id = get_incoming_road_id_from_connection(connection)
@@ -609,7 +617,7 @@ def get_all_road_linkage_junction_connections(
             if connection_road_linkage is None:
                 continue
 
-            if connection_road_linkage.contact_point == linkage_tag:
+            if connection_road_linkage.contact_point == target_contact_point:
                 linkage_connections.append(connection)
 
     return linkage_connections
