@@ -12,3 +12,7 @@ from . import (
 from . import (
     junctions_connection_one_connection_element as junctions_connection_one_connection_element,
 )
+
+from . import (
+    junctions_connection_one_link_to_incoming as junctions_connection_one_link_to_incoming,
+)

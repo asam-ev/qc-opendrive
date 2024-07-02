@@ -323,6 +323,32 @@ def get_connecting_road_id_from_connection(
         return int(connecting_road_id)
 
 
+def get_contact_point_from_connection(
+    connection: etree._Element,
+) -> Union[None, models.ContactPoint]:
+    contact_point_str = connection.get("contactPoint")
+    if contact_point_str is None:
+        return None
+    else:
+        return models.ContactPoint(contact_point_str)
+
+
+def get_from_attribute_from_lane_link(lane_link: etree._Element) -> str:
+    from_attribute = lane_link.get("from")
+    if from_attribute is None:
+        return None
+    else:
+        return int(from_attribute)
+
+
+def get_to_attribute_from_lane_link(lane_link: etree._Element):
+    to_attribute = lane_link.get("to")
+    if to_attribute is None:
+        return None
+    else:
+        return int(to_attribute)
+
+
 def get_length_from_geometry(geometry: etree._ElementTree) -> Union[None, float]:
     length = geometry.get("length")
     if length is None:
