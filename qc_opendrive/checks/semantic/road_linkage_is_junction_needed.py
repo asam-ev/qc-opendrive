@@ -36,6 +36,20 @@ def _raise_road_linkage_is_junction_needed_issue(
         )
 
 
+def _create_contact_point_id_from_road_linkage(road_linkage: models.RoadLinkage) -> str:
+    return f"{road_linkage.id}-{road_linkage.contact_point.value}"
+
+
+def _get_road_linkage_from_contact_point_id(
+    contact_point_id: str,
+) -> models.RoadLinkage:
+    contact_point_id_split = contact_point_id.split("-")
+    return models.RoadLinkage(
+        id=contact_point_id_split[0],
+        contact_point=models.ContactPoint(contact_point_id_split[1]),
+    )
+
+
 def _check_road_linkage_is_junction_needed(
     checker_data: models.CheckerData, rule_uid: str
 ) -> None:
@@ -44,8 +58,7 @@ def _check_road_linkage_is_junction_needed(
     if len(roads) < 2:
         return
 
-    road_linkage_successor_map: Dict[int, List[etree._ElementTree]] = {}
-    road_linkage_predecessor_map: Dict[int, List[etree._ElementTree]] = {}
+    road_contact_point_map: Dict[str, List[etree._Element]] = {}
 
     for road in roads:
         # Verify if road is not part of a junction to proceed.
@@ -58,58 +71,70 @@ def _check_road_linkage_is_junction_needed(
             )
 
             if road_predecessor_linkage is not None:
+                contact_point_id = _create_contact_point_id_from_road_linkage(
+                    road_predecessor_linkage
+                )
+                if contact_point_id not in road_contact_point_map:
+                    road_contact_point_map[contact_point_id] = []
                 predecessor_link = utils.get_road_link_element(
                     road, road_predecessor_linkage.id, models.LinkageTag.PREDECESSOR
                 )
-                if road_predecessor_linkage.id not in road_linkage_predecessor_map:
-                    road_linkage_predecessor_map[road_predecessor_linkage.id] = []
 
-                road_linkage_predecessor_map[road_predecessor_linkage.id].append(
-                    predecessor_link
-                )
+                road_contact_point_map[contact_point_id].append(predecessor_link)
 
             road_successor_linkage = utils.get_road_linkage(
                 road, models.LinkageTag.SUCCESSOR
             )
 
             if road_successor_linkage is not None:
+                contact_point_id = _create_contact_point_id_from_road_linkage(
+                    road_successor_linkage
+                )
+                if contact_point_id not in road_contact_point_map:
+                    road_contact_point_map[contact_point_id] = []
                 successor_link = utils.get_road_link_element(
-                    road, road_successor_linkage.id, models.LinkageTag.SUCCESSOR
-                )
-                if road_successor_linkage.id not in road_linkage_successor_map:
-                    road_linkage_successor_map[road_successor_linkage.id] = []
-
-                road_linkage_successor_map[road_successor_linkage.id].append(
-                    successor_link
+                    road, road_successor_linkage.id, models.LinkageTag.PREDECESSOR
                 )
 
-    for predecessor_elements in road_linkage_predecessor_map.values():
-        # in case two roads use the same predecessor the linkage is
-        # unclear
-        if len(predecessor_elements) > 1:
+                road_contact_point_map[contact_point_id].append(successor_link)
+
+    for contact_point_id, elements in road_contact_point_map.items():
+        # in case two roads use the same contact point for a "target" road the
+        # linkage is unclear
+        if len(elements) > 1:
+            road_linkage = _get_road_linkage_from_contact_point_id(contact_point_id)
+
+            linkage_tag = None
+
+            if road_linkage.contact_point == models.ContactPoint.END:
+                linkage_tag = models.LinkageTag.SUCCESSOR
+            elif road_linkage.contact_point == models.ContactPoint.START:
+                linkage_tag = models.LinkageTag.PREDECESSOR
+            else:
+                continue
+
             _raise_road_linkage_is_junction_needed_issue(
                 checker_data,
                 rule_uid,
-                predecessor_elements,
-                models.LinkageTag.PREDECESSOR,
-            )
-
-    for successor_elements in road_linkage_successor_map.values():
-        # in case two roads road use the same successor the linkage is
-        # unclear
-        if len(successor_elements) > 1:
-            _raise_road_linkage_is_junction_needed_issue(
-                checker_data,
-                rule_uid,
-                successor_elements,
-                models.LinkageTag.SUCCESSOR,
+                elements,
+                linkage_tag,
             )
 
 
 def check_rule(checker_data: models.CheckerData) -> None:
     """
-    Implements a rule to check if a junction is needed in roads linkage in case
-    of ambiguity.
+    Rule ID: asam.net:xodr:1.4.0:road.linkage.is_junction_needed
+
+    Description: Two roads shall only be linked directly, if the linkage is clear.
+    If the relationship to successor or predecessor is ambiguous, junctions
+    shall be used.
+
+    Severity: ERROR
+
+    Version range: [1.4.0, )
+
+    Remark:
+        None
 
     More info at
         - https://github.com/asam-ev/qc-opendrive/issues/4
