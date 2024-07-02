@@ -25,7 +25,7 @@
 						<roadMark sOffset="0.00000000000000e+00" type="none" weight="standard" color="standard" material="standard" laneChange="both" />
 						<speed sOffset="0.00000000000000e+00" max="1.38888888888889e+01" unit="m/s" />
 						<height sOffset="0.00000000000000e+00" inner="0.00000000000000e+00" outer="0.00000000000000e+00" />
-					</lane>
+					</lane> <!-- width ends in 0.0 -->
 					<lane id="1" type="driving">
 						<width sOffset="0.00000000000000e+00" a="3.00000000000000e+00" b="0.00000000000000e+00" c="0.00000000000000e+00" d="0.00000000000000e+00" />
 						<roadMark sOffset="0.00000000000000e+00" type="none" weight="standard" color="standard" material="standard" laneChange="both" />
@@ -129,7 +129,7 @@
 						<roadMark sOffset="0.00000000000000e+00" type="none" weight="standard" color="standard" material="standard" laneChange="both" />
 						<speed sOffset="0.00000000000000e+00" max="1.38888888888889e+01" unit="m/s" />
 						<height sOffset="0.00000000000000e+00" inner="0.00000000000000e+00" outer="0.00000000000000e+00" />
-					</lane>
+					</lane> <!-- width starts in 0.0 -->
 				</right>
 			</laneSection>
 		</lanes>
@@ -144,10 +144,10 @@
         </connection>
 		<connection id="2" incomingRoad="3" connectingRoad="2" contactPoint="end">
             <laneLink from="-2" to="-1" />
-        </connection>
+        </connection>  <!-- issue: lanes which start/end with width=0 shall have no linking on that side -->
 		<connection id="3" incomingRoad="1" connectingRoad="2" contactPoint="start">
             <laneLink from="2" to="1" />
-        </connection>
+        </connection>  <!-- issue: lanes which start/end with width=0 shall have no linking on that side -->
     </junction>
 
 </OpenDRIVE>
