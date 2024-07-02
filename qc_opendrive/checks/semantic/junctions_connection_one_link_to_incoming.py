@@ -71,24 +71,25 @@ def _check_connection_lane_link_same_direction(
 
     # If the connection contact point is start we get the incoming road from
     # predecessor, otherwise we can get from the successor.
+    connecting_road_linkage = None
     if contact_point == models.ContactPoint.START:
-        incoming_linkage = utils.get_road_linkage(
+        connecting_road_linkage = utils.get_road_linkage(
             connecting_road, models.LinkageTag.PREDECESSOR
         )
     elif contact_point == models.ContactPoint.END:
-        incoming_linkage = utils.get_road_linkage(
+        connecting_road_linkage = utils.get_road_linkage(
             connecting_road, models.LinkageTag.SUCCESSOR
         )
     else:
         return
 
-    if incoming_linkage is None:
+    if connecting_road_linkage is None:
         return
 
     incoming_lane_section = None
-    if incoming_linkage.contact_point == models.ContactPoint.START:
+    if connecting_road_linkage.contact_point == models.ContactPoint.START:
         incoming_lane_section = utils.get_first_lane_section(incoming_road)
-    elif incoming_linkage.contact_point == models.ContactPoint.END:
+    elif connecting_road_linkage.contact_point == models.ContactPoint.END:
         incoming_lane_section = utils.get_last_lane_section(incoming_road)
     else:
         return
