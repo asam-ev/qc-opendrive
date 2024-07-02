@@ -47,3 +47,15 @@ class ParamPoly3:
     u: Poly3
     v: Poly3
     range: ParamPoly3Range
+
+
+@dataclass
+class ContactingLaneSection:
+    lane_section: etree._ElementTree
+    linkage_tag: LinkageTag
+
+
+@dataclass
+class ContactingLaneSections:
+    incoming: etree._ElementTree
+    connection: etree._ElementTree
