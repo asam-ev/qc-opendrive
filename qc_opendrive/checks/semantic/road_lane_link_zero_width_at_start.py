@@ -62,6 +62,11 @@ def _check_road_lane_link_zero_width_at_start(
                     if len(predecessor_lane_ids) > 0:
                         lane_id = utils.get_lane_id(lane)
                         if lane_id == 0:
+                            # Because of backward compatibility, this rule does
+                            # not apply to lane 0 (i.e. it is not allowed to have
+                            # a width (see Rule 77) but it might have a predecessor).
+                            # In this case the severity level should be changed
+                            # to "WARNING"
                             _raise_issue(
                                 checker_data, rule_uid, lane, IssueSeverity.WARNING
                             )
@@ -124,6 +129,11 @@ def _check_junction_road_lane_link_zero_width_at_start(
 
                         if from_lane_id == lane_id:
                             if lane_id == 0:
+                                # Because of backward compatibility, this rule does
+                                # not apply to lane 0 (i.e. it is not allowed to have
+                                # a width (see Rule 77) but it might have a predecessor).
+                                # In this case the severity level should be changed
+                                # to "WARNING"
                                 _raise_issue(
                                     checker_data,
                                     rule_uid,
