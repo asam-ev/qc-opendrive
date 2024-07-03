@@ -37,6 +37,23 @@ def _raise_issue(
     )
 
 
+def _raise_issue_based_on_lane_id(
+    lane: etree._Element,
+    lane_id: int,
+    checker_data: models.CheckerData,
+    rule_uid: str,
+) -> None:
+    if lane_id == 0:
+        # Because of backward compatibility, this rule does
+        # not apply to lane 0 (i.e. it is not allowed to have
+        # a width (see Rule 77) but it might have a predecessor).
+        # In this case the severity level should be changed
+        # to "WARNING"
+        _raise_issue(checker_data, rule_uid, lane, IssueSeverity.WARNING)
+    else:
+        _raise_issue(checker_data, rule_uid, lane, IssueSeverity.ERROR)
+
+
 def _check_road_lane_link_zero_width_at_start(
     checker_data: models.CheckerData, rule_uid: str
 ) -> None:
@@ -61,19 +78,123 @@ def _check_road_lane_link_zero_width_at_start(
 
                     if len(predecessor_lane_ids) > 0:
                         lane_id = utils.get_lane_id(lane)
-                        if lane_id == 0:
-                            # Because of backward compatibility, this rule does
-                            # not apply to lane 0 (i.e. it is not allowed to have
-                            # a width (see Rule 77) but it might have a predecessor).
-                            # In this case the severity level should be changed
-                            # to "WARNING"
-                            _raise_issue(
-                                checker_data, rule_uid, lane, IssueSeverity.WARNING
-                            )
-                        else:
-                            _raise_issue(
-                                checker_data, rule_uid, lane, IssueSeverity.ERROR
-                            )
+                        _raise_issue_based_on_lane_id(
+                            lane,
+                            lane_id,
+                            checker_data,
+                            rule_uid,
+                        )
+
+
+def _check_incoming_road_junction_predecessor_lane_width_zero(
+    checker_data: models.CheckerData,
+    rule_uid: str,
+    road: etree._Element,
+    road_id: int,
+    road_id_map: Dict[int, etree._ElementTree],
+    junction_id_map: Dict[int, etree._ElementTree],
+) -> None:
+    predecessor_junction_id = utils.get_road_junction_linkage(
+        road, models.LinkageTag.PREDECESSOR
+    )
+
+    if predecessor_junction_id is None:
+        return
+
+    predecessor_connections = utils.get_all_road_linkage_junction_connections(
+        road_id,
+        predecessor_junction_id,
+        road_id_map,
+        junction_id_map,
+        models.LinkageTag.PREDECESSOR,
+    )
+
+    first_lane_section = utils.get_first_lane_section(road)
+    lanes = utils.get_left_and_right_lanes_from_lane_section(first_lane_section)
+
+    for lane in lanes:
+        lane_start_width = utils.evaluate_lane_width(lane, 0.0)
+        if lane_start_width is None:
+            continue
+
+        if lane_start_width < FLOAT_COMPARISON_THRESHOLD:
+            lane_id = utils.get_lane_id(lane)
+            if lane_id is None:
+                continue
+
+            for connection in predecessor_connections:
+                lane_links = utils.get_lane_links_from_connection(connection)
+
+                for lane_link in lane_links:
+                    from_lane_id = utils.get_from_attribute_from_lane_link(lane_link)
+
+                    if from_lane_id is None:
+                        continue
+
+                    if from_lane_id == lane_id:
+                        _raise_issue_based_on_lane_id(
+                            lane,
+                            lane_id,
+                            checker_data,
+                            rule_uid,
+                        )
+
+
+def _check_connecting_road_predecessor_lane_width_zero(
+    checker_data: models.CheckerData,
+    rule_uid: str,
+    road: etree._Element,
+    road_id: int,
+    road_id_map: Dict[int, etree._ElementTree],
+    junction_id_map: Dict[int, etree._ElementTree],
+) -> None:
+    road_junction_id = utils.get_road_junction_id(road)
+
+    if road_junction_id is None:
+        return
+
+    junction = junction_id_map.get(road_junction_id)
+
+    if junction is None:
+        return
+
+    connections = utils.get_connections_from_junction(junction)
+
+    predecessor_connections = []
+    for connection in connections:
+        contact_point = utils.get_contact_point_from_connection(connection)
+        if contact_point is not None and contact_point == models.ContactPoint.START:
+            predecessor_connections.append(connection)
+
+    first_lane_section = utils.get_first_lane_section(road)
+    lanes = utils.get_left_and_right_lanes_from_lane_section(first_lane_section)
+
+    for lane in lanes:
+        lane_start_width = utils.evaluate_lane_width(lane, 0.0)
+        if lane_start_width is None:
+            continue
+
+        if lane_start_width < FLOAT_COMPARISON_THRESHOLD:
+            lane_id = utils.get_lane_id(lane)
+            if lane_id is None:
+                continue
+
+            for connection in predecessor_connections:
+                lane_links = utils.get_lane_links_from_connection(connection)
+
+                for lane_link in lane_links:
+                    to_lane_id = utils.get_to_attribute_from_lane_link(lane_link)
+
+                    if to_lane_id is None:
+                        continue
+
+                    if to_lane_id == lane_id:
+                        _raise_issue_based_on_lane_id(
+                            lane,
+                            lane_id,
+                            checker_data,
+                            rule_uid,
+                        )
 
 
 def _check_junction_road_lane_link_zero_width_at_start(
@@ -83,70 +204,14 @@ def _check_junction_road_lane_link_zero_width_at_start(
     junction_id_map = utils.get_junction_id_map(checker_data.input_file_xml_root)
 
     for road_id, road in road_id_map.items():
-        # Connecting roads should not have road linkage to other junctions, this
-        # is checked by other rules.
         if utils.road_belongs_to_junction(road):
-            continue
-
-        predecessor_junction_id = utils.get_road_junction_linkage(
-            road, models.LinkageTag.PREDECESSOR
-        )
-
-        if predecessor_junction_id is None:
-            continue
-
-        predecessor_connections = utils.get_all_road_linkage_junction_connections(
-            road_id,
-            predecessor_junction_id,
-            road_id_map,
-            junction_id_map,
-            models.LinkageTag.PREDECESSOR,
-        )
-
-        first_lane_section = utils.get_first_lane_section(road)
-        lanes = utils.get_left_and_right_lanes_from_lane_section(first_lane_section)
-
-        for lane in lanes:
-            lane_start_width = utils.evaluate_lane_width(lane, 0.0)
-            if lane_start_width is None:
-                continue
-
-            if lane_start_width < FLOAT_COMPARISON_THRESHOLD:
-                lane_id = utils.get_lane_id(lane)
-                if lane_id is None:
-                    continue
-
-                for connection in predecessor_connections:
-                    lane_links = utils.get_lane_links_from_connection(connection)
-
-                    for lane_link in lane_links:
-                        from_lane_id = utils.get_from_attribute_from_lane_link(
-                            lane_link
-                        )
-
-                        if from_lane_id is None:
-                            continue
-
-                        if from_lane_id == lane_id:
-                            if lane_id == 0:
-                                # Because of backward compatibility, this rule does
-                                # not apply to lane 0 (i.e. it is not allowed to have
-                                # a width (see Rule 77) but it might have a predecessor).
-                                # In this case the severity level should be changed
-                                # to "WARNING"
-                                _raise_issue(
-                                    checker_data,
-                                    rule_uid,
-                                    lane,
-                                    IssueSeverity.WARNING,
-                                )
-                            else:
-                                _raise_issue(
-                                    checker_data,
-                                    rule_uid,
-                                    lane,
-                                    IssueSeverity.ERROR,
-                                )
+            _check_connecting_road_predecessor_lane_width_zero(
+                checker_data, rule_uid, road, road_id, road_id_map, junction_id_map
+            )
+        else:
+            _check_incoming_road_junction_predecessor_lane_width_zero(
+                checker_data, rule_uid, road, road_id, road_id_map, junction_id_map
+            )
 
 
 def check_rule(checker_data: models.CheckerData) -> None:
