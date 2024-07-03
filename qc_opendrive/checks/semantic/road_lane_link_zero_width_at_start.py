@@ -140,12 +140,10 @@ def _check_incoming_road_junction_predecessor_lane_width_zero(
                         )
 
 
-def _check_connecting_road_predecessor_lane_width_zero(
+def _check_connecting_road_lane_width_zero_with_predecessor(
     checker_data: models.CheckerData,
     rule_uid: str,
     road: etree._Element,
-    road_id: int,
-    road_id_map: Dict[int, etree._ElementTree],
     junction_id_map: Dict[int, etree._ElementTree],
 ) -> None:
     road_junction_id = utils.get_road_junction_id(road)
@@ -205,8 +203,8 @@ def _check_junction_road_lane_link_zero_width_at_start(
 
     for road_id, road in road_id_map.items():
         if utils.road_belongs_to_junction(road):
-            _check_connecting_road_predecessor_lane_width_zero(
-                checker_data, rule_uid, road, road_id, road_id_map, junction_id_map
+            _check_connecting_road_lane_width_zero_with_predecessor(
+                checker_data, rule_uid, road, junction_id_map
             )
         else:
             _check_incoming_road_junction_predecessor_lane_width_zero(
