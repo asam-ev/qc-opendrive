@@ -150,7 +150,7 @@ def get_road_linkage(
         return None
 
 
-def get_road_junction_linkage(
+def get_linked_junction_id(
     road: etree._ElementTree, linkage_tag: models.LinkageTag
 ) -> Union[None, int]:
     road_link = road.find("link")
@@ -572,24 +572,14 @@ def evaluate_lane_width(lane: etree._Element, ds: float) -> Union[None, float]:
     return poly3_to_eval(ds)
 
 
-def get_contact_point_from_linkage_tag(
-    linkage_tag: models.LinkageTag,
-) -> Union[None, models.ContactPoint]:
-    if linkage_tag == models.LinkageTag.PREDECESSOR:
-        return models.ContactPoint.START
-    elif linkage_tag == models.LinkageTag.SUCCESSOR:
-        return models.ContactPoint.END
-    else:
-        return None
-
-
-def get_all_road_linkage_junction_connections(
+def get_connections_between_road_and_junction(
     road_id: int,
     junction_id: int,
     road_id_map: Dict[int, etree._ElementTree],
     junction_id_map: Dict[int, etree._ElementTree],
-    incoming_road_linkage_tag: models.LinkageTag,
+    incoming_road_contact_point: models.ContactPoint,
 ) -> List[etree._Element]:
+    """ """
     linkage_connections = []
 
     junction = junction_id_map.get(junction_id)
@@ -625,23 +615,18 @@ def get_all_road_linkage_junction_connections(
             if connection_road_linkage is None:
                 continue
 
-            connecting_road_contact_point = get_contact_point_from_linkage_tag(
-                linkage_tag=incoming_road_linkage_tag
-            )
-            if connecting_road_contact_point is None:
-                continue
-
-            if connection_road_linkage.contact_point == connecting_road_contact_point:
+            if connection_road_linkage.contact_point == incoming_road_contact_point:
                 linkage_connections.append(connection)
 
     return linkage_connections
 
 
-def get_connecting_road_junction_linkage_connections(
+def get_connections_of_connecting_road(
     connecting_road_id: int,
     junction: etree._Element,
-    connecting_road_linkage_tag: models.LinkageTag,
+    connecting_road_contact_point: models.ContactPoint,
 ) -> List[etree._Element]:
+    """ """
     connections = get_connections_from_junction(junction)
 
     linkage_connections = []
@@ -655,16 +640,10 @@ def get_connecting_road_junction_linkage_connections(
         ):
             contact_point = get_contact_point_from_connection(connection)
 
-            connecting_road_contact_point = get_contact_point_from_linkage_tag(
-                linkage_tag=connecting_road_linkage_tag
-            )
-            if connecting_road_contact_point is None:
+            if contact_point is None:
                 continue
 
-            if (
-                contact_point is not None
-                and contact_point == connecting_road_contact_point
-            ):
+            elif contact_point == connecting_road_contact_point:
                 linkage_connections.append(connection)
 
     return linkage_connections

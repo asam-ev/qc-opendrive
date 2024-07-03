@@ -94,20 +94,32 @@ def _check_incoming_road_junction_predecessor_lane_width_zero(
     road_id_map: Dict[int, etree._ElementTree],
     junction_id_map: Dict[int, etree._ElementTree],
 ) -> None:
-    predecessor_junction_id = utils.get_road_junction_linkage(
+    predecessor_junction_id = utils.get_linked_junction_id(
         road, models.LinkageTag.PREDECESSOR
     )
 
     if predecessor_junction_id is None:
         return
 
-    predecessor_connections = utils.get_all_road_linkage_junction_connections(
+    predecessor_connections = utils.get_connections_between_road_and_junction(
         road_id,
         predecessor_junction_id,
         road_id_map,
         junction_id_map,
-        models.LinkageTag.PREDECESSOR,
+        models.ContactPoint.START,
     )
+
+    lane_ids_with_predecessor = set()
+    for connection in predecessor_connections:
+        lane_links = utils.get_lane_links_from_connection(connection)
+
+        for lane_link in lane_links:
+            from_lane_id = utils.get_from_attribute_from_lane_link(lane_link)
+
+            if from_lane_id is None:
+                continue
+
+            lane_ids_with_predecessor.add(from_lane_id)
 
     first_lane_section = utils.get_first_lane_section(road)
     lanes = utils.get_left_and_right_lanes_from_lane_section(first_lane_section)
@@ -122,22 +134,13 @@ def _check_incoming_road_junction_predecessor_lane_width_zero(
             if lane_id is None:
                 continue
 
-            for connection in predecessor_connections:
-                lane_links = utils.get_lane_links_from_connection(connection)
-
-                for lane_link in lane_links:
-                    from_lane_id = utils.get_from_attribute_from_lane_link(lane_link)
-
-                    if from_lane_id is None:
-                        continue
-
-                    if from_lane_id == lane_id:
-                        _raise_issue_based_on_lane_id(
-                            lane,
-                            lane_id,
-                            checker_data,
-                            rule_uid,
-                        )
+            if lane_id in lane_ids_with_predecessor:
+                _raise_issue_based_on_lane_id(
+                    lane,
+                    lane_id,
+                    checker_data,
+                    rule_uid,
+                )
 
 
 def _check_connecting_road_lane_width_zero_with_predecessor(
@@ -157,9 +160,21 @@ def _check_connecting_road_lane_width_zero_with_predecessor(
     if junction is None:
         return
 
-    predecessor_connections = utils.get_connecting_road_junction_linkage_connections(
-        road_id, junction, models.LinkageTag.PREDECESSOR
+    predecessor_connections = utils.get_connections_of_connecting_road(
+        road_id, junction, models.ContactPoint.START
     )
+
+    lane_ids_with_predecessor = set()
+    for connection in predecessor_connections:
+        lane_links = utils.get_lane_links_from_connection(connection)
+
+        for lane_link in lane_links:
+            to_lane_id = utils.get_to_attribute_from_lane_link(lane_link)
+
+            if to_lane_id is None:
+                continue
+
+            lane_ids_with_predecessor.add(to_lane_id)
 
     first_lane_section = utils.get_first_lane_section(road)
     lanes = utils.get_left_and_right_lanes_from_lane_section(first_lane_section)
@@ -174,22 +189,13 @@ def _check_connecting_road_lane_width_zero_with_predecessor(
             if lane_id is None:
                 continue
 
-            for connection in predecessor_connections:
-                lane_links = utils.get_lane_links_from_connection(connection)
-
-                for lane_link in lane_links:
-                    to_lane_id = utils.get_to_attribute_from_lane_link(lane_link)
-
-                    if to_lane_id is None:
-                        continue
-
-                    if to_lane_id == lane_id:
-                        _raise_issue_based_on_lane_id(
-                            lane,
-                            lane_id,
-                            checker_data,
-                            rule_uid,
-                        )
+            if lane_id in lane_ids_with_predecessor:
+                _raise_issue_based_on_lane_id(
+                    lane,
+                    lane_id,
+                    checker_data,
+                    rule_uid,
+                )
 
 
 def _check_junction_road_lane_link_zero_width_at_start(
