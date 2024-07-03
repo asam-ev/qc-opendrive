@@ -144,6 +144,7 @@ def _check_connecting_road_lane_width_zero_with_predecessor(
     checker_data: models.CheckerData,
     rule_uid: str,
     road: etree._Element,
+    road_id: int,
     junction_id_map: Dict[int, etree._ElementTree],
 ) -> None:
     road_junction_id = utils.get_road_junction_id(road)
@@ -156,13 +157,9 @@ def _check_connecting_road_lane_width_zero_with_predecessor(
     if junction is None:
         return
 
-    connections = utils.get_connections_from_junction(junction)
-
-    predecessor_connections = []
-    for connection in connections:
-        contact_point = utils.get_contact_point_from_connection(connection)
-        if contact_point is not None and contact_point == models.ContactPoint.START:
-            predecessor_connections.append(connection)
+    predecessor_connections = utils.get_connecting_road_junction_linkage_connections(
+        road_id, junction, models.LinkageTag.PREDECESSOR
+    )
 
     first_lane_section = utils.get_first_lane_section(road)
     lanes = utils.get_left_and_right_lanes_from_lane_section(first_lane_section)
@@ -204,7 +201,7 @@ def _check_junction_road_lane_link_zero_width_at_start(
     for road_id, road in road_id_map.items():
         if utils.road_belongs_to_junction(road):
             _check_connecting_road_lane_width_zero_with_predecessor(
-                checker_data, rule_uid, road, junction_id_map
+                checker_data, rule_uid, road, road_id, junction_id_map
             )
         else:
             _check_incoming_road_junction_predecessor_lane_width_zero(

@@ -572,6 +572,17 @@ def evaluate_lane_width(lane: etree._Element, ds: float) -> Union[None, float]:
     return poly3_to_eval(ds)
 
 
+def get_contact_point_from_linkage_tag(
+    linkage_tag: models.LinkageTag,
+) -> Union[None, models.ContactPoint]:
+    if linkage_tag == models.LinkageTag.PREDECESSOR:
+        return models.ContactPoint.START
+    elif linkage_tag == models.LinkageTag.SUCCESSOR:
+        return models.ContactPoint.END
+    else:
+        return None
+
+
 def get_all_road_linkage_junction_connections(
     road_id: int,
     junction_id: int,
@@ -614,15 +625,46 @@ def get_all_road_linkage_junction_connections(
             if connection_road_linkage is None:
                 continue
 
-            connecting_road_contact_point = None
-            if incoming_road_linkage_tag == models.LinkageTag.PREDECESSOR:
-                connecting_road_contact_point = models.ContactPoint.START
-            elif incoming_road_linkage_tag == models.LinkageTag.SUCCESSOR:
-                connecting_road_contact_point = models.ContactPoint.END
-            else:
+            connecting_road_contact_point = get_contact_point_from_linkage_tag(
+                linkage_tag=incoming_road_linkage_tag
+            )
+            if connecting_road_contact_point is None:
                 continue
 
             if connection_road_linkage.contact_point == connecting_road_contact_point:
+                linkage_connections.append(connection)
+
+    return linkage_connections
+
+
+def get_connecting_road_junction_linkage_connections(
+    connecting_road_id: int,
+    junction: etree._Element,
+    connecting_road_linkage_tag: models.LinkageTag,
+) -> List[etree._Element]:
+    connections = get_connections_from_junction(junction)
+
+    linkage_connections = []
+    for connection in connections:
+        connection_connecting_road_id = get_connecting_road_id_from_connection(
+            connection
+        )
+        if (
+            connection_connecting_road_id is not None
+            and connection_connecting_road_id == connecting_road_id
+        ):
+            contact_point = get_contact_point_from_connection(connection)
+
+            connecting_road_contact_point = get_contact_point_from_linkage_tag(
+                linkage_tag=connecting_road_linkage_tag
+            )
+            if connecting_road_contact_point is None:
+                continue
+
+            if (
+                contact_point is not None
+                and contact_point == connecting_road_contact_point
+            ):
                 linkage_connections.append(connection)
 
     return linkage_connections
