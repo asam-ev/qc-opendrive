@@ -579,7 +579,12 @@ def get_connections_between_road_and_junction(
     junction_id_map: Dict[int, etree._ElementTree],
     incoming_road_contact_point: models.ContactPoint,
 ) -> List[etree._Element]:
-    """ """
+    """
+    This function receives the a road id, a junction id and a contact point for
+    the road where the junction contacts to and returns all connections to that
+    specific contact point. It also receives the road and junction id map for
+    the sake of simplicity.
+    """
     linkage_connections = []
 
     junction = junction_id_map.get(junction_id)
@@ -626,7 +631,11 @@ def get_connections_of_connecting_road(
     junction: etree._Element,
     connecting_road_contact_point: models.ContactPoint,
 ) -> List[etree._Element]:
-    """ """
+    """
+    This function receives a connecting road id, the junction element it belongs
+    to and a target contact point to the road and returns all connection elements
+    that connect to the road at the target contact point.
+    """
     connections = get_connections_from_junction(junction)
 
     linkage_connections = []
@@ -634,10 +643,11 @@ def get_connections_of_connecting_road(
         connection_connecting_road_id = get_connecting_road_id_from_connection(
             connection
         )
-        if (
-            connection_connecting_road_id is not None
-            and connection_connecting_road_id == connecting_road_id
-        ):
+
+        if connection_connecting_road_id is None:
+            continue
+
+        elif connection_connecting_road_id == connecting_road_id:
             contact_point = get_contact_point_from_connection(connection)
 
             if contact_point is None:
