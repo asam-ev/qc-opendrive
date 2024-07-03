@@ -587,14 +587,6 @@ def get_all_road_linkage_junction_connections(
 
     connections = get_connections_from_junction(junction)
 
-    target_contact_point = None
-    if incoming_road_linkage_tag == models.LinkageTag.PREDECESSOR:
-        target_contact_point = models.ContactPoint.START
-    elif incoming_road_linkage_tag == models.LinkageTag.SUCCESSOR:
-        target_contact_point = models.ContactPoint.END
-    else:
-        return []
-
     for connection in connections:
         incoming_road_id = get_incoming_road_id_from_connection(connection)
         connecting_road_id = get_connecting_road_id_from_connection(connection)
@@ -622,7 +614,15 @@ def get_all_road_linkage_junction_connections(
             if connection_road_linkage is None:
                 continue
 
-            if connection_road_linkage.contact_point == target_contact_point:
+            connecting_road_contact_point = None
+            if incoming_road_linkage_tag == models.LinkageTag.PREDECESSOR:
+                connecting_road_contact_point = models.ContactPoint.START
+            elif incoming_road_linkage_tag == models.LinkageTag.SUCCESSOR:
+                connecting_road_contact_point = models.ContactPoint.END
+            else:
+                continue
+
+            if connection_road_linkage.contact_point == connecting_road_contact_point:
                 linkage_connections.append(connection)
 
     return linkage_connections
