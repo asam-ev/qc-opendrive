@@ -488,7 +488,7 @@ def test_road_lane_link_zero_width_at_start_junction(
         ),
     ],
 )
-def test_road_lane_link_zero_width_at_start_junction(
+def test_road_lane_link_zero_width_at_start_inside_junction(
     target_file: str,
     issue_count: int,
     issue_xpath: List[str],
