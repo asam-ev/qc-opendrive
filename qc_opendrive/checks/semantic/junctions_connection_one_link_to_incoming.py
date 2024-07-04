@@ -71,18 +71,18 @@ def _check_connection_lane_link_same_direction(
         if traffic_hand == models.TrafficHandRule.RHT:
             if contact_point == models.ContactPoint.START and predecessor is not None:
                 if predecessor.contact_point == models.ContactPoint.END:
-                    if from_lane_id != -1 or to_lane_id != -1:
+                    if from_lane_id > 0 or to_lane_id > 0:
                         _raise_lane_linkage_issue(checker_data, rule_uid, lane_link)
                 elif predecessor.contact_point == models.ContactPoint.START:
-                    if from_lane_id != 1 or to_lane_id != -1:
+                    if from_lane_id < 0 or to_lane_id > 0:
                         _raise_lane_linkage_issue(checker_data, rule_uid, lane_link)
 
             if contact_point == models.ContactPoint.END and successor is not None:
                 if successor.contact_point == models.ContactPoint.END:
-                    if from_lane_id != -1 or to_lane_id != 1:
+                    if from_lane_id > 0 or to_lane_id < 0:
                         _raise_lane_linkage_issue(checker_data, rule_uid, lane_link)
                 elif successor.contact_point == models.ContactPoint.START:
-                    if from_lane_id != 1 or to_lane_id != 1:
+                    if from_lane_id < 0 or to_lane_id < 0:
                         _raise_lane_linkage_issue(checker_data, rule_uid, lane_link)
 
         elif traffic_hand == models.TrafficHandRule.LHT:
