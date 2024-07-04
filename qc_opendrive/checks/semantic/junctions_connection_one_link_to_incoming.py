@@ -73,7 +73,7 @@ def _check_connection_lane_link_same_direction(
                 if predecessor.contact_point == models.ContactPoint.END:
                     if from_lane_id != -1 or to_lane_id != -1:
                         _raise_lane_linkage_issue(checker_data, rule_uid, lane_link)
-                if predecessor.contact_point == models.ContactPoint.START:
+                elif predecessor.contact_point == models.ContactPoint.START:
                     if from_lane_id != 1 or to_lane_id != -1:
                         _raise_lane_linkage_issue(checker_data, rule_uid, lane_link)
 
@@ -81,7 +81,7 @@ def _check_connection_lane_link_same_direction(
                 if successor.contact_point == models.ContactPoint.END:
                     if from_lane_id != -1 or to_lane_id != 1:
                         _raise_lane_linkage_issue(checker_data, rule_uid, lane_link)
-                if successor.contact_point == models.ContactPoint.START:
+                elif successor.contact_point == models.ContactPoint.START:
                     if from_lane_id != 1 or to_lane_id != 1:
                         _raise_lane_linkage_issue(checker_data, rule_uid, lane_link)
 
