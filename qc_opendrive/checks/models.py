@@ -65,3 +65,9 @@ class ContactingLaneSections:
 class WidthPoly3:
     poly3: Poly3
     s_offset: float
+
+
+@dataclass
+class Border:
+    poly3: Poly3
+    s_offset: float

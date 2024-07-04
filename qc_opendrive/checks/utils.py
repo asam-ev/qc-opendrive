@@ -657,3 +657,39 @@ def get_connections_of_connecting_road(
                 linkage_connections.append(connection)
 
     return linkage_connections
+
+
+def get_road_length(road: etree._ElementTree) -> Union[None, float]:
+    length = road.get("length")
+    if length is None:
+        return None
+    else:
+        return float(length)
+
+
+def get_s_coordinate_from_lane_section(
+    lane_section: etree._ElementTree,
+) -> Union[None, float]:
+    s_coordinate = lane_section.get("s")
+    if s_coordinate is None:
+        return None
+    else:
+        return float(s_coordinate)
+
+
+def get_borders_from_lane(lane: etree._ElementTree) -> List[models.Border]:
+    border_list = []
+    for border in lane.iter("border"):
+        border_list.append(
+            models.Border(
+                models.Poly3(
+                    a=float(border.get("a")),
+                    b=float(border.get("b")),
+                    c=float(border.get("c")),
+                    d=float(border.get("d")),
+                ),
+                s_offset=float(border.get("sOffset")),
+            )
+        )
+
+    return border_list
