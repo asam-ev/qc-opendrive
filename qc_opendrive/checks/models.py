@@ -59,3 +59,9 @@ class ContactingLaneSection:
 class ContactingLaneSections:
     incoming: etree._ElementTree
     connection: etree._ElementTree
+
+
+@dataclass
+class WidthPoly3:
+    poly3: Poly3
+    s_offset: float

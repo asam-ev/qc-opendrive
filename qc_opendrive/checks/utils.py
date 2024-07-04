@@ -150,6 +150,27 @@ def get_road_linkage(
         return None
 
 
+def get_linked_junction_id(
+    road: etree._ElementTree, linkage_tag: models.LinkageTag
+) -> Union[None, int]:
+    road_link = road.find("link")
+    if road_link is None:
+        return None
+
+    linkage = road_link.find(linkage_tag.value)
+
+    if linkage is None:
+        return None
+    elif linkage.get("elementType") == "junction":
+        junction_id = linkage.get("elementId")
+        if junction_id is None:
+            return None
+        else:
+            return int(junction_id)
+    else:
+        return None
+
+
 def get_predecessor_road_id(road: etree._ElementTree) -> Union[None, int]:
     linkage = get_road_linkage(road, models.LinkageTag.PREDECESSOR)
     if linkage is None:
@@ -333,7 +354,7 @@ def get_contact_point_from_connection(
         return models.ContactPoint(contact_point_str)
 
 
-def get_from_attribute_from_lane_link(lane_link: etree._Element) -> str:
+def get_from_attribute_from_lane_link(lane_link: etree._Element) -> Union[int, None]:
     from_attribute = lane_link.get("from")
     if from_attribute is None:
         return None
@@ -341,7 +362,7 @@ def get_from_attribute_from_lane_link(lane_link: etree._Element) -> str:
         return int(from_attribute)
 
 
-def get_to_attribute_from_lane_link(lane_link: etree._Element):
+def get_to_attribute_from_lane_link(lane_link: etree._Element) -> Union[int, None]:
     to_attribute = lane_link.get("to")
     if to_attribute is None:
         return None
@@ -488,3 +509,151 @@ def get_connecting_lane_ids(
         return get_successor_lane_ids(lane)
     else:
         return []
+
+
+def get_poly3_from_width(
+    width: etree._ElementTree,
+) -> models.WidthPoly3:
+    return models.WidthPoly3(
+        poly3=models.Poly3(
+            a=float(width.get("a")),
+            b=float(width.get("b")),
+            c=float(width.get("c")),
+            d=float(width.get("d")),
+        ),
+        s_offset=float(width.get("sOffset")),
+    )
+
+
+def get_lane_width_poly3_list(lane: etree._Element) -> List[models.WidthPoly3]:
+    width_poly3 = []
+    for width in lane.iter("width"):
+        width_poly3.append(get_poly3_from_width(width))
+    return width_poly3
+
+
+def evaluate_lane_width(lane: etree._Element, ds: float) -> Union[None, float]:
+    # This function follows the assumption that the width elements for a given
+    # lane follow the standard rules for width elements.
+    #
+    # Standard width rules:
+    # - The width of a lane shall remain valid until a new <width> element is
+    #   defined or the lane section ends.
+    # - A new <width> element shall be defined when the variables of the
+    #   polynomial function change.
+    # - <width> elements shall be defined in ascending order according to the
+    #   s-coordinate.
+    # - Width (ds) shall be greater than or equal to zero.
+    #
+
+    lane_id = get_lane_id(lane)
+
+    if lane_id == 0:
+        return 0.0
+
+    lane_width_poly3_list = get_lane_width_poly3_list(lane)
+
+    if len(lane_width_poly3_list) == 0:
+        return None
+
+    current_s_offset = lane_width_poly3_list[0].s_offset
+    index = 0
+    while ds >= current_s_offset and index < len(lane_width_poly3_list):
+        current_s_offset = lane_width_poly3_list[index].s_offset
+        index += 1
+
+    if index > 0:
+        index -= 1
+    else:
+        return None
+
+    poly3_to_eval = poly3_to_polynomial(lane_width_poly3_list[index].poly3)
+
+    return poly3_to_eval(ds)
+
+
+def get_connections_between_road_and_junction(
+    road_id: int,
+    junction_id: int,
+    road_id_map: Dict[int, etree._ElementTree],
+    junction_id_map: Dict[int, etree._ElementTree],
+    incoming_road_contact_point: models.ContactPoint,
+) -> List[etree._Element]:
+    """
+    This function receives the a road id, a junction id and a contact point for
+    the road where the junction contacts to and returns all connections to that
+    specific contact point. It also receives the road and junction id map for
+    the sake of simplicity.
+    """
+    linkage_connections = []
+
+    junction = junction_id_map.get(junction_id)
+    if junction is None:
+        return []
+
+    connections = get_connections_from_junction(junction)
+
+    for connection in connections:
+        incoming_road_id = get_incoming_road_id_from_connection(connection)
+        connecting_road_id = get_connecting_road_id_from_connection(connection)
+
+        if incoming_road_id is None or connecting_road_id is None:
+            continue
+
+        if incoming_road_id == road_id:
+            connecting_road = road_id_map.get(connecting_road_id)
+            if connecting_road is None:
+                continue
+
+            connection_contact_point = get_contact_point_from_connection(connection)
+
+            connection_road_linkage = None
+            if connection_contact_point == models.ContactPoint.START:
+                connection_road_linkage = get_road_linkage(
+                    connecting_road, models.LinkageTag.PREDECESSOR
+                )
+            elif connection_contact_point == models.ContactPoint.END:
+                connection_road_linkage = get_road_linkage(
+                    connecting_road, models.LinkageTag.SUCCESSOR
+                )
+
+            if connection_road_linkage is None:
+                continue
+
+            if connection_road_linkage.contact_point == incoming_road_contact_point:
+                linkage_connections.append(connection)
+
+    return linkage_connections
+
+
+def get_connections_of_connecting_road(
+    connecting_road_id: int,
+    junction: etree._Element,
+    connecting_road_contact_point: models.ContactPoint,
+) -> List[etree._Element]:
+    """
+    This function receives a connecting road id, the junction element it belongs
+    to and a target contact point to the road and returns all connection elements
+    that connect to the road at the target contact point.
+    """
+    connections = get_connections_from_junction(junction)
+
+    linkage_connections = []
+    for connection in connections:
+        connection_connecting_road_id = get_connecting_road_id_from_connection(
+            connection
+        )
+
+        if connection_connecting_road_id is None:
+            continue
+
+        elif connection_connecting_road_id == connecting_road_id:
+            contact_point = get_contact_point_from_connection(connection)
+
+            if contact_point is None:
+                continue
+
+            elif contact_point == connecting_road_contact_point:
+                linkage_connections.append(connection)
+
+    return linkage_connections
