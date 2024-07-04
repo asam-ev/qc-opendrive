@@ -659,7 +659,7 @@ def get_connections_of_connecting_road(
     return linkage_connections
 
 
-def get_road_hand_rule(road: etree._Element) -> models.TrafficHandRule:
+def get_traffic_hand_rule_from_road(road: etree._Element) -> models.TrafficHandRule:
     rule = road.get("rule")
 
     if rule is None:
@@ -668,3 +668,12 @@ def get_road_hand_rule(road: etree._Element) -> models.TrafficHandRule:
         return models.TrafficHandRule.RHT
     else:
         return models.TrafficHandRule(rule)
+
+
+def get_lane_section_s_offset(lane_section: etree._Element) -> Union[None, float]:
+    s_offset = lane_section.get("sOffset")
+
+    if s_offset is None:
+        return None
+    else:
+        return float(s_offset)

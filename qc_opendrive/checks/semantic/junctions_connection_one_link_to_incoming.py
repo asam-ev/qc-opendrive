@@ -33,15 +33,78 @@ def _raise_lane_linkage_issue(
     )
 
 
+def _check_rht_lane_direction(
+    to_lane_id: int,
+    from_lane_id: int,
+    predecessor_road_linkage: models.RoadLinkage,
+    successor_road_linkage: models.RoadLinkage,
+    connection_contact_point: models.ContactPoint,
+) -> bool:
+    if (
+        connection_contact_point == models.ContactPoint.START
+        and predecessor_road_linkage is not None
+    ):
+        if predecessor_road_linkage.contact_point == models.ContactPoint.END:
+            if from_lane_id > 0 or to_lane_id > 0:
+                return False
+        elif predecessor_road_linkage.contact_point == models.ContactPoint.START:
+            if from_lane_id < 0 or to_lane_id > 0:
+                return False
+
+    if (
+        connection_contact_point == models.ContactPoint.END
+        and successor_road_linkage is not None
+    ):
+        if successor_road_linkage.contact_point == models.ContactPoint.END:
+            if from_lane_id > 0 or to_lane_id < 0:
+                return False
+        elif successor_road_linkage.contact_point == models.ContactPoint.START:
+            if from_lane_id < 0 or to_lane_id < 0:
+                return False
+    return True
+
+
+def _check_lht_lane_direction(
+    to_lane_id: int,
+    from_lane_id: int,
+    predecessor_road_linkage: models.RoadLinkage,
+    successor_road_linkage: models.RoadLinkage,
+    connection_contact_point: models.ContactPoint,
+) -> bool:
+    if (
+        connection_contact_point == models.ContactPoint.START
+        and predecessor_road_linkage is not None
+    ):
+        if predecessor_road_linkage.contact_point == models.ContactPoint.END:
+            if from_lane_id < 0 or to_lane_id < 0:
+                return False
+        elif predecessor_road_linkage.contact_point == models.ContactPoint.START:
+            if from_lane_id > 0 or to_lane_id < 0:
+                return False
+
+    if (
+        connection_contact_point == models.ContactPoint.END
+        and successor_road_linkage is not None
+    ):
+        if successor_road_linkage.contact_point == models.ContactPoint.END:
+            if from_lane_id < 0 or to_lane_id > 0:
+                return False
+        elif successor_road_linkage.contact_point == models.ContactPoint.START:
+            if from_lane_id > 0 or to_lane_id > 0:
+                return False
+
+    return True
+
+
 def _check_connection_lane_link_same_direction(
     checker_data: models.CheckerData,
     road_id_map: Dict[int, etree._ElementTree],
     connection: etree._Element,
     rule_uid: str,
 ) -> None:
-    contact_point = utils.get_contact_point_from_connection(connection)
+    connection_contact_point = utils.get_contact_point_from_connection(connection)
 
-    if contact_point is None:
+    if connection_contact_point is None:
         return
 
     incoming_road_id = utils.get_incoming_road_id_from_connection(connection)
@@ -51,15 +114,21 @@ def _check_connection_lane_link_same_direction(
         return
 
     connecting_road = road_id_map.get(connecting_road_id)
+    incoming_road = road_id_map.get(incoming_road_id)
 
-    if connecting_road is None:
+    if connecting_road is None or incoming_road is None:
         return
 
-    predecessor = utils.get_road_linkage(connecting_road, models.LinkageTag.PREDECESSOR)
-    successor = utils.get_road_linkage(connecting_road, models.LinkageTag.SUCCESSOR)
+    connecting_road_predecessor = utils.get_road_linkage(
+        connecting_road, models.LinkageTag.PREDECESSOR
+    )
+    connecting_road_successor = utils.get_road_linkage(
+        connecting_road, models.LinkageTag.SUCCESSOR
+    )
 
+    connection_traffic_hand = utils.get_traffic_hand_rule_from_road(connecting_road)
+    incoming_traffic_hand = utils.get_traffic_hand_rule_from_road(incoming_road)
     lane_links = utils.get_lane_links_from_connection(connection)
-    traffic_hand = utils.get_road_hand_rule(connecting_road)
 
     for lane_link in lane_links:
         from_lane_id = utils.get_from_attribute_from_lane_link(lane_link)
@@ -68,39 +137,45 @@ def _check_connection_lane_link_same_direction(
         if from_lane_id is None or to_lane_id is None:
             continue
 
-        if traffic_hand == models.TrafficHandRule.RHT:
-            if contact_point == models.ContactPoint.START and predecessor is not None:
-                if predecessor.contact_point == models.ContactPoint.END:
-                    if from_lane_id > 0 or to_lane_id > 0:
-                        _raise_lane_linkage_issue(checker_data, rule_uid, lane_link)
-                elif predecessor.contact_point == models.ContactPoint.START:
-                    if from_lane_id < 0 or to_lane_id > 0:
-                        _raise_lane_linkage_issue(checker_data, rule_uid, lane_link)
+        if connection_traffic_hand == models.TrafficHandRule.RHT:
+            if incoming_traffic_hand == models.TrafficHandRule.RHT:
+                if not _check_rht_lane_direction(
+                    to_lane_id,
+                    from_lane_id,
+                    connecting_road_predecessor,
+                    connecting_road_successor,
+                    connection_contact_point,
+                ):
+                    _raise_lane_linkage_issue(checker_data, rule_uid, lane_link)
+            else:
+                if not _check_lht_lane_direction(
+                    to_lane_id,
+                    from_lane_id,
+                    connecting_road_successor,
+                    connecting_road_predecessor,
+                    connection_contact_point,
+                ):
+                    _raise_lane_linkage_issue(checker_data, rule_uid, lane_link)
 
-            if contact_point == models.ContactPoint.END and successor is not None:
-                if successor.contact_point == models.ContactPoint.END:
-                    if from_lane_id > 0 or to_lane_id < 0:
-                        _raise_lane_linkage_issue(checker_data, rule_uid, lane_link)
-                elif successor.contact_point == models.ContactPoint.START:
-                    if from_lane_id < 0 or to_lane_id < 0:
-                        _raise_lane_linkage_issue(checker_data, rule_uid, lane_link)
-
-        elif traffic_hand == models.TrafficHandRule.LHT:
-            if contact_point == models.ContactPoint.START and predecessor is not None:
-                if predecessor.contact_point == models.ContactPoint.END:
-                    if from_lane_id < 0 or to_lane_id < 0:
-                        _raise_lane_linkage_issue(checker_data, rule_uid, lane_link)
-                elif predecessor.contact_point == models.ContactPoint.START:
-                    if from_lane_id > 0 or to_lane_id < 0:
-                        _raise_lane_linkage_issue(checker_data, rule_uid, lane_link)
-
-            if contact_point == models.ContactPoint.END and successor is not None:
-                if successor.contact_point == models.ContactPoint.END:
-                    if from_lane_id < 0 or to_lane_id > 0:
-                        _raise_lane_linkage_issue(checker_data, rule_uid, lane_link)
-                elif successor.contact_point == models.ContactPoint.START:
-                    if from_lane_id > 0 or to_lane_id > 0:
-                        _raise_lane_linkage_issue(checker_data, rule_uid, lane_link)
+        elif connection_traffic_hand == models.TrafficHandRule.LHT:
+            if incoming_traffic_hand == models.TrafficHandRule.LHT:
+                if not _check_lht_lane_direction(
+                    to_lane_id,
+                    from_lane_id,
+                    connecting_road_predecessor,
+                    connecting_road_successor,
+                    connection_contact_point,
+                ):
+                    _raise_lane_linkage_issue(checker_data, rule_uid, lane_link)
+            else:
+                if not _check_rht_lane_direction(
+                    to_lane_id,
+                    from_lane_id,
+                    connecting_road_successor,
+                    connecting_road_predecessor,
+                    connection_contact_point,
+                ):
+                    _raise_lane_linkage_issue(checker_data, rule_uid, lane_link)
 
 
 def _check_junctions_connection_one_link_to_incoming(
