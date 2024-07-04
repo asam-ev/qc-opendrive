@@ -124,12 +124,12 @@
 	</road>
 
     <junction name="primary" id="100" type="default">
-        <connection id="0" incomingRoad="1" connectingRoad="2" contactPoint="start">
-            <laneLink from="1" to="1" />
+		<connection id="1" incomingRoad="1" connectingRoad="2" contactPoint="start">
+            <laneLink from="-1" to="-1" />
         </connection>
         <connection id="0" incomingRoad="1" connectingRoad="2" contactPoint="start">
-            <laneLink from="-1" to="2" />
-        </connection>
+            <laneLink from="1" to="1" /> <!-- issue: lane link on opposite direction -->
+        </connection> <!-- issue: duplicated connection with pair incoming and connecting road-->
     </junction>
 
 </OpenDRIVE>
