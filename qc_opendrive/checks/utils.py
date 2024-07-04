@@ -657,3 +657,14 @@ def get_connections_of_connecting_road(
                 linkage_connections.append(connection)
 
     return linkage_connections
+
+
+def get_road_hand_rule(road: etree._Element) -> models.TrafficHandRule:
+    rule = road.get("rule")
+
+    if rule is None:
+        # From standard:
+        # When this attribute is missing, RHT is assumed.
+        return models.TrafficHandRule.RHT
+    else:
+        return models.TrafficHandRule(rule)

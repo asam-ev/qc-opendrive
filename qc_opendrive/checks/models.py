@@ -65,3 +65,8 @@ class ContactingLaneSections:
 class WidthPoly3:
     poly3: Poly3
     s_offset: float
+
+
+class TrafficHandRule(str, Enum):
+    LHT = "LHT"
+    RHT = "RHT"
