@@ -1,15 +1,9 @@
-from dataclasses import dataclass
 import logging
 
 import numpy as np
 from scipy.integrate import quad
 
-from typing import Union, List, Dict, Set
-from enum import Enum
-
-from lxml import etree
-
-from qc_baselib import Configuration, Result, IssueSeverity
+from qc_baselib import IssueSeverity
 
 from qc_opendrive import constants
 from qc_opendrive.checks import utils, models

@@ -1,12 +1,10 @@
-from dataclasses import dataclass
 import logging
 
-from typing import Union, List, Dict, Set
-from enum import Enum
+from typing import Dict
 
 from lxml import etree
 
-from qc_baselib import Configuration, Result, IssueSeverity
+from qc_baselib import IssueSeverity
 
 from qc_opendrive import constants
 from qc_opendrive.checks import utils, models
@@ -167,7 +165,13 @@ def _check_last_lane_section(
 
 def check_rule(checker_data: models.CheckerData) -> None:
     """
-    Rule: Lanes that continues across the lane sections shall be connected in both directions.
+    Rule ID: asam.net:xodr:1.4.0:road.lane.link.lanes_across_lane_sections
+
+    Description: Lanes that continues across the lane sections shall be connected in both directions.
+
+    Severity: ERROR
+
+    Version range: [1.7.0, )
 
     More info at
         - https://github.com/asam-ev/qc-opendrive/issues/3
@@ -192,6 +196,14 @@ def check_rule(checker_data: models.CheckerData) -> None:
     road_id_map = utils.get_road_id_map(checker_data.input_file_xml_root)
 
     for road in utils.get_roads(checker_data.input_file_xml_root):
+        # For all roads, no matter whether they belong to a junction or not, middle lane sections
+        # shall always be connected
         _check_middle_lane_sections(checker_data, road, rule_uid)
-        _check_first_lane_section(checker_data, road, road_id_map, rule_uid)
-        _check_last_lane_section(checker_data, road, road_id_map, rule_uid)
+
+        # For all roads not belonging to a junction, the first and the last lane sections shall be checked.
+        # For roads belonging to a junction, ignore this rule for the first and the last lane section
+        # due to the following statement from the standard:
+        #     "The <link> element shall be omitted if the lane starts or ends in a junction or has no link."
+        if not utils.road_belongs_to_junction(road):
+            _check_first_lane_section(checker_data, road, road_id_map, rule_uid)
+            _check_last_lane_section(checker_data, road, road_id_map, rule_uid)
