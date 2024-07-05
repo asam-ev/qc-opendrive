@@ -68,6 +68,10 @@ class WidthPoly3:
     s_offset: float
 
 
+class TrafficHandRule(str, Enum):
+    LHT = "LHT"
+    RHT = "RHT"
+
 @dataclass
 class Border:
     poly3: Poly3
@@ -78,3 +82,4 @@ class Border:
 class LaneSectionWithLength:
     lane_section: etree._ElementTree
     length: float
+

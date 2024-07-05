@@ -393,6 +393,20 @@ def test_junctions_connection_one_connection_element(
                 "/OpenDRIVE/junction/connection[2]/laneLink",
             ],
         ),
+        (
+            "valid_LHT",
+            0,
+            [],
+        ),
+        (
+            "invalid_LHT",
+            2,
+            [
+                "/OpenDRIVE/junction/connection[1]",
+                "/OpenDRIVE/junction/connection[2]",
+                "/OpenDRIVE/junction/connection[2]/laneLink",
+            ],
+        ),
     ],
 )
 def test_junctions_connection_one_link_to_incoming(

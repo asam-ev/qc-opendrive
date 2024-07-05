@@ -44,6 +44,10 @@
 		</lanes>
 	</road>
     <road name="B" length="10.0" id="2" junction="100">
+		<link>
+            <predecessor elementType="road" elementId="1" contactPoint="end" />
+			<successor elementType="road" elementId="3" contactPoint="start"/>
+		</link>
 		<planView>
 			<geometry s="0.00000000000000e+00" x="0.03" y="-0.05" hdg="1.57080404096212e+00" length="10.0">
 				<line />
@@ -57,6 +61,10 @@
 			<laneSection s="0.00000000000000e+00">
 				<left>
 					<lane id="1" type="driving">
+						<link>
+							<predecessor id="1" />
+							<successor id="1" />
+						</link>
 						<width sOffset="0.00000000000000e+00" a="3.00000000000000e+00" b="0.00000000000000e+00" c="0.00000000000000e+00" d="0.00000000000000e+00" />
 						<roadMark sOffset="0.00000000000000e+00" type="none" weight="standard" color="standard" material="standard" laneChange="both" />
 						<speed sOffset="0.00000000000000e+00" max="1.38888888888889e+01" unit="m/s" />
@@ -70,6 +78,10 @@
 				</center>
 				<right>
 					<lane id="-1" type="driving">
+						<link>
+							<predecessor id="-1" />
+							<successor id="-1" />
+						</link>
 						<width sOffset="0.00000000000000e+00" a="3.00000000000000e+00" b="0.00000000000000e+00" c="0.00000000000000e+00" d="0.00000000000000e+00" />
 						<roadMark sOffset="0.00000000000000e+00" type="none" weight="standard" color="standard" material="standard" laneChange="both" />
 						<speed sOffset="0.00000000000000e+00" max="1.38888888888889e+01" unit="m/s" />
@@ -120,10 +132,7 @@
 	</road>
 
     <junction name="primary" id="100" type="default">
-        <connection id="0" incomingRoad="1" connectingRoad="2" contactPoint="start">
-            <laneLink from="1" to="1" />
-        </connection>
-        <connection id="1" incomingRoad="3" connectingRoad="2" contactPoint="end">
+        <connection id="1" incomingRoad="1" connectingRoad="2" contactPoint="start">
             <laneLink from="-1" to="-1" />
         </connection>
     </junction>
