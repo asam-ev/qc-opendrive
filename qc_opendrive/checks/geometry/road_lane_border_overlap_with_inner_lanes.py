@@ -138,9 +138,9 @@ def _intersect_or_stay_within(border_pair: BorderPair) -> bool:
     Let f(ds) = t_left(ds + left_start) - t_right(ds + right_start)
     where t(ds) =  a + b*ds + c*ds^2 + d*ds^3
 
-    For ds in range [0, length], check if f(ds) > 0
+    For ds in range [0, length], check if f(ds) >= 0
 
-    This function expands f(ds) and check if f(ds) is always positive when ds is in [0, length].
+    This function expands f(ds) and check if f(ds) is always non-negative when ds is in [0, length].
     As f(ds) is a third order polynomial, the check is done based on the following conditions
     Condition 1: f(0) >= 0
     Condition 2: f(length) >= 0
@@ -214,62 +214,42 @@ def _check_overlap(
             return
 
 
+def _check_overlap_among_lane_list(
+    lanes: List[etree._ElementTree],
+    lane_section_length: float,
+    rule_uid: str,
+    checker_data: models.CheckerData,
+) -> None:
+    lanes = [lane for lane in lanes if utils.get_lane_id(lane) is not None]
+    sorted_lanes = sorted(lanes, key=lambda lane: utils.get_lane_id(lane))
+    for right_lane_index in range(0, len(sorted_lanes)):
+        for left_lane_index in range(right_lane_index + 1, len(sorted_lanes)):
+            _check_overlap(
+                sorted_lanes[left_lane_index],
+                sorted_lanes[right_lane_index],
+                lane_section_length,
+                rule_uid,
+                checker_data,
+            )
+
+
 def _check_road(
     road: etree._ElementTree, rule_uid: str, checker_data: models.CheckerData
 ) -> None:
-    lane_sections = utils.get_lane_sections(road)
-    for i in range(0, len(lane_sections)):
-        lane_section = lane_sections[i]
-        lane_section_start_point = utils.get_s_coordinate_from_lane_section(
-            lane_section
+    sorted_lane_sections_with_length = (
+        utils.get_sorted_lane_sections_with_length_from_road(road)
+    )
+
+    for lane_section in sorted_lane_sections_with_length:
+        left_lanes = utils.get_left_lanes_from_lane_section(lane_section.lane_section)
+        _check_overlap_among_lane_list(
+            left_lanes, lane_section.length, rule_uid, checker_data
         )
-        if lane_section_start_point is None:
-            continue
 
-        lane_section_end_point = None
-        if i < len(lane_sections) - 1:
-            next_lane_section = lane_sections[i + 1]
-            lane_section_end_point = utils.get_s_coordinate_from_lane_section(
-                next_lane_section
-            )
-        else:
-            road_length = utils.get_road_length(road)
-            if road_length is None:
-                return
-            lane_section_end_point = road_length
-
-        if lane_section_end_point is None:
-            continue
-
-        lane_section_length = lane_section_end_point - lane_section_start_point
-        if lane_section_length <= 0:
-            continue
-
-        lanes = utils.get_left_lanes_from_lane_section(lane_section)
-        lanes = [lane for lane in lanes if utils.get_lane_id(lane) is not None]
-        sorted_lanes = sorted(lanes, key=lambda lane: utils.get_lane_id(lane))
-        for right_lane_index in range(0, len(sorted_lanes)):
-            for left_lane_index in range(right_lane_index + 1, len(sorted_lanes)):
-                _check_overlap(
-                    sorted_lanes[left_lane_index],
-                    sorted_lanes[right_lane_index],
-                    lane_section_length,
-                    rule_uid,
-                    checker_data,
-                )
-
-        lanes = utils.get_right_lanes_from_lane_section(lane_section)
-        lanes = [lane for lane in lanes if utils.get_lane_id(lane) is not None]
-        sorted_lanes = sorted(lanes, key=lambda lane: utils.get_lane_id(lane))
-        for right_lane_index in range(0, len(sorted_lanes)):
-            for left_lane_index in range(right_lane_index + 1, len(sorted_lanes)):
-                _check_overlap(
-                    sorted_lanes[left_lane_index],
-                    sorted_lanes[right_lane_index],
-                    lane_section_length,
-                    rule_uid,
-                    checker_data,
-                )
+        right_lanes = utils.get_right_lanes_from_lane_section(lane_section.lane_section)
+        _check_overlap_among_lane_list(
+            right_lanes, lane_section.length, rule_uid, checker_data
+        )
 
 
 def check_rule(checker_data: models.CheckerData) -> None:

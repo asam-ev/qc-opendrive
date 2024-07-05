@@ -693,3 +693,55 @@ def get_borders_from_lane(lane: etree._ElementTree) -> List[models.Border]:
         )
 
     return border_list
+
+
+def get_sorted_lane_sections_with_length_from_road(
+    road: etree._ElementTree,
+) -> List[models.LaneSectionWithLength]:
+    """
+    If there is missing information so that lane section length cannot be computed, such as
+    missing s-coordinate of lane section or missing road length, an empty list will be returned.
+    """
+    lane_sections = get_lane_sections(road)
+
+    for lane_section in lane_sections:
+        s_coordinate = get_s_coordinate_from_lane_section(lane_section)
+        if s_coordinate is None:
+            return []
+
+    sorted_lane_sections = sorted(
+        lane_sections,
+        key=lambda lane_section: get_s_coordinate_from_lane_section(lane_section),
+    )
+
+    sorted_lane_sections_with_length = []
+    for i in range(0, len(sorted_lane_sections)):
+        lane_section = sorted_lane_sections[i]
+
+        lane_section_start_point = get_s_coordinate_from_lane_section(lane_section)
+        if lane_section_start_point is None:
+            return []
+
+        lane_section_end_point = None
+        if i < len(sorted_lane_sections) - 1:
+            next_lane_section = sorted_lane_sections[i + 1]
+            lane_section_end_point = get_s_coordinate_from_lane_section(
+                next_lane_section
+            )
+        else:
+            road_length = get_road_length(road)
+            if road_length is None:
+                return []
+            lane_section_end_point = road_length
+
+        if lane_section_end_point is None:
+            return []
+
+        lane_section_length = lane_section_end_point - lane_section_start_point
+        sorted_lane_sections_with_length.append(
+            models.LaneSectionWithLength(
+                lane_section=lane_section, length=lane_section_length
+            )
+        )
+
+    return sorted_lane_sections_with_length

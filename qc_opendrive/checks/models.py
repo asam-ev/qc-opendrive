@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
+from typing import Union
 from lxml import etree
 
 from qc_baselib import Configuration, Result
@@ -71,3 +72,9 @@ class WidthPoly3:
 class Border:
     poly3: Poly3
     s_offset: float
+
+
+@dataclass
+class LaneSectionWithLength:
+    lane_section: etree._ElementTree
+    length: float
