@@ -4,7 +4,7 @@
 		<userData code="settings" value="" />
 	</header>
 
-	<road name="A" length="10.0" id="1" junction="-1">
+	<road name="A" length="10.0" id="1" junction="-1" rule="LHT">
         <link>
             <successor elementType="junction" elementId="100"/>
         </link>
@@ -43,7 +43,7 @@
 			</laneSection>
 		</lanes>
 	</road>
-    <road name="B" length="10.0" id="2" junction="100">
+    <road name="B" length="10.0" id="2" junction="100" rule="LHT">
 		<link>
 			<predecessor elementType="road" elementId="1" contactPoint="end"/>
 			<successor elementType="road" elementId="3" contactPoint="start"/>
@@ -83,7 +83,7 @@
 			</laneSection>
 		</lanes>
 	</road>
-    <road name="C" length="10.0" id="3" junction="-1">
+    <road name="C" length="10.0" id="3" junction="-1" rule="LHT">
         <link>
             <predecessor elementType="junction" elementId="100"/>
         </link>
@@ -124,12 +124,12 @@
 	</road>
 
     <junction name="primary" id="100" type="default">
-		<connection id="1" incomingRoad="1" connectingRoad="2" contactPoint="start">
+		<connection id="0" incomingRoad="1" connectingRoad="2" contactPoint="start">
+            <laneLink from="1" to="1" />
+        </connection>
+		<connection id="1" incomingRoad="3" connectingRoad="2" contactPoint="end">
             <laneLink from="-1" to="-1" />
         </connection>
-        <connection id="0" incomingRoad="1" connectingRoad="2" contactPoint="start">
-            <laneLink from="1" to="1" /> <!-- issue: lane link on opposite direction -->
-        </connection> <!-- issue: duplicated connection with pair incoming and connecting road-->
     </junction>
 
 </OpenDRIVE>
