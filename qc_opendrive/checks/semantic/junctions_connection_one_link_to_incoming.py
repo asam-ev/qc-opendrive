@@ -33,13 +33,17 @@ def _raise_lane_linkage_issue(
     )
 
 
-def _check_rht_lane_direction(
+def _is_rht_lane_direction_valid(
     to_lane_id: int,
     from_lane_id: int,
     predecessor_road_linkage: models.RoadLinkage,
     successor_road_linkage: models.RoadLinkage,
     connection_contact_point: models.ContactPoint,
 ) -> bool:
+    """
+    This function checks if RHT incoming traffic to a RHT junction has
+    valid driving direction lane linkage.
+    """
     if (
         connection_contact_point == models.ContactPoint.START
         and predecessor_road_linkage is not None
@@ -64,13 +68,17 @@ def _check_rht_lane_direction(
     return True
 
 
-def _check_lht_lane_direction(
+def _is_lht_lane_direction_valid(
     to_lane_id: int,
     from_lane_id: int,
     predecessor_road_linkage: models.RoadLinkage,
     successor_road_linkage: models.RoadLinkage,
     connection_contact_point: models.ContactPoint,
 ) -> bool:
+    """
+    This function checks if LHT incoming traffic to a LHT junction has
+    valid driving direction lane linkage.
+    """
     if (
         connection_contact_point == models.ContactPoint.START
         and predecessor_road_linkage is not None
@@ -91,6 +99,78 @@ def _check_lht_lane_direction(
                 return False
         elif successor_road_linkage.contact_point == models.ContactPoint.START:
             if from_lane_id > 0 or to_lane_id > 0:
+                return False
+
+    return True
+
+
+def _is_lht_to_rht_lane_direction_valid(
+    to_lane_id: int,
+    from_lane_id: int,
+    predecessor_road_linkage: models.RoadLinkage,
+    successor_road_linkage: models.RoadLinkage,
+    connection_contact_point: models.ContactPoint,
+) -> bool:
+    """
+    This function checks if LHT mixed incoming traffic to a RHT junction has
+    valid driving direction lane linkage.
+    """
+    if (
+        connection_contact_point == models.ContactPoint.START
+        and predecessor_road_linkage is not None
+    ):
+        if predecessor_road_linkage.contact_point == models.ContactPoint.END:
+            if from_lane_id < 0 or to_lane_id > 0:
+                return False
+        elif predecessor_road_linkage.contact_point == models.ContactPoint.START:
+            if from_lane_id > 0 or to_lane_id > 0:
+                return False
+
+    if (
+        connection_contact_point == models.ContactPoint.END
+        and successor_road_linkage is not None
+    ):
+        if successor_road_linkage.contact_point == models.ContactPoint.END:
+            if from_lane_id < 0 or to_lane_id < 0:
+                return False
+        elif successor_road_linkage.contact_point == models.ContactPoint.START:
+            if from_lane_id > 0 or to_lane_id < 0:
+                return False
+
+    return True
+
+
+def _is_rht_to_lht_lane_direction_valid(
+    to_lane_id: int,
+    from_lane_id: int,
+    predecessor_road_linkage: models.RoadLinkage,
+    successor_road_linkage: models.RoadLinkage,
+    connection_contact_point: models.ContactPoint,
+) -> bool:
+    """
+    This function checks if RHT mixed incoming traffic to a LHT junction has
+    valid driving direction lane linkage.
+    """
+    if (
+        connection_contact_point == models.ContactPoint.START
+        and predecessor_road_linkage is not None
+    ):
+        if predecessor_road_linkage.contact_point == models.ContactPoint.END:
+            if from_lane_id > 0 or to_lane_id < 0:
+                return False
+        elif predecessor_road_linkage.contact_point == models.ContactPoint.START:
+            if from_lane_id < 0 or to_lane_id < 0:
+                return False
+
+    if (
+        connection_contact_point == models.ContactPoint.END
+        and successor_road_linkage is not None
+    ):
+        if successor_road_linkage.contact_point == models.ContactPoint.END:
+            if from_lane_id > 0 or to_lane_id > 0:
+                return False
+        elif successor_road_linkage.contact_point == models.ContactPoint.START:
+            if from_lane_id < 0 or to_lane_id > 0:
                 return False
 
     return True
@@ -139,7 +219,7 @@ def _check_connection_lane_link_same_direction(
 
         if connection_traffic_hand == models.TrafficHandRule.RHT:
             if incoming_traffic_hand == models.TrafficHandRule.RHT:
-                if not _check_rht_lane_direction(
+                if not _is_rht_lane_direction_valid(
                     to_lane_id,
                     from_lane_id,
                     connecting_road_predecessor,
@@ -148,18 +228,18 @@ def _check_connection_lane_link_same_direction(
                 ):
                     _raise_lane_linkage_issue(checker_data, rule_uid, lane_link)
             else:
-                if not _check_lht_lane_direction(
+                if not _is_lht_to_rht_lane_direction_valid(
                     to_lane_id,
                     from_lane_id,
-                    connecting_road_successor,
                     connecting_road_predecessor,
+                    connecting_road_successor,
                     connection_contact_point,
                 ):
                     _raise_lane_linkage_issue(checker_data, rule_uid, lane_link)
 
         elif connection_traffic_hand == models.TrafficHandRule.LHT:
             if incoming_traffic_hand == models.TrafficHandRule.LHT:
-                if not _check_lht_lane_direction(
+                if not _is_lht_lane_direction_valid(
                     to_lane_id,
                     from_lane_id,
                     connecting_road_predecessor,
@@ -168,11 +248,11 @@ def _check_connection_lane_link_same_direction(
                 ):
                     _raise_lane_linkage_issue(checker_data, rule_uid, lane_link)
             else:
-                if not _check_rht_lane_direction(
+                if not _is_rht_to_lht_lane_direction_valid(
                     to_lane_id,
                     from_lane_id,
-                    connecting_road_successor,
                     connecting_road_predecessor,
+                    connecting_road_successor,
                     connection_contact_point,
                 ):
                     _raise_lane_linkage_issue(checker_data, rule_uid, lane_link)
