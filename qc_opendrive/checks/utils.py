@@ -5,6 +5,9 @@ from qc_opendrive.checks import models
 import numpy as np
 
 
+EPSILON = 1.0e-6
+
+
 def get_lanes(root: etree._ElementTree) -> List[etree._ElementTree]:
     lanes = []
 
@@ -513,8 +516,8 @@ def get_connecting_lane_ids(
 
 def get_poly3_from_width(
     width: etree._ElementTree,
-) -> models.WidthPoly3:
-    return models.WidthPoly3(
+) -> models.OffsetPoly3:
+    return models.OffsetPoly3(
         poly3=models.Poly3(
             a=float(width.get("a")),
             b=float(width.get("b")),
@@ -525,7 +528,7 @@ def get_poly3_from_width(
     )
 
 
-def get_lane_width_poly3_list(lane: etree._Element) -> List[models.WidthPoly3]:
+def get_lane_width_poly3_list(lane: etree._Element) -> List[models.OffsetPoly3]:
     width_poly3 = []
     for width in lane.iter("width"):
         width_poly3.append(get_poly3_from_width(width))
@@ -659,7 +662,6 @@ def get_connections_of_connecting_road(
     return linkage_connections
 
 
-
 def get_traffic_hand_rule_from_road(road: etree._Element) -> models.TrafficHandRule:
     rule = road.get("rule")
 
@@ -679,6 +681,7 @@ def get_lane_section_s_offset(lane_section: etree._Element) -> Union[None, float
     else:
         return float(s_offset)
 
+
 def get_road_length(road: etree._ElementTree) -> Union[None, float]:
     length = road.get("length")
     if length is None:
@@ -697,11 +700,11 @@ def get_s_coordinate_from_lane_section(
         return float(s_coordinate)
 
 
-def get_borders_from_lane(lane: etree._ElementTree) -> List[models.Border]:
+def get_borders_from_lane(lane: etree._ElementTree) -> List[models.OffsetPoly3]:
     border_list = []
     for border in lane.iter("border"):
         border_list.append(
-            models.Border(
+            models.OffsetPoly3(
                 models.Poly3(
                     a=float(border.get("a")),
                     b=float(border.get("b")),
@@ -765,3 +768,139 @@ def get_sorted_lane_sections_with_length_from_road(
         )
 
     return sorted_lane_sections_with_length
+
+
+def get_road_elevations(road: etree._ElementTree) -> List[models.OffsetPoly3]:
+    elevation_profile = road.find("elevationProfile")
+
+    if elevation_profile is None:
+        return []
+
+    elevation_list = []
+    for elevation in elevation_profile.iter("elevation"):
+        elevation_list.append(
+            models.OffsetPoly3(
+                models.Poly3(
+                    a=float(elevation.get("a")),
+                    b=float(elevation.get("b")),
+                    c=float(elevation.get("c")),
+                    d=float(elevation.get("d")),
+                ),
+                s_offset=float(elevation.get("s")),
+            )
+        )
+
+    return elevation_list
+
+
+def get_road_superelevations(road: etree._ElementTree) -> List[models.OffsetPoly3]:
+    lateral_profile = road.find("lateralProfile")
+
+    if lateral_profile is None:
+        return []
+
+    superelevation_list = []
+    for superelevation in lateral_profile.iter("superelevation"):
+        superelevation_list.append(
+            models.OffsetPoly3(
+                models.Poly3(
+                    a=float(superelevation.get("a")),
+                    b=float(superelevation.get("b")),
+                    c=float(superelevation.get("c")),
+                    d=float(superelevation.get("d")),
+                ),
+                s_offset=float(superelevation.get("s")),
+            )
+        )
+
+    return superelevation_list
+
+
+def get_lane_offsets_from_road(road: etree._ElementTree) -> List[models.OffsetPoly3]:
+    lanes = road.find("lanes")
+
+    if lanes is None:
+        return []
+
+    lane_offset_list = []
+    for lane_offset in lanes.iter("laneOffset"):
+        lane_offset_list.append(
+            models.OffsetPoly3(
+                models.Poly3(
+                    a=float(lane_offset.get("a")),
+                    b=float(lane_offset.get("b")),
+                    c=float(lane_offset.get("c")),
+                    d=float(lane_offset.get("d")),
+                ),
+                s_offset=float(lane_offset.get("s")),
+            )
+        )
+
+    return lane_offset_list
+
+
+def are_same_equations(first: models.OffsetPoly3, second: models.OffsetPoly3) -> bool:
+    """
+    This function checks if two equations are the same.
+    Equation 1:
+    f1(s) = a1 + b1*(s - s_offset1) + c1*(s - s_offset1)**2 + d1*(s - s_offset1)**3
+    f2(s) = a2 + b2*(s - s_offset2) + c2*(s - s_offset2)**2 + d2*(s - s_offset2)**3
+
+    The check is implemented as follows.
+    Let f3(s) = f1(s) - f2(s).
+
+    Explanding and simplifying f3(s), we obtain:
+    f3(s) = a3 + b3 * s + c3 * s**2 + d3 * s**3
+
+    f1(s) and f2(s) are considered the same if a3, b3, c3, d3 are zeros.
+    """
+    a3 = (
+        first.poly3.a
+        - second.poly3.a
+        - first.poly3.b * first.s_offset
+        + second.poly3.b * second.s_offset
+        + first.poly3.c * first.s_offset**2
+        - second.poly3.c * second.s_offset**2
+        - first.poly3.d * first.s_offset**3
+        + second.poly3.d * second.s_offset**3
+    )
+
+    b3 = (
+        first.poly3.b
+        - second.poly3.b
+        - 2 * first.poly3.c * first.s_offset
+        + 2 * second.poly3.c * second.s_offset
+        + 3 * first.poly3.d * first.s_offset**2
+        - 3 * second.poly3.d * second.s_offset**2
+    )
+
+    c3 = (
+        first.poly3.c
+        - second.poly3.c
+        - 3 * first.poly3.d * first.s_offset
+        + 3 * second.poly3.d * second.s_offset
+    )
+
+    d3 = first.poly3.d - second.poly3.d
+
+    return (
+        np.abs(a3) < EPSILON
+        and np.abs(b3) < EPSILON
+        and np.abs(c3) < EPSILON
+        and np.abs(d3) < EPSILON
+    )
+
+
+def get_road_plan_view_geometry_list(
+    road: etree._ElementTree,
+) -> List[etree._ElementTree]:
+    plan_view = road.find("planView")
+
+    if plan_view is None:
+        return []
+
+    return list(plan_view.iter("geometry"))
+
+
+def is_line_geometry(geometry: etree._ElementTree) -> bool:
+    return geometry.find("line") is not None
