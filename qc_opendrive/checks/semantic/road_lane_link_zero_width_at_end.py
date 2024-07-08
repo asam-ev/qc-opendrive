@@ -64,19 +64,17 @@ def _check_road_lane_link_zero_width_at_end(
             utils.get_sorted_lane_sections_with_length_from_road(road)
         )
 
-        for lane_section_with_width in lane_sections_with_length:
+        for lane_section in lane_sections_with_length:
             lanes = utils.get_left_and_right_lanes_from_lane_section(
-                lane_section_with_width.lane_section
+                lane_section.lane_section
             )
 
             for lane in lanes:
-                lane_end_width = utils.evaluate_lane_width(
-                    lane, lane_section_with_width.length
-                )
+                lane_end_width = utils.evaluate_lane_width(lane, lane_section.length)
                 if lane_end_width is None:
                     continue
 
-                if lane_end_width < FLOAT_COMPARISON_THRESHOLD:
+                if abs(lane_end_width) < FLOAT_COMPARISON_THRESHOLD:
                     # This rule only evaluate explicit successor.
                     # Other rules verify if any implicit successor was not
                     # properly registered.
@@ -134,20 +132,18 @@ def _check_incoming_road_junction_successor_lane_width_zero(
     if len(lane_sections_with_length) == 0:
         return
 
-    last_lane_section_with_width = lane_sections_with_length[-1]
+    last_lane_section = lane_sections_with_length[-1]
 
     lanes = utils.get_left_and_right_lanes_from_lane_section(
-        last_lane_section_with_width.lane_section
+        last_lane_section.lane_section
     )
 
     for lane in lanes:
-        lane_end_width = utils.evaluate_lane_width(
-            lane, last_lane_section_with_width.length
-        )
+        lane_end_width = utils.evaluate_lane_width(lane, last_lane_section.length)
         if lane_end_width is None:
             continue
 
-        if lane_end_width < FLOAT_COMPARISON_THRESHOLD:
+        if abs(lane_end_width) < FLOAT_COMPARISON_THRESHOLD:
             lane_id = utils.get_lane_id(lane)
             if lane_id is None:
                 continue
@@ -201,19 +197,17 @@ def _check_connecting_road_lane_width_zero_with_successor(
     if len(lane_sections_with_length) == 0:
         return
 
-    last_lane_section_with_width = lane_sections_with_length[-1]
+    last_lane_section = lane_sections_with_length[-1]
     lanes = utils.get_left_and_right_lanes_from_lane_section(
-        last_lane_section_with_width.lane_section
+        last_lane_section.lane_section
     )
 
     for lane in lanes:
-        lane_start_width = utils.evaluate_lane_width(
-            lane, last_lane_section_with_width.length
-        )
-        if lane_start_width is None:
+        lane_end_width = utils.evaluate_lane_width(lane, last_lane_section.length)
+        if lane_end_width is None:
             continue
 
-        if lane_start_width < FLOAT_COMPARISON_THRESHOLD:
+        if abs(lane_end_width) < FLOAT_COMPARISON_THRESHOLD:
             lane_id = utils.get_lane_id(lane)
             if lane_id is None:
                 continue
