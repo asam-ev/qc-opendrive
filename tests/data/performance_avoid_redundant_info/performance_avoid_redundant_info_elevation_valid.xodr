@@ -1,0 +1,15 @@
+<?xml version="1.0" standalone="yes"?>
+<OpenDRIVE>
+  <header revMajor="1" revMinor="8" name="" version="1.00" date="Tue Mar 14 14:23:24 2023"
+    north="0.0000000000000000e+00" south="0.0000000000000000e+00" east="0.0000000000000000e+00"
+    west="0.0000000000000000e+00">
+  </header>
+  <road name="" length="1.5250000000000000e+02" id="1" junction="-1" rule="RHT">
+    <elevationProfile>
+      <elevation s="0.0000000000000000e+00" a="0.0000000000000000e+00" b="0.0000000000000000e+00"
+        c="0.0000000000000000e+00" d="0.0000000000000000e+00" />
+      <elevation s="2.5000000000000000e+00" a="1.0000000000000000e+00" b="0.0000000000000000e+00"
+        c="0.0000000000000000e+00" d="0.0000000000000000e+00" />
+    </elevationProfile>
+  </road>
+</OpenDRIVE>

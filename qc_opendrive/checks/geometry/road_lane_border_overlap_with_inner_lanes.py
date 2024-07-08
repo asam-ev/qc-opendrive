@@ -24,8 +24,8 @@ class BorderPair:
 
 
 def _create_border_pairs(
-    left_lane_borders: List[models.Border],
-    right_lane_borders: List[models.Border],
+    left_lane_borders: List[models.OffsetPoly3],
+    right_lane_borders: List[models.OffsetPoly3],
     lane_section_length: float,
 ) -> List[BorderPair]:
     if len(left_lane_borders) == 0 or len(right_lane_borders) == 0:
