@@ -157,6 +157,9 @@ def _check_level_change_linkage_roads(
     else:
         return
 
+    if current_lane_section is None:
+        return
+
     all_lanes = utils.get_left_and_right_lanes_from_lane_section(current_lane_section)
 
     linkage = utils.get_road_linkage(road, linkage_tag)

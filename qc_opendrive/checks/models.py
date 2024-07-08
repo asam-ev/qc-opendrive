@@ -62,20 +62,9 @@ class ContactingLaneSections:
     connection: etree._ElementTree
 
 
-@dataclass
-class WidthPoly3:
-    poly3: Poly3
-    s_offset: float
-
-
 class TrafficHandRule(str, Enum):
     LHT = "LHT"
     RHT = "RHT"
-
-@dataclass
-class Border:
-    poly3: Poly3
-    s_offset: float
 
 
 @dataclass
@@ -83,3 +72,8 @@ class LaneSectionWithLength:
     lane_section: etree._ElementTree
     length: float
 
+
+@dataclass
+class OffsetPoly3:
+    poly3: Poly3
+    s_offset: float

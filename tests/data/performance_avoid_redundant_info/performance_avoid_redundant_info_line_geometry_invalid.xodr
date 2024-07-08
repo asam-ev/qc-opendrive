@@ -1,0 +1,23 @@
+<?xml version="1.0" standalone="yes"?>
+<OpenDRIVE>
+  <header revMajor="1" revMinor="8" name="" version="1.00" date="Thu Feb 27 19:52:10 2020"
+    north="0.0000000000000000e+00" south="0.0000000000000000e+00" east="0.0000000000000000e+00"
+    west="0.0000000000000000e+00">
+  </header>
+  <road name="" length="2.2312979554025290e+01" id="13" junction="44" rule="RHT">
+    <planView>
+      <geometry s="0.0000000000000000e+00" x="9.9724879887666887e+01" y="1.3217542150772269e+02"
+        hdg="-2.1115927452268277e+00" length="4.0000000000000000e+00">
+        <spiral curvStart="4.2283306389903234e-02" curvEnd="0.0000000000000000e+00" />
+      </geometry>
+      <geometry s="4.0000000000000000e+00" x="9.7862702792824848e+01" y="1.2863675951012104e+02"
+        hdg="-2.0270261324530106e+00" length="9.9999999999996772e-02">
+        <line />
+      </geometry>
+      <geometry s="4.0999999999999970e+00" x="9.7818646126055683e+01" y="1.2854698752054082e+02"
+        hdg="-2.0270261324577694e+00" length="4.1421632052535601e-01">
+        <line />
+      </geometry>
+    </planView>
+  </road>
+</OpenDRIVE>
