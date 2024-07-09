@@ -80,6 +80,10 @@
 				</center>
 				<right>
 					<lane id="-1" type="driving">
+						<link>
+							<successor id="-1"/>
+							<successor id="-2"/>
+						</link>
 						<width sOffset="0.00000000000000e+00" a="3.00000000000000e+00" b="0.00000000000000e+00" c="0.00000000000000e+00" d="0.00000000000000e+00" />
 						<roadMark sOffset="0.00000000000000e+00" type="none" weight="standard" color="standard" material="standard" laneChange="both" />
 						<speed sOffset="0.00000000000000e+00" max="1.38888888888889e+01" unit="m/s" />
