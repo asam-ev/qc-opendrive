@@ -18,3 +18,4 @@ from . import (
 )
 from . import road_lane_link_zero_width_at_start as road_lane_link_zero_width_at_start
 from . import road_lane_link_zero_width_at_end as road_lane_link_zero_width_at_end
+from . import road_lane_link_new_lane_appear as road_lane_link_new_lane_appear

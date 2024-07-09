@@ -9,7 +9,7 @@ from qc_opendrive import constants
 from qc_opendrive.checks import utils, models
 from qc_opendrive.checks.semantic import semantic_constants
 
-RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.7.0"
+RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.4.0"
 
 FLOAT_COMPARISON_THRESHOLD = 1e-6
 
@@ -78,7 +78,10 @@ def _check_successor_with_width_zero_between_lane_sections(
 
             start_lane_width = utils.evaluate_lane_width(successor_lane, 0.0)
 
-            if abs(start_lane_width) < FLOAT_COMPARISON_THRESHOLD:
+            if (
+                start_lane_width is not None
+                and abs(start_lane_width) < FLOAT_COMPARISON_THRESHOLD
+            ):
                 _raise_issue(
                     checker_data,
                     rule_uid,
@@ -96,7 +99,7 @@ def _check_appearing_successor_with_width_zero_on_road(
     if len(lane_sections) < 2:
         return
 
-    for index in range(len(lane_sections - 1)):
+    for index in range(len(lane_sections) - 1):
         current_lane_section = lane_sections[index]
         next_lane_section = lane_sections[index + 1]
         _check_successor_with_width_zero_between_lane_sections(
@@ -197,7 +200,10 @@ def _check_appearing_successor_junction(
                 connection_lane, 0.0
             )
 
-            if abs(connection_lane_start_width) < FLOAT_COMPARISON_THRESHOLD:
+            if (
+                connection_lane_start_width is not None
+                and abs(connection_lane_start_width) < FLOAT_COMPARISON_THRESHOLD
+            ):
                 current_road_lane = utils.get_lane_from_lane_section(
                     current_road_last_lane_section, from_lane_id
                 )
@@ -219,7 +225,7 @@ def _check_road_lane_link_new_lane_appear(
     junction_id_map = utils.get_junction_id_map(checker_data.input_file_xml_root)
 
     for road_id, road in road_id_map.items():
-        _check_appearing_successor_with_width_zero_on_road(road)
+        _check_appearing_successor_with_width_zero_on_road(checker_data, rule_uid, road)
 
         successor_road_id = utils.get_successor_road_id(road)
 
