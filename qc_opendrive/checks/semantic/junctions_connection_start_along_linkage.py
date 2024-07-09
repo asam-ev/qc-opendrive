@@ -1,6 +1,5 @@
 import logging
 
-from typing import Dict, List
 from lxml import etree
 
 from qc_baselib import IssueSeverity
