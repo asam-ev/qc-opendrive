@@ -64,11 +64,6 @@ def _check_successor_with_width_zero_between_lane_sections(
 
         successor_lane_ids = utils.get_successor_lane_ids(lane)
 
-        # # We are only checking for multiple successors? Does appearing besides
-        # # make any difference in this case?
-        # if len(successor_lane_ids) < 2:
-        #     continue
-
         for successor_lane_id in successor_lane_ids:
             successor_lane = utils.get_lane_from_lane_section(
                 next_lane_section, successor_lane_id
@@ -115,6 +110,10 @@ def _check_appearing_successor_road(
     successor_road_id: int,
 ) -> None:
     current_road = road_id_map.get(current_road_id)
+
+    if current_road is None:
+        return
+
     successor_road = road_id_map.get(successor_road_id)
 
     if current_road is None or successor_road is None:
@@ -126,13 +125,9 @@ def _check_appearing_successor_road(
         current_road, models.LinkageTag.SUCCESSOR
     )
 
-    successor_road_target_lane_section = None
-    if successor_linkage.contact_point == models.ContactPoint.END:
-        successor_road_target_lane_section = utils.get_last_lane_section(successor_road)
-    elif successor_linkage.contact_point == models.ContactPoint.START:
-        successor_road_target_lane_section = utils.get_first_lane_section(
-            successor_road
-        )
+    successor_road_target_lane_section = (
+        utils.get_contact_lane_section_from_linked_road(successor_linkage, road_id_map)
+    )
 
     if successor_road_target_lane_section is None:
         return
@@ -141,7 +136,7 @@ def _check_appearing_successor_road(
         checker_data,
         rule_uid,
         current_road_last_lane_section,
-        successor_road_target_lane_section,
+        successor_road_target_lane_section.lane_section,
     )
 
 
@@ -160,11 +155,6 @@ def _check_appearing_successor_junction(
         junction_id_map,
         models.ContactPoint.END,  # ROAD END == ROAD SUCCESSOR
     )
-    current_road = road_id_map.get(road_id)
-    current_road_last_lane_section = utils.get_last_lane_section(current_road)
-
-    if current_road_last_lane_section is None:
-        return
 
     for connection in successor_connections:
         connecting_road_id = utils.get_connecting_road_id_from_connection(connection)
@@ -176,12 +166,14 @@ def _check_appearing_successor_junction(
         if connection_road is None:
             continue
 
-        contact_point = utils.get_contact_point_from_connection(connection)
-        connection_lane_section = (
-            utils.get_contact_lane_section_from_junction_connection_road(
-                connection_road, contact_point
+        contact_lane_sections = (
+            utils.get_incoming_and_connection_contacting_lane_sections(
+                connection, road_id_map
             )
         )
+
+        if contact_lane_sections is None:
+            continue
 
         lane_links = utils.get_lane_links_from_connection(connection)
 
@@ -193,7 +185,7 @@ def _check_appearing_successor_junction(
                 continue
 
             connection_lane = utils.get_lane_from_lane_section(
-                connection_lane_section, to_lane_id
+                contact_lane_sections.connection, to_lane_id
             )
 
             connection_lane_start_width = utils.evaluate_lane_width(
@@ -205,7 +197,7 @@ def _check_appearing_successor_junction(
                 and abs(connection_lane_start_width) < FLOAT_COMPARISON_THRESHOLD
             ):
                 current_road_lane = utils.get_lane_from_lane_section(
-                    current_road_last_lane_section, from_lane_id
+                    contact_lane_sections.incoming, from_lane_id
                 )
                 if current_road_lane is None:
                     continue
