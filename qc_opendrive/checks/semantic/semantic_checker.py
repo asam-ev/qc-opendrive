@@ -20,6 +20,7 @@ from qc_opendrive.checks.semantic import (
     junctions_connection_one_connection_element,
     junctions_connection_one_link_to_incoming,
     junctions_connection_start_along_linkage,
+    junctions_connection_end_opposite_linkage,
 )
 
 
@@ -49,6 +50,7 @@ def run_checks(config: Configuration, result: Result) -> None:
         junctions_connection_one_connection_element.check_rule,
         junctions_connection_one_link_to_incoming.check_rule,
         junctions_connection_start_along_linkage.check_rule,
+        junctions_connection_end_opposite_linkage.check_rule,
     ]
 
     checker_data = models.CheckerData(

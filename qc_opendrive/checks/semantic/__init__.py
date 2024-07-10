@@ -22,3 +22,6 @@ from . import road_lane_link_new_lane_appear as road_lane_link_new_lane_appear
 from . import (
     junctions_connection_start_along_linkage as junctions_connection_start_along_linkage,
 )
+from . import (
+    junctions_connection_end_opposite_linkage as junctions_connection_end_opposite_linkage,
+)
