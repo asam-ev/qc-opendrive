@@ -11,7 +11,7 @@ from qc_opendrive.checks.performance import performance_constants
 RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.7.0"
 
 
-def _check_road_elevations(
+def _check_road_superelevations(
     checker_data: models.CheckerData, road: etree._ElementTree, rule_uid: str
 ) -> None:
     superelevation_list = utils.get_road_superelevations(road)
@@ -22,7 +22,7 @@ def _check_road_elevations(
             issue_id = checker_data.result.register_issue(
                 checker_bundle_name=constants.BUNDLE_NAME,
                 checker_id=performance_constants.CHECKER_ID,
-                description=f"Redudant elevation declaration.",
+                description=f"Redudant superelevation declaration.",
                 level=IssueSeverity.WARNING,
                 rule_uid=rule_uid,
             )
@@ -36,7 +36,7 @@ def _check_road_elevations(
             )
 
 
-def _check_road_superelevations(
+def _check_road_elevations(
     checker_data: models.CheckerData, road: etree._ElementTree, rule_uid: str
 ) -> None:
     elevation_list = utils.get_road_elevations(road)
@@ -47,7 +47,7 @@ def _check_road_superelevations(
             issue_id = checker_data.result.register_issue(
                 checker_bundle_name=constants.BUNDLE_NAME,
                 checker_id=performance_constants.CHECKER_ID,
-                description=f"Redudant superelevation declaration.",
+                description=f"Redudant elevation declaration.",
                 level=IssueSeverity.WARNING,
                 rule_uid=rule_uid,
             )
