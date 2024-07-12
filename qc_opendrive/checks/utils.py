@@ -559,16 +559,17 @@ def evaluate_lane_width(lane: etree._Element, ds: float) -> Union[None, float]:
     if len(lane_width_poly3_list) == 0:
         return None
 
-    current_s_offset = lane_width_poly3_list[0].s_offset
-    index = 0
-    while ds >= current_s_offset and index < len(lane_width_poly3_list):
-        current_s_offset = lane_width_poly3_list[index].s_offset
-        index += 1
+    count = 0
+    for lane_width_poly in lane_width_poly3_list:
+        if lane_width_poly.s_offset > ds:
+            break
+        else:
+            count += 1
 
-    if index > 0:
-        index -= 1
-    else:
+    if count == 0:
         return None
+
+    index = count - 1
 
     poly3_to_eval = poly3_to_polynomial(lane_width_poly3_list[index].poly3)
 
