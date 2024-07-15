@@ -905,3 +905,16 @@ def get_road_plan_view_geometry_list(
 
 def is_line_geometry(geometry: etree._ElementTree) -> bool:
     return geometry.find("line") is not None
+
+
+def get_lane_direction(lane: etree._Element) -> Union[models.LaneDirection, None]:
+    lane_direction = lane.get("direction")
+
+    if lane_direction is None:
+        # By the standard definition, if no direction is provided the standard
+        # based on the traffic hand should be used.
+        return models.LaneDirection.STANDARD
+    elif lane_direction in iter(models.LaneDirection):
+        return models.LaneDirection(lane_direction)
+    else:
+        return None
