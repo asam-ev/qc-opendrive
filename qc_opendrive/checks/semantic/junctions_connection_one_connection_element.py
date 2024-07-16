@@ -27,6 +27,9 @@ def _check_junctions_connection_one_connection_element(
                 connection
             )
 
+            if connecting_road_id is None:
+                continue
+
             if connecting_road_id not in connecting_road_id_connections_map:
                 connecting_road_id_connections_map[connecting_road_id] = []
 
