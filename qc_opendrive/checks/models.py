@@ -77,3 +77,9 @@ class LaneSectionWithLength:
 class OffsetPoly3:
     poly3: Poly3
     s_offset: float
+
+
+class LaneDirection(str, Enum):
+    STANDARD = "standard"
+    REVERSED = "reversed"
+    BOTH = "both"

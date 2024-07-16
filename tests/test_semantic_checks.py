@@ -435,6 +435,37 @@ def test_junctions_connection_one_link_to_incoming(
             "invalid",
             1,
             [
+                "/OpenDRIVE/junction/connection[5]/laneLink",
+            ],
+        ),
+    ],
+)
+def test_junctions_connection_one_link_to_incoming_bidirectional(
+    target_file: str,
+    issue_count: int,
+    issue_xpath: List[str],
+    monkeypatch,
+) -> None:
+    base_path = "tests/data/junctions_connection_one_link_to_incoming/"
+    target_file_name = f"Ex_Bidirectional_Junction_{target_file}.xodr"
+    rule_uid = "asam.net:xodr:1.8.0:junctions.connection.one_link_to_incoming"
+    issue_severity = IssueSeverity.ERROR
+
+    target_file_path = os.path.join(base_path, target_file_name)
+    create_test_config(target_file_path)
+    launch_main(monkeypatch)
+    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
+    cleanup_files()
+
+
+@pytest.mark.parametrize(
+    "target_file,issue_count,issue_xpath",
+    [
+        ("valid", 0, []),
+        (
+            "invalid",
+            1,
+            [
                 "/OpenDRIVE/road/lanes/laneSection[2]/right/lane[2]",
             ],
         ),
