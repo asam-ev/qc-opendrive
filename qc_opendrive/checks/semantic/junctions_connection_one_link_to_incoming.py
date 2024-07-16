@@ -463,6 +463,9 @@ def _check_junctions_connection_one_link_to_incoming(
                 connection
             )
 
+            if incoming_road_id is None or connecting_road_id is None:
+                continue
+
             if incoming_road_id not in connection_road_link_map:
                 connection_road_link_map[incoming_road_id] = {}
             if connecting_road_id not in connection_road_link_map[incoming_road_id]:
