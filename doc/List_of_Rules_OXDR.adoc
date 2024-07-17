@@ -1,5 +1,11 @@
 *Rules*
 
+not implemented  :red_circle: 
+
+implemented :green_circle: 
+
+in progress :yellow_circle: 
+
 * {rule_uid1} Only `<speed>` and `<priority>` elements shall be used within the `<defaultRegulations>` element. :red_circle:
 * {rule_uid2} The `<signalRegulations>` element shall be used for signs that result in different driving rules.  :green_circle:
 * {rule_uid3} <signalRegulations>` elements shall not be used as a signal catalogue. :yellow_circle:
