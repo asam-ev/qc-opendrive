@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<OpenDRIVE>
+	<header revMajor="1" revMinor="5" name="created by Trian3DBuilder v8.0.0 r13880 - road_linkage_is_junction_needed_invalid" version="1.00" date="03.06.2024 06:54:46" north="3.50860889879943e+01" south="-1.49139110120057e+01" east="3.67393953684785e+01" west="-1.32606046315215e+01" vendor="TrianGraphics GmbH">
+		<userData code="settings" value=" UseVecIDsFromTrian3D" />
+	</header>
+	<road name="A" length="10.0" id="1" junction="-1">
+        <link>
+            <successor elementType="road" elementId="2" contactPoint="start" />
+        </link>
+		<planView>
+			<geometry s="0.0" x="0.0" y="-10.0" hdg="1.57080404096212e+00" length="10.0">
+				<line />
+			</geometry>
+		</planView>
+		<elevationProfile>
+			<elevation s="0.00000000000000e+00" a="0.00000000000000e+00" b="0.00000000000000e+00" c="0.00000000000000e+00" d="0.00000000000000e+00" />
+		</elevationProfile>
+		<lateralProfile />
+		<lanes>
+			<laneSection s="0.00000000000000e+00">
+				<left>
+					<lane id="1" type="driving">
+						<width sOffset="0.00000000000000e+00" a="3.00000000000000e+00" b="0.00000000000000e+00" c="0.00000000000000e+00" d="0.00000000000000e+00" />
+						<roadMark sOffset="0.00000000000000e+00" type="none" weight="standard" color="standard" material="standard" laneChange="both" />
+						<speed sOffset="0.00000000000000e+00" max="1.38888888888889e+01" unit="m/s" />
+						<height sOffset="0.00000000000000e+00" inner="0.00000000000000e+00" outer="0.00000000000000e+00" />
+					</lane>
+				</left>
+				<center>
+					<lane id="0" type="driving">
+						<roadMark sOffset="0.00000000000000e+00" type="none" weight="standard" color="standard" material="standard" laneChange="both" />
+					</lane>
+				</center>
+				<right>
+					<lane id="-1" type="driving">
+						<width sOffset="0.00000000000000e+00" a="3.00000000000000e+00" b="0.00000000000000e+00" c="0.00000000000000e+00" d="0.00000000000000e+00" />
+						<roadMark sOffset="0.00000000000000e+00" type="none" weight="standard" color="standard" material="standard" laneChange="both" />
+						<speed sOffset="0.00000000000000e+00" max="1.38888888888889e+01" unit="m/s" />
+						<height sOffset="0.00000000000000e+00" inner="0.00000000000000e+00" outer="0.00000000000000e+00" />
+					</lane>
+				</right>
+			</laneSection>
+		</lanes>
+	</road>
+	<road name="B" length="10.0" id="2" junction="-1">
+        <link>
+            <predecessor elementType="road" elementId="1" contactPoint="end" />
+        </link>
+		<planView>
+			<geometry s="0.0" x="0.0" y="0.0" hdg="2.03436958379066e+00" length="10.0">
+				<line />
+			</geometry>
+		</planView>
+		<elevationProfile>
+			<elevation s="0.00000000000000e+00" a="0.00000000000000e+00" b="0.00000000000000e+00" c="0.00000000000000e+00" d="0.00000000000000e+00" />
+		</elevationProfile>
+		<lateralProfile />
+		<lanes>
+			<laneSection s="0.00000000000000e+00">
+				<left>
+					<lane id="1" type="driving">
+						<width sOffset="0.00000000000000e+00" a="3.00000000000000e+00" b="0.00000000000000e+00" c="0.00000000000000e+00" d="0.00000000000000e+00" />
+						<roadMark sOffset="0.00000000000000e+00" type="none" weight="standard" color="standard" material="standard" laneChange="both" />
+						<speed sOffset="0.00000000000000e+00" max="1.38888888888889e+01" unit="m/s" />
+						<height sOffset="0.00000000000000e+00" inner="0.00000000000000e+00" outer="0.00000000000000e+00" />
+					</lane>
+				</left>
+				<center>
+					<lane id="0" type="driving">
+						<roadMark sOffset="0.00000000000000e+00" type="none" weight="standard" color="standard" material="standard" laneChange="both" />
+					</lane>
+				</center>
+			</laneSection>
+		</lanes>
+	</road>
+	<road name="C" length="10.0" id="3" junction="-1">
+        <link>
+             <!-- issue: connection not defined in road A to road C -> use junction instead -->
+             <predecessor elementType="road" elementId="1" contactPoint="end" />
+        </link>
+		<planView>
+			<geometry s="0.0" x="0.0" y="0.0" hdg="1.10713287685699e+00" length="10.0">
+				<line />
+			</geometry>
+		</planView>
+		<elevationProfile>
+			<elevation s="0.00000000000000e+00" a="0.00000000000000e+00" b="0.00000000000000e+00" c="0.00000000000000e+00" d="0.00000000000000e+00" />
+		</elevationProfile>
+		<lateralProfile />
+		<lanes>
+			<laneSection s="0.00000000000000e+00">
+				<center>
+					<lane id="0" type="driving">
+						<roadMark sOffset="0.00000000000000e+00" type="none" weight="standard" color="standard" material="standard" laneChange="both" />
+					</lane>
+				</center>
+				<right>
+					<lane id="-1" type="driving">
+						<width sOffset="0.00000000000000e+00" a="3.00000000000000e+00" b="0.00000000000000e+00" c="0.00000000000000e+00" d="0.00000000000000e+00" />
+						<roadMark sOffset="0.00000000000000e+00" type="none" weight="standard" color="standard" material="standard" laneChange="both" />
+						<speed sOffset="0.00000000000000e+00" max="1.38888888888889e+01" unit="m/s" />
+						<height sOffset="0.00000000000000e+00" inner="0.00000000000000e+00" outer="0.00000000000000e+00" />
+					</lane>
+				</right>
+			</laneSection>
+		</lanes>
+	</road>
+</OpenDRIVE>

@@ -1,0 +1,47 @@
+<?xml version="1.0" standalone="yes"?>
+<OpenDRIVE>
+  <header revMajor="1" revMinor="8" name="" version="1.00" date="Tue Jan 24 12:23:01 2023" north="0.0000000000000000e+00" south="0.0000000000000000e+00" east="0.0000000000000000e+00" west="0.0000000000000000e+00">
+    </header>
+  <road name="A" length="100.0" id="1" junction="-1" rule="RHT">
+    <planView>
+      <geometry s="0.0000000000000000e+00" x="0.0" y="0.0" hdg="0.0" length="100.0">
+        <line/>
+      </geometry>
+    </planView>
+    <elevationProfile>
+      <elevation s="0.0000000000000000e+00" a="0.0000000000000000e+00" b="0.0000000000000000e+00" c="0.0000000000000000e+00" d="0.0000000000000000e+00"/>
+    </elevationProfile>
+    <lanes>
+      <laneSection s="0.0000000000000000e+00">
+        <left>
+          <lane id="3" type="driving" level="false">
+            <link>
+            </link>
+            <width sOffset="0.0000000000000000e+00" a="3.7000000000000002e+00" b="0.0000000000000000e+00" c="0.0000000000000000e+00" d="0.0000000000000000e+00"/>
+            <access sOffset="0.0000000000000000e+00" rule="allow">
+                <restriction type="bus"/>
+                <restriction type="bicycle"/>
+            </access>
+            <access sOffset="50.0000000000000000e+00" rule="deny">
+                <restriction type="truck"/>
+            </access>
+          </lane>
+          <lane id="2" type="driving" level="false">
+            <link>
+            </link>
+            <width sOffset="0.0000000000000000e+00" a="3.7000000000000002e+00" b="0.0000000000000000e+00" c="0.0000000000000000e+00" d="0.0000000000000000e+00"/>
+          </lane>
+          <lane id="1" type="driving" level="false">
+            <link>
+            </link>
+            <width sOffset="0.0000000000000000e+00" a="3.7000000000000002e+00" b="0.0000000000000000e+00" c="0.0000000000000000e+00" d="0.0000000000000000e+00"/>
+          </lane>
+        </left>
+        <center>
+          <lane id="0" >
+          </lane>
+        </center>
+      </laneSection>
+    </lanes>
+  </road>
+</OpenDRIVE>

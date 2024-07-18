@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<OpenDRIVE>
+	<header revMajor="1" revMinor="8" name="" version="1.00" date="26.06.2024 15:35:45" north="3.50860889879943e+01" south="-1.49139110120057e+01" east="3.67393953684785e+01" west="-1.32606046315215e+01" vendor="">
+		<userData code="settings" value="" />
+	</header>
+
+	<road name="A" length="10.0" id="1" junction="-1">
+        <link>
+            <successor elementType="junction" elementId="100"/>
+        </link>
+		<planView>
+			<geometry s="0.00000000000000e+00" x="1.68150305747988e-04" y="-9.99989698737860e+00" hdg="1.57080404096212e+00" length="10.0">
+				<line />
+			</geometry>
+		</planView>
+		<elevationProfile>
+			<elevation s="0.00000000000000e+00" a="0.00000000000000e+00" b="0.00000000000000e+00" c="0.00000000000000e+00" d="0.00000000000000e+00" />
+		</elevationProfile>
+		<lateralProfile />
+		<lanes>
+			<laneSection s="0.00000000000000e+00">
+				<left>
+					<lane id="2" type="driving">
+						<width sOffset="0.00000000000000e+00" a="3.00000000000000e+00" b="0.00000000000000e+00" c="0.00000000000000e+00" d="0.00000000000000e+00" />
+						<roadMark sOffset="0.00000000000000e+00" type="none" weight="standard" color="standard" material="standard" laneChange="both" />
+						<speed sOffset="0.00000000000000e+00" max="1.38888888888889e+01" unit="m/s" />
+						<height sOffset="0.00000000000000e+00" inner="0.00000000000000e+00" outer="0.00000000000000e+00" />
+					</lane>
+					<lane id="1" type="driving">
+						<width sOffset="0.00000000000000e+00" a="3.00000000000000e+00" b="0.00000000000000e+00" c="0.00000000000000e+00" d="0.00000000000000e+00" />
+						<roadMark sOffset="0.00000000000000e+00" type="none" weight="standard" color="standard" material="standard" laneChange="both" />
+						<speed sOffset="0.00000000000000e+00" max="1.38888888888889e+01" unit="m/s" />
+						<height sOffset="0.00000000000000e+00" inner="0.00000000000000e+00" outer="0.00000000000000e+00" />
+					</lane>
+				</left>
+				<center>
+					<lane id="0" type="driving">
+						<roadMark sOffset="0.00000000000000e+00" type="none" weight="standard" color="standard" material="standard" laneChange="both" />
+					</lane>
+				</center>
+				<right>
+					<lane id="-1" type="driving">
+						<width sOffset="0.00000000000000e+00" a="3.00000000000000e+00" b="0.00000000000000e+00" c="0.00000000000000e+00" d="0.00000000000000e+00" />
+						<roadMark sOffset="0.00000000000000e+00" type="none" weight="standard" color="standard" material="standard" laneChange="both" />
+						<speed sOffset="0.00000000000000e+00" max="1.38888888888889e+01" unit="m/s" />
+						<height sOffset="0.00000000000000e+00" inner="0.00000000000000e+00" outer="0.00000000000000e+00" />
+					</lane>
+				</right>
+			</laneSection>
+		</lanes>
+	</road>
+    <road name="B" length="10.0" id="2" junction="100">
+		<link>
+            <predecessor elementType="road" elementId="1" contactPoint="end" />
+			<successor elementType="road" elementId="3" contactPoint="start"/>
+		</link>
+		<planView>
+			<geometry s="0.00000000000000e+00" x="0.03" y="-0.05" hdg="1.57080404096212e+00" length="10.0">
+				<line />
+			</geometry>
+		</planView>
+		<elevationProfile>
+			<elevation s="0.00000000000000e+00" a="0.00000000000000e+00" b="0.00000000000000e+00" c="0.00000000000000e+00" d="0.00000000000000e+00" />
+		</elevationProfile>
+		<lateralProfile />
+		<lanes>
+			<laneSection s="0.00000000000000e+00">
+				<left>
+                    <lane id="2" type="driving">
+						<width sOffset="0.00000000000000e+00" a="3.00000000000000e+00" b="-0.30000000000000e+00" c="0.00000000000000e+00" d="0.00000000000000e+00" />
+						<roadMark sOffset="0.00000000000000e+00" type="none" weight="standard" color="standard" material="standard" laneChange="both" />
+						<speed sOffset="0.00000000000000e+00" max="1.38888888888889e+01" unit="m/s" />
+						<height sOffset="0.00000000000000e+00" inner="0.00000000000000e+00" outer="0.00000000000000e+00" />
+					</lane>
+					<lane id="1" type="driving">
+						<width sOffset="0.00000000000000e+00" a="3.00000000000000e+00" b="0.00000000000000e+00" c="0.00000000000000e+00" d="0.00000000000000e+00" />
+						<roadMark sOffset="0.00000000000000e+00" type="none" weight="standard" color="standard" material="standard" laneChange="both" />
+						<speed sOffset="0.00000000000000e+00" max="1.38888888888889e+01" unit="m/s" />
+						<height sOffset="0.00000000000000e+00" inner="0.00000000000000e+00" outer="0.00000000000000e+00" />
+					</lane>
+				</left>
+				<center>
+					<lane id="0" type="driving">
+						<roadMark sOffset="0.00000000000000e+00" type="none" weight="standard" color="standard" material="standard" laneChange="both" />
+					</lane>
+				</center>
+				<right>
+					<lane id="-1" type="driving">
+						<width sOffset="0.00000000000000e+00" a="3.00000000000000e+00" b="0.00000000000000e+00" c="0.00000000000000e+00" d="0.00000000000000e+00" />
+						<roadMark sOffset="0.00000000000000e+00" type="none" weight="standard" color="standard" material="standard" laneChange="both" />
+						<speed sOffset="0.00000000000000e+00" max="1.38888888888889e+01" unit="m/s" />
+						<height sOffset="0.00000000000000e+00" inner="0.00000000000000e+00" outer="0.00000000000000e+00" />
+					</lane>
+                    <lane id="-2" type="driving">
+						<width sOffset="0.00000000000000e+00" a="0.00000000000000e+00" b="0.30000000000000e+00" c="0.00000000000000e+00" d="0.00000000000000e+00" />
+						<roadMark sOffset="0.00000000000000e+00" type="none" weight="standard" color="standard" material="standard" laneChange="both" />
+						<speed sOffset="0.00000000000000e+00" max="1.38888888888889e+01" unit="m/s" />
+						<height sOffset="0.00000000000000e+00" inner="0.00000000000000e+00" outer="0.00000000000000e+00" />
+					</lane>
+				</right>
+			</laneSection>
+		</lanes>
+	</road>
+    <road name="C" length="10.0" id="3" junction="-1">
+        <link>
+            <predecessor elementType="junction" elementId="100"/>
+        </link>
+		<planView>
+			<geometry s="0.00000000000000e+00" x="0.05" y="9.95" hdg="1.57080404096212e+00" length="10.0">
+				<line />
+			</geometry>
+		</planView>
+		<elevationProfile>
+			<elevation s="0.00000000000000e+00" a="0.00000000000000e+00" b="0.00000000000000e+00" c="0.00000000000000e+00" d="0.00000000000000e+00" />
+		</elevationProfile>
+		<lateralProfile />
+		<lanes>
+			<laneSection s="0.00000000000000e+00">
+				<left>
+					<lane id="1" type="driving">
+						<width sOffset="0.00000000000000e+00" a="3.00000000000000e+00" b="0.00000000000000e+00" c="0.00000000000000e+00" d="0.00000000000000e+00" />
+						<roadMark sOffset="0.00000000000000e+00" type="none" weight="standard" color="standard" material="standard" laneChange="both" />
+						<speed sOffset="0.00000000000000e+00" max="1.38888888888889e+01" unit="m/s" />
+						<height sOffset="0.00000000000000e+00" inner="0.00000000000000e+00" outer="0.00000000000000e+00" />
+					</lane>
+				</left>
+				<center>
+					<lane id="0" type="driving">
+						<roadMark sOffset="0.00000000000000e+00" type="none" weight="standard" color="standard" material="standard" laneChange="both" />
+					</lane>
+				</center>
+				<right>
+					<lane id="-1" type="driving">
+						<width sOffset="0.00000000000000e+00" a="3.00000000000000e+00" b="0.00000000000000e+00" c="0.00000000000000e+00" d="0.00000000000000e+00" />
+						<roadMark sOffset="0.00000000000000e+00" type="none" weight="standard" color="standard" material="standard" laneChange="both" />
+						<speed sOffset="0.00000000000000e+00" max="1.38888888888889e+01" unit="m/s" />
+						<height sOffset="0.00000000000000e+00" inner="0.00000000000000e+00" outer="0.00000000000000e+00" />
+					</lane>
+					<lane id="-2" type="driving">
+						<width sOffset="0.00000000000000e+00" a="3.00000000000000e+00" b="0.00000000000000e+00" c="0.00000000000000e+00" d="0.00000000000000e+00" />
+						<roadMark sOffset="0.00000000000000e+00" type="none" weight="standard" color="standard" material="standard" laneChange="both" />
+						<speed sOffset="0.00000000000000e+00" max="1.38888888888889e+01" unit="m/s" />
+						<height sOffset="0.00000000000000e+00" inner="0.00000000000000e+00" outer="0.00000000000000e+00" />
+					</lane>
+				</right>
+			</laneSection>
+		</lanes>
+	</road>
+
+    <junction name="primary" id="100" type="default">
+        <connection id="0" incomingRoad="1" connectingRoad="2" contactPoint="start">
+            <laneLink from="-1" to="-1" />
+        </connection>
+        <connection id="1" incomingRoad="3" connectingRoad="2" contactPoint="end">
+            <laneLink from="1" to="1" />
+        </connection>
+    </junction>
+
+</OpenDRIVE>
