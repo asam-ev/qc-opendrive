@@ -56,7 +56,7 @@ def check_rule(checker_data: models.CheckerData) -> None:
         geometries = utils.get_road_plan_view_geometry_list(road)
 
         # We can only calculate gaps with 2 or more geometries
-        if len(geometry) < 2:
+        if len(geometries) < 2:
             continue
 
         # we are assuming geometries is a sorted list on s position
@@ -85,7 +85,7 @@ def check_rule(checker_data: models.CheckerData) -> None:
                 if gap_size > TOLERANCE_THRESHOLD:
                     issue_id = checker_data.result.register_issue(
                         checker_bundle_name=constants.BUNDLE_NAME,
-                        checker_id=geometry_constants.CHECKER_ID,
+                        checker_id=smoothness_constants.CHECKER_ID,
                         description=f"The transition between geometry elements should be defined with no gaps.",
                         level=IssueSeverity.ERROR,
                         rule_uid=rule_uid,
@@ -93,7 +93,7 @@ def check_rule(checker_data: models.CheckerData) -> None:
 
                     checker_data.result.add_xml_location(
                         checker_bundle_name=constants.BUNDLE_NAME,
-                        checker_id=geometry_constants.CHECKER_ID,
+                        checker_id=smoothness_constants.CHECKER_ID,
                         issue_id=issue_id,
                         xpath=checker_data.input_file_xml_root.getpath(
                             previous_geometry
@@ -102,7 +102,7 @@ def check_rule(checker_data: models.CheckerData) -> None:
                     )
                     checker_data.result.add_xml_location(
                         checker_bundle_name=constants.BUNDLE_NAME,
-                        checker_id=geometry_constants.CHECKER_ID,
+                        checker_id=smoothness_constants.CHECKER_ID,
                         issue_id=issue_id,
                         xpath=checker_data.input_file_xml_root.getpath(geometry),
                         description=f"Second geometry element",
