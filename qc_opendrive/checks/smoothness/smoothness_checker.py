@@ -44,7 +44,7 @@ def run_checks(config: Configuration, result: Result) -> None:
         rule(checker_data=checker_data)
 
     logging.info(
-        f"Issues found - {result.get_checker_issue_count(checker_bundle_name=constants.BUNDLE_NAME, checker_id=geometry_constants.CHECKER_ID)}"
+        f"Issues found - {result.get_checker_issue_count(checker_bundle_name=constants.BUNDLE_NAME, checker_id=smoothness_constants.CHECKER_ID)}"
     )
 
     # TODO: Add logic to deal with error or to skip it
