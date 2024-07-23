@@ -2,7 +2,7 @@ import logging
 
 import numpy as np
 
-from scipy.special import fresnel
+import pyclothoids as pc
 from dataclasses import dataclass
 
 from qc_baselib import IssueSeverity
@@ -32,9 +32,12 @@ def calculate_arc_point(
     heading: float,
     curvature: float,
 ) -> float:
+    # curvature = 1/radius so inverting we get the below formula
     radius = 1 / curvature
+    # parametric equation for circle arc centered at (0,0)
     arc_x = radius * np.cos(s / radius)
     arc_y = radius * np.sin(s / radius)
+    # Point 2D for the arc centered at (x,y) rotated by heading
     return Point2D(
         x=(x * np.cos(heading)) + arc_x,
         y=(y * np.sin(heading)) + arc_y,
@@ -48,8 +51,14 @@ def calculate_spiral_point(
     heading: float,
     curv_start: float,
     curv_end: float,
+    length: float,
 ) -> float:
-    return s
+
+    kd = (curv_start - curv_end) / length
+
+    clothoid = pc.Clothoid.StandardParams(x, y, heading, curv_start, kd, length)
+
+    return Point2D(x=clothoid.X(s), y=clothoid.Y(s))
 
 
 def check_rule(checker_data: models.CheckerData) -> None:
