@@ -997,7 +997,7 @@ def calculate_arc_point(
 
     # center based on radius and current heading
     xc = x - radius * np.sin(heading)
-    yc = y - radius * np.cos(heading)
+    yc = y + radius * np.cos(heading)
 
     # final angle for the arc of length s
     theta_f = heading + curvature * s
@@ -1029,3 +1029,18 @@ def calculate_spiral_point(
     clothoid = pc.Clothoid.StandardParams(x, y, heading, curv_start, kd, length)
 
     return models.Point2D(x=clothoid.X(s), y=clothoid.Y(s))
+
+
+def calculate_spiral_point_heading(
+    s: float,
+    x: float,
+    y: float,
+    heading: float,
+    curv_start: float,
+    curv_end: float,
+    length: float,
+) -> float:
+    kd = (curv_end - curv_start) / length
+    clothoid = pc.Clothoid.StandardParams(x, y, heading, curv_start, kd, length)
+
+    return clothoid.Theta(s)
