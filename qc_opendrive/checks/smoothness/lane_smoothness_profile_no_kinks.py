@@ -15,7 +15,7 @@ from qc_opendrive.checks.geometry import geometry_constants
 
 RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.7.0"
 # This parameter needs to be configurable later
-TOLERANCE_THRESHOLD = 0.001  # meters
+TOLERANCE_THRESHOLD = 0.001  # radians
 
 
 def check_rule(checker_data: models.CheckerData) -> None:
@@ -33,7 +33,7 @@ def check_rule(checker_data: models.CheckerData) -> None:
     More info at
         -
     """
-    logging.info("Executing lane_smoothness.profile_no_gaps check.")
+    logging.info("Executing lane_smoothness.profile_no_kinks check.")
 
     rule_uid = checker_data.result.register_rule(
         checker_bundle_name=constants.BUNDLE_NAME,
@@ -41,7 +41,7 @@ def check_rule(checker_data: models.CheckerData) -> None:
         emanating_entity="asam.net",
         standard="xodr",
         definition_setting=RULE_INITIAL_SUPPORTED_SCHEMA_VERSION,
-        rule_full_name="lane_smoothness.profile_no_gaps",
+        rule_full_name="lane_smoothness.profile_no_kinks",
     )
 
     if checker_data.schema_version < RULE_INITIAL_SUPPORTED_SCHEMA_VERSION:
@@ -60,7 +60,7 @@ def check_rule(checker_data: models.CheckerData) -> None:
             continue
 
         # we are assuming geometries is a sorted list on s position
-        previous_end_point: Union[models.Point2D, None] = None
+        previous_heading: Union[models.Point2D, None] = None
         previous_geometry: Union[etree._Element, None] = None
         for geometry in geometries:
 
@@ -73,20 +73,17 @@ def check_rule(checker_data: models.CheckerData) -> None:
                 # what to do when intermediate geometry cannot be calculated?
                 # assume we restart the gap search?
                 # raise an issue?
-                previous_end_point = None
+                previous_heading = None
                 previous_geometry = None
                 continue
 
-            if previous_end_point is not None:
-                gap_size = distance.euclidean(
-                    (previous_end_point.x, previous_end_point.y),
-                    (x, y),
-                )
-                if gap_size > TOLERANCE_THRESHOLD:
+            if previous_heading is not None:
+                kink_size = abs(heading - previous_heading)
+                if kink_size > TOLERANCE_THRESHOLD:
                     issue_id = checker_data.result.register_issue(
                         checker_bundle_name=constants.BUNDLE_NAME,
                         checker_id=geometry_constants.CHECKER_ID,
-                        description=f"The transition between geometry elements should be defined with no gaps.",
+                        description=f"The transition between geometry elements should be defined with no kinks.",
                         level=IssueSeverity.ERROR,
                         rule_uid=rule_uid,
                     )
@@ -112,20 +109,18 @@ def check_rule(checker_data: models.CheckerData) -> None:
             arc = utils.get_geometry_arc(geometry)
             spiral = utils.get_geometry_spiral(geometry)
 
-            end_point = None
+            end_heading = None
             if line is not None:
-                end_point = utils.calculate_line_point(
-                    s=length, x=x, y=y, heading=heading
-                )
+                end_heading = heading
             elif arc is not None:
                 arc_curvature = utils.get_curvature_from_arc(arc)
 
                 if arc_curvature is None:
-                    previous_end_point = None
+                    previous_heading = None
                     previous_geometry = None
                     continue
 
-                end_point = utils.calculate_arc_point(
+                end_heading = utils.calculate_arc_heading(
                     s=length, x=x, y=y, heading=heading, curvature=arc_curvature
                 )
             elif spiral is not None:
@@ -133,11 +128,11 @@ def check_rule(checker_data: models.CheckerData) -> None:
                 curv_end = utils.get_curv_end_from_spiral(spiral)
 
                 if curv_end is None or curv_start is None:
-                    previous_end_point = None
+                    previous_heading = None
                     previous_geometry = None
                     continue
 
-                end_point = utils.calculate_spiral_point(
+                end_heading = utils.calculate_spiral_point_heading(
                     s=length,
                     x=x,
                     y=y,
@@ -147,9 +142,9 @@ def check_rule(checker_data: models.CheckerData) -> None:
                     length=length,
                 )
             else:
-                previous_end_point = None
+                previous_heading = None
                 previous_geometry = None
                 continue
 
-            previous_end_point = end_point
+            previous_heading = end_heading
             previous_geometry = geometry

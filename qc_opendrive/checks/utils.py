@@ -1012,6 +1012,29 @@ def calculate_arc_point(
     )
 
 
+def calculate_arc_heading(
+    s: float,
+    x: float,
+    y: float,
+    heading: float,
+    curvature: float,
+) -> float:
+    # curvature = 1/radius so inverting we get the below formula
+    radius = 1 / curvature
+
+    # final angle for the arc of length s
+    theta_f = heading + curvature * s
+
+    # calculate the derivatives
+    dx_dtheta = -radius * np.sin(theta_f)
+    dy_dtheta = radius * np.cos(theta_f)
+
+    # calculate the heading angle
+    heading = np.arctan2(dy_dtheta, dx_dtheta)
+
+    return heading
+
+
 def calculate_spiral_point(
     s: float,
     x: float,
