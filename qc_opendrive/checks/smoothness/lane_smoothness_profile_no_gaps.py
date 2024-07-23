@@ -133,7 +133,7 @@ def check_rule(checker_data: models.CheckerData) -> None:
             end_point = None
             if line is not None:
                 end_point = utils.calculate_line_point(
-                    s=length, s0=s0, x0=x0, y0=y0, heading=heading
+                    s=s0 + length, s0=s0, x0=x0, y0=y0, heading=heading
                 )
 
                 if road_id == 77:
@@ -157,7 +157,7 @@ def check_rule(checker_data: models.CheckerData) -> None:
                     continue
 
                 end_point = utils.calculate_arc_point(
-                    s=length,
+                    s=s0 + length,
                     s0=s0,
                     x0=x0,
                     y0=y0,
@@ -192,7 +192,7 @@ def check_rule(checker_data: models.CheckerData) -> None:
                     continue
 
                 end_point = utils.calculate_spiral_point(
-                    s=length,
+                    s=s0 + length,
                     s0=s0,
                     x0=x0,
                     y0=y0,
