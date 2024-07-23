@@ -11,7 +11,7 @@ from qc_baselib import IssueSeverity
 
 from qc_opendrive import constants
 from qc_opendrive.checks import utils, models
-from qc_opendrive.checks.geometry import geometry_constants
+from qc_opendrive.checks.smoothness import smoothness_constants
 
 RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.7.0"
 # This parameter needs to be configurable later
@@ -37,7 +37,7 @@ def check_rule(checker_data: models.CheckerData) -> None:
 
     rule_uid = checker_data.result.register_rule(
         checker_bundle_name=constants.BUNDLE_NAME,
-        checker_id=geometry_constants.CHECKER_ID,
+        checker_id=smoothness_constants.CHECKER_ID,
         emanating_entity="asam.net",
         standard="xodr",
         definition_setting=RULE_INITIAL_SUPPORTED_SCHEMA_VERSION,
