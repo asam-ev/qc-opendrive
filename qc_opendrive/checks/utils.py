@@ -1,9 +1,10 @@
-from typing import List, Dict, Union
-
-from lxml import etree
-from qc_opendrive.checks import models
 import numpy as np
+import pyclothoids as pc
 
+from typing import List, Dict, Union
+from lxml import etree
+
+from qc_opendrive.checks import models
 
 EPSILON = 1.0e-6
 
@@ -918,3 +919,113 @@ def get_lane_direction(lane: etree._Element) -> Union[models.LaneDirection, None
         return models.LaneDirection(lane_direction)
     else:
         return None
+
+
+def get_geometry_arc(geometry: etree._Element) -> Union[etree._Element, None]:
+    return geometry.find("arc")
+
+
+def get_geometry_line(geometry: etree._Element) -> Union[etree._Element, None]:
+    return geometry.find("line")
+
+
+def get_geometry_spiral(geometry: etree._Element) -> Union[etree._Element, None]:
+    return geometry.find("spiral")
+
+
+def get_x_from_geometry(geometry: etree._ElementTree) -> Union[None, float]:
+    x = geometry.get("x")
+    if x is None:
+        return None
+    else:
+        return float(x)
+
+
+def get_y_from_geometry(geometry: etree._ElementTree) -> Union[None, float]:
+    y = geometry.get("y")
+    if y is None:
+        return None
+    else:
+        return float(y)
+
+
+def get_heading_from_geometry(geometry: etree._ElementTree) -> Union[None, float]:
+    heading = geometry.get("hdg")
+    if heading is None:
+        return None
+    else:
+        return float(heading)
+
+
+def get_curvature_from_arc(arc: etree._Element) -> Union[None, float]:
+    curvature = arc.get("curvature")
+    if curvature is None:
+        return None
+    else:
+        return float(curvature)
+
+
+def get_curv_start_from_spiral(spiral: etree._Element) -> Union[None, float]:
+    curvStart = spiral.get("curvStart")
+    if curvStart is None:
+        return None
+    else:
+        return float(curvStart)
+
+
+def get_curv_end_from_spiral(spiral: etree._Element) -> Union[None, float]:
+    curvEnd = spiral.get("curvEnd")
+    if curvEnd is None:
+        return None
+    else:
+        return float(curvEnd)
+
+
+def calculate_line_point(s: float, x: float, y: float, heading: float) -> float:
+    return models.Point2D(x=x + s * np.cos(heading), y=y + s * np.sin(heading))
+
+
+def calculate_arc_point(
+    s: float,
+    x: float,
+    y: float,
+    heading: float,
+    curvature: float,
+) -> float:
+    # curvature = 1/radius so inverting we get the below formula
+    radius = 1 / curvature
+
+    # center based on radius and current heading
+    xc = x - radius * np.sin(heading)
+    yc = y - radius * np.cos(heading)
+
+    # final angle for the arc of length s
+    theta_f = heading + curvature * s
+
+    # parametric equation for circle arc centered at (xc,yc)
+    arc_x = xc + radius * np.cos(theta_f)
+    arc_y = yc + radius * np.sin(theta_f)
+
+    return models.Point2D(
+        x=arc_x,
+        y=arc_y,
+    )
+
+
+def calculate_spiral_point(
+    s: float,
+    x: float,
+    y: float,
+    heading: float,
+    curv_start: float,
+    curv_end: float,
+    length: float,
+) -> float:
+    # curvature rate given by
+    # A = (K1 - K0) / L
+    kd = (curv_end - curv_start) / length
+
+    # Standard clothoid for the given parameters
+    clothoid = pc.Clothoid.StandardParams(x, y, heading, curv_start, kd, length)
+
+    return models.Point2D(x=clothoid.X(s), y=clothoid.Y(s))
