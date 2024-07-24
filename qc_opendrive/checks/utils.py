@@ -918,3 +918,12 @@ def get_lane_direction(lane: etree._Element) -> Union[models.LaneDirection, None
         return models.LaneDirection(lane_direction)
     else:
         return None
+
+
+def get_heading_from_geometry(geometry: etree._ElementTree) -> Union[None, float]:
+    heading = geometry.get("hdg")
+
+    if heading is None:
+        return None
+
+    return float(heading)
