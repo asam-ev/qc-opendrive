@@ -13,17 +13,6 @@ RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.7.0"
 TOLERANCE_THRESHOLD = 0.001
 
 
-def _integrand(t, du, dv) -> float:
-    """
-    The equation to calculate the length of a parametric curve represented by u(t), v(t)
-    is integral of sqrt(du^2 + dv^2) dt.
-
-    More info at
-        - https://en.wikipedia.org/wiki/Arc_length
-    """
-    return np.sqrt(du(t) ** 2 + dv(t) ** 2)
-
-
 def check_rule(checker_data: models.CheckerData) -> None:
     """
     Rule ID: asam.net:xodr:1.7.0:road.geometry.param_poly3.length_match
@@ -42,7 +31,7 @@ def check_rule(checker_data: models.CheckerData) -> None:
     More info at
         - https://github.com/asam-ev/qc-opendrive/issues/5
     """
-    logging.info("Executing road.lane.link.lanes_across_lane_sections check.")
+    logging.info("Executing road.geometry.param_poly3.length_match check.")
 
     rule_uid = checker_data.result.register_rule(
         checker_bundle_name=constants.BUNDLE_NAME,
@@ -76,7 +65,9 @@ def check_rule(checker_data: models.CheckerData) -> None:
         du = u.deriv()
         dv = v.deriv()
 
-        integral_length, estimated_error = quad(_integrand, 0.0, 1.0, args=(du, dv))
+        integral_length, estimated_error = quad(
+            utils.arc_length_integrand, 0.0, 1.0, args=(du, dv)
+        )
 
         if np.abs(integral_length - length) > TOLERANCE_THRESHOLD:
             issue_id = checker_data.result.register_issue(
