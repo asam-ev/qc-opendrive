@@ -65,19 +65,11 @@ def check_rule(checker_data: models.CheckerData) -> None:
         du = u.deriv()
         dv = v.deriv()
 
-        # print(u(0), v(0))
-        # print(u(length), v(length))
-        # p_space = np.linspace(0, length, 100)
-
-        # for p in p_space:
-        #     print(p, u(p), v(p))
-
         integral_length, estimated_error = quad(
             utils.arc_length_integrand, 0.0, length, args=(du, dv)
         )
 
         if np.abs(integral_length - length) > TOLERANCE_THRESHOLD:
-            print(f"diff len = {np.abs(integral_length - length)}")
             issue_id = checker_data.result.register_issue(
                 checker_bundle_name=constants.BUNDLE_NAME,
                 checker_id=geometry_constants.CHECKER_ID,
