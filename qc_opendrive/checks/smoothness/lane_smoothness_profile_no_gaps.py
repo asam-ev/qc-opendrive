@@ -14,9 +14,6 @@ from qc_opendrive.checks import utils, models
 from qc_opendrive.checks.smoothness import smoothness_constants
 
 
-import matplotlib.pyplot as plt
-
-
 RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.7.0"
 # This parameter needs to be configurable later
 TOLERANCE_THRESHOLD = 0.1  # meters
@@ -56,8 +53,6 @@ def check_rule(checker_data: models.CheckerData) -> None:
 
     road_id_map = utils.get_road_id_map(checker_data.input_file_xml_root)
 
-    plt.figure(figsize=(10, 6))
-
     for road_id, road in road_id_map.items():
         geometries = utils.get_road_plan_view_geometry_list(road)
 
@@ -89,8 +84,6 @@ def check_rule(checker_data: models.CheckerData) -> None:
                 previous_end_point = None
                 previous_geometry = None
                 continue
-            if road_id == 77:
-                print(x0, y0, s0, heading, length)
 
             if previous_end_point is not None:
                 gap_size = distance.euclidean(
@@ -98,9 +91,6 @@ def check_rule(checker_data: models.CheckerData) -> None:
                     (x0, y0),
                 )
                 if gap_size > TOLERANCE_THRESHOLD:
-                    # print(
-                    #     f"gs = {gap_size}\npp = {(previous_end_point.x, previous_end_point.y)}\n p={(x0, y0)}"
-                    # )
                     issue_id = checker_data.result.register_issue(
                         checker_bundle_name=constants.BUNDLE_NAME,
                         checker_id=smoothness_constants.CHECKER_ID,
@@ -126,6 +116,7 @@ def check_rule(checker_data: models.CheckerData) -> None:
                         description=f"Second geometry element",
                     )
 
+            # missing param poly3
             line = utils.get_geometry_line(geometry)
             arc = utils.get_geometry_arc(geometry)
             spiral = utils.get_geometry_spiral(geometry)
@@ -135,19 +126,6 @@ def check_rule(checker_data: models.CheckerData) -> None:
                 end_point = utils.calculate_line_point(
                     s=s0 + length, s0=s0, x0=x0, y0=y0, heading=heading
                 )
-
-                if road_id == 77:
-                    x_out = []
-                    y_out = []
-                    s = np.linspace(s0, s0 + length, 100)
-                    for si in s:
-                        p = utils.calculate_line_point(
-                            s=si, s0=s0, x0=x0, y0=y0, heading=heading
-                        )
-                        # print(si, p)
-                        x_out.append(p.x)
-                        y_out.append(p.y)
-                    plt.plot(x_out, y_out, label="line(x,y)")
             elif arc is not None:
                 arc_curvature = utils.get_curvature_from_arc(arc)
 
@@ -164,23 +142,6 @@ def check_rule(checker_data: models.CheckerData) -> None:
                     heading=heading,
                     curvature=arc_curvature,
                 )
-
-                if road_id == 77:
-                    x_out = []
-                    y_out = []
-                    s = np.linspace(s0, s0 + length, 100)
-                    for si in s:
-                        p = utils.calculate_arc_point(
-                            s=si,
-                            s0=s0,
-                            x0=x0,
-                            y0=y0,
-                            heading=heading,
-                            curvature=arc_curvature,
-                        )
-                        x_out.append(p.x)
-                        y_out.append(p.y)
-                    plt.plot(x_out, y_out, label="arc(x,y)")
 
             elif spiral is not None:
                 curv_start = utils.get_curv_start_from_spiral(spiral)
@@ -201,26 +162,6 @@ def check_rule(checker_data: models.CheckerData) -> None:
                     curv_end=curv_end,
                     length=length,
                 )
-
-                if road_id == 77:
-                    x_out = []
-                    y_out = []
-                    s = np.linspace(s0, s0 + length, 100)
-                    for si in s:
-                        p = utils.calculate_spiral_point(
-                            s=si,
-                            s0=s0,
-                            x0=x0,
-                            y0=y0,
-                            heading=heading,
-                            curv_start=curv_start,
-                            curv_end=curv_end,
-                            length=length,
-                        )
-                        x_out.append(p.x)
-                        y_out.append(p.y)
-                    plt.plot(x_out, y_out, label="spiral(x,y)")
-
             else:
                 previous_end_point = None
                 previous_geometry = None
@@ -228,12 +169,3 @@ def check_rule(checker_data: models.CheckerData) -> None:
 
             previous_end_point = end_point
             previous_geometry = geometry
-
-    plt.title("Multiple Curves Plot")
-    plt.xlabel("x")
-    plt.ylabel("y")
-
-    # Add a legend
-    plt.legend()
-
-    plt.savefig("road_77_curves.png")

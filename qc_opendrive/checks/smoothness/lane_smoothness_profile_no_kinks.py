@@ -15,7 +15,7 @@ from qc_opendrive.checks.smoothness import smoothness_constants
 
 RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.7.0"
 # This parameter needs to be configurable later
-TOLERANCE_THRESHOLD = 0.001  # radians
+TOLERANCE_THRESHOLD = 0.1  # radians
 
 
 def check_rule(checker_data: models.CheckerData) -> None:
@@ -64,12 +64,19 @@ def check_rule(checker_data: models.CheckerData) -> None:
         previous_geometry: Union[etree._Element, None] = None
         for geometry in geometries:
 
-            x = utils.get_x_from_geometry(geometry)
-            y = utils.get_y_from_geometry(geometry)
+            x0 = utils.get_x_from_geometry(geometry)
+            y0 = utils.get_y_from_geometry(geometry)
+            s0 = utils.get_s_from_geometry(geometry)
             heading = utils.get_heading_from_geometry(geometry)
             length = utils.get_length_from_geometry(geometry)
 
-            if x is None or y is None or heading is None or length is None:
+            if (
+                x0 is None
+                or y0 is None
+                or heading is None
+                or length is None
+                or s0 is None
+            ):
                 # what to do when intermediate geometry cannot be calculated?
                 # assume we restart the gap search?
                 # raise an issue?
@@ -121,7 +128,12 @@ def check_rule(checker_data: models.CheckerData) -> None:
                     continue
 
                 end_heading = utils.calculate_arc_heading(
-                    s=length, x=x, y=y, heading=heading, curvature=arc_curvature
+                    s=s0 + length,
+                    s0=s0,
+                    x0=x0,
+                    y0=y0,
+                    heading=heading,
+                    curvature=arc_curvature,
                 )
             elif spiral is not None:
                 curv_start = utils.get_curv_start_from_spiral(spiral)
@@ -133,9 +145,10 @@ def check_rule(checker_data: models.CheckerData) -> None:
                     continue
 
                 end_heading = utils.calculate_spiral_point_heading(
-                    s=length,
-                    x=x,
-                    y=y,
+                    s=s0 + length,
+                    s0=s0,
+                    x0=x0,
+                    y0=y0,
                     heading=heading,
                     curv_start=curv_start,
                     curv_end=curv_end,

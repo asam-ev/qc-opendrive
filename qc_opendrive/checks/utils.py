@@ -949,6 +949,14 @@ def get_y_from_geometry(geometry: etree._ElementTree) -> Union[None, float]:
         return float(y)
 
 
+def get_s_from_geometry(geometry: etree._ElementTree) -> Union[None, float]:
+    s = geometry.get("s")
+    if s is None:
+        return None
+    else:
+        return float(s)
+
+
 def get_heading_from_geometry(geometry: etree._ElementTree) -> Union[None, float]:
     heading = geometry.get("hdg")
     if heading is None:
@@ -981,30 +989,29 @@ def get_curv_end_from_spiral(spiral: etree._Element) -> Union[None, float]:
         return float(curvEnd)
 
 
-def calculate_line_point(s: float, x: float, y: float, heading: float) -> float:
-    return models.Point2D(x=x + s * np.cos(heading), y=y + s * np.sin(heading))
+def calculate_line_point(
+    s: float, s0: float, x0: float, y0: float, heading: float
+) -> models.Point2D:
+    return models.Point2D(
+        x=x0 + ((s - s0) * np.cos(heading)),
+        y=y0 + ((s - s0) * np.sin(heading)),
+    )
 
 
 def calculate_arc_point(
     s: float,
-    x: float,
-    y: float,
+    s0: float,
+    x0: float,
+    y0: float,
     heading: float,
     curvature: float,
-) -> float:
+) -> models.Point2D:
     # curvature = 1/radius so inverting we get the below formula
     radius = 1 / curvature
 
-    # center based on radius and current heading
-    xc = x - radius * np.sin(heading)
-    yc = y + radius * np.cos(heading)
-
-    # final angle for the arc of length s
-    theta_f = heading + curvature * s
-
-    # parametric equation for circle arc centered at (xc,yc)
-    arc_x = xc + radius * np.cos(theta_f)
-    arc_y = yc + radius * np.sin(theta_f)
+    theta_f = (s - s0) * curvature - np.pi / 2
+    arc_x = x0 + radius * (np.cos(theta_f + heading) - np.sin(heading))
+    arc_y = y0 + radius * (np.sin(theta_f + heading) + np.cos(heading))
 
     return models.Point2D(
         x=arc_x,
@@ -1014,56 +1021,47 @@ def calculate_arc_point(
 
 def calculate_arc_heading(
     s: float,
-    x: float,
-    y: float,
+    s0: float,
+    x0: float,
+    y0: float,
     heading: float,
     curvature: float,
 ) -> float:
-    # curvature = 1/radius so inverting we get the below formula
-    radius = 1 / curvature
-
-    # final angle for the arc of length s
-    theta_f = heading + curvature * s
-
-    # calculate the derivatives
-    dx_dtheta = -radius * np.sin(theta_f)
-    dy_dtheta = radius * np.cos(theta_f)
-
-    # calculate the heading angle
-    heading = np.arctan2(dy_dtheta, dx_dtheta)
-
+    heading = heading + curvature * (s - s0)
     return heading
 
 
 def calculate_spiral_point(
     s: float,
-    x: float,
-    y: float,
+    s0: float,
+    x0: float,
+    y0: float,
     heading: float,
     curv_start: float,
     curv_end: float,
     length: float,
-) -> float:
+) -> models.Point2D:
     # curvature rate given by
     # A = (K1 - K0) / L
     kd = (curv_end - curv_start) / length
 
     # Standard clothoid for the given parameters
-    clothoid = pc.Clothoid.StandardParams(x, y, heading, curv_start, kd, length)
+    clothoid = pc.Clothoid.StandardParams(x0, y0, heading, curv_start, kd, length)
 
-    return models.Point2D(x=clothoid.X(s), y=clothoid.Y(s))
+    return models.Point2D(x=clothoid.X(s - s0), y=clothoid.Y(s - s0))
 
 
 def calculate_spiral_point_heading(
     s: float,
-    x: float,
-    y: float,
+    s0: float,
+    x0: float,
+    y0: float,
     heading: float,
     curv_start: float,
     curv_end: float,
     length: float,
 ) -> float:
     kd = (curv_end - curv_start) / length
-    clothoid = pc.Clothoid.StandardParams(x, y, heading, curv_start, kd, length)
+    clothoid = pc.Clothoid.StandardParams(x0, y0, heading, curv_start, kd, length)
 
-    return clothoid.Theta(s)
+    return clothoid.Theta(s - s0)
