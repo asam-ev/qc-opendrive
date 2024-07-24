@@ -74,7 +74,7 @@ def check_rule(checker_data: models.CheckerData) -> None:
                 checker_bundle_name=constants.BUNDLE_NAME,
                 checker_id=geometry_constants.CHECKER_ID,
                 description=f"Length does not match the actual curve length. The estimated absolute error from numerical integration is {estimated_error}",
-                level=IssueSeverity.WARNING,
+                level=IssueSeverity.ERROR,
                 rule_uid=rule_uid,
             )
 
