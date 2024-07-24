@@ -9,6 +9,7 @@ from qc_opendrive.checks import utils, models
 from qc_opendrive.checks.performance import performance_constants
 
 RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.7.0"
+FLOAT_TOLERANCE = 1e-6
 
 
 def _check_road_superelevations(
@@ -94,8 +95,16 @@ def _check_road_plan_view(
         current_geometry = geometry_list[i]
         next_geometry = geometry_list[i + 1]
 
-        if utils.is_line_geometry(current_geometry) and utils.is_line_geometry(
-            next_geometry
+        current_geometry_heading = utils.get_heading_from_geometry(current_geometry)
+        next_geometry_heading = utils.get_heading_from_geometry(next_geometry)
+
+        if current_geometry_heading is None or next_geometry_heading is None:
+            continue
+
+        if (
+            utils.is_line_geometry(current_geometry)
+            and utils.is_line_geometry(next_geometry)
+            and abs(current_geometry_heading - next_geometry_heading) < FLOAT_TOLERANCE
         ):
             issue_id = checker_data.result.register_issue(
                 checker_bundle_name=constants.BUNDLE_NAME,
