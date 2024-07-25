@@ -1,7 +1,7 @@
 from typing import List, Dict, Union
 
 from lxml import etree
-from qc_opendrive.checks import models
+from qc_opendrive.base import models
 import numpy as np
 
 
