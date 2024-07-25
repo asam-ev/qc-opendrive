@@ -9,9 +9,9 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.10"
 qc-baselib = {git = "https://github.com/asam-ev/qc-baselib-py.git", rev = "develop"}
-lxml = "5.2.2"
-numpy = "2.0.0"
-scipy = "1.14.0"
+lxml = "^5.2.2"
+numpy = "^2.0.0"
+scipy = "^1.14.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.2"
