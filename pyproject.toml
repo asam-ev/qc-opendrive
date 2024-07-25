@@ -17,9 +17,6 @@ scipy = "1.14.0"
 pytest = "^8.2.2"
 black = "^24.4.2"
 
-[tool.poetry.scripts]
-main = "main.log_revision:start"
-
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
