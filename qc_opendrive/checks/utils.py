@@ -416,6 +416,50 @@ def poly3_to_polynomial(poly3: models.Poly3) -> np.polynomial.Polynomial:
     return np.polynomial.Polynomial([poly3.a, poly3.b, poly3.c, poly3.d])
 
 
+def get_arclen_param_poly3_from_geometry(
+    geometry: etree._ElementTree,
+) -> Union[None, models.ParamPoly3]:
+    param_poly3 = None
+
+    for element in geometry.iter("paramPoly3"):
+        param_poly3 = element
+
+    if param_poly3 is None:
+        return None
+
+    if param_poly3.get("pRange") != models.ParamPoly3Range.ARC_LENGTH:
+        return None
+
+    return models.ParamPoly3(
+        u=models.Poly3(
+            a=float(param_poly3.get("aU")),
+            b=float(param_poly3.get("bU")),
+            c=float(param_poly3.get("cU")),
+            d=float(param_poly3.get("dU")),
+        ),
+        v=models.Poly3(
+            a=float(param_poly3.get("aV")),
+            b=float(param_poly3.get("bV")),
+            c=float(param_poly3.get("cV")),
+            d=float(param_poly3.get("dV")),
+        ),
+        range=models.ParamPoly3Range.ARC_LENGTH,
+    )
+
+
+def arc_length_integrand(
+    t: float, du: np.polynomial.Polynomial, dv: np.polynomial.Polynomial
+) -> float:
+    """
+    The equation to calculate the length of a parametric curve represented by u(t), v(t)
+    is integral of sqrt(du^2 + dv^2) dt.
+
+    More info at
+        - https://en.wikipedia.org/wiki/Arc_length
+    """
+    return np.sqrt(du(t) ** 2 + dv(t) ** 2)
+
+
 def get_contact_lane_section_from_linked_road(
     linkage: etree._ElementTree, road_id_map: Dict[int, etree._ElementTree]
 ) -> Union[None, models.ContactingLaneSection]:
