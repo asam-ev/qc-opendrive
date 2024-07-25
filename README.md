@@ -37,6 +37,13 @@ pip install qc_opendrive @ git+https://github.com/asam-ev/qc-opendrive@main
 **Note**: To install from different sources, you can replace `@main` with
 your desired target. For example, `develop` branch as `@develop`.
 
+After installation, the usage is similar to the one expressed in the
+[`main.py`](./main.py) script:
+
+```Python3
+from qc_opendrive.base import utils, models
+```
+
 ## Usage
 
 The checker can be used as a Python script:
