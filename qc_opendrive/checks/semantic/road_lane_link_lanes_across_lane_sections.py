@@ -7,7 +7,7 @@ from lxml import etree
 from qc_baselib import IssueSeverity
 
 from qc_opendrive import constants
-from qc_opendrive.checks import utils, models
+from qc_opendrive.base import models, utils
 from qc_opendrive.checks.semantic import semantic_constants
 
 RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.4.0"
