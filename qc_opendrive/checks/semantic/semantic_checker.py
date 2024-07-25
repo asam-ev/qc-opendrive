@@ -5,7 +5,7 @@ from lxml import etree
 from qc_baselib import Configuration, Result, StatusType
 
 from qc_opendrive import constants
-from qc_opendrive.checks import utils, models
+from qc_opendrive.base import models, utils
 
 from qc_opendrive.checks.semantic import (
     semantic_constants,
