@@ -25,6 +25,18 @@ This will install the needed dependencies to your local Python.
 poetry install
 ```
 
+## Installation as library
+
+It is possible to install this project as a Python module to be used in third
+party implementations. For that, run:
+
+```
+pip install qc_opendrive @ git+https://github.com/asam-ev/qc-opendrive@main
+```
+
+**Note**: To install from different sources, you can replace `@main` with
+your desired target. For example, `develop` branch as `@develop`.
+
 ## Usage
 
 The checker can be used as a Python script:
