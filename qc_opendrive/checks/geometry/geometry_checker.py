@@ -12,6 +12,7 @@ from qc_opendrive.checks.geometry import (
     road_geometry_param_poly3_length_match,
     road_lane_border_overlap_with_inner_lanes,
     road_geometry_parampoly3_arclength_range,
+    road_geometry_parampoly3_normalized_range,
 )
 
 
@@ -33,6 +34,7 @@ def run_checks(config: Configuration, result: Result) -> None:
         road_geometry_param_poly3_length_match.check_rule,
         road_lane_border_overlap_with_inner_lanes.check_rule,
         road_geometry_parampoly3_arclength_range.check_rule,
+        road_geometry_parampoly3_normalized_range.check_rule,
     ]
 
     checker_data = models.CheckerData(
