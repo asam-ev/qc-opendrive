@@ -1,7 +1,7 @@
 from typing import List, Dict, Union
 
 from lxml import etree
-from qc_opendrive.checks import models
+from qc_opendrive.base import models
 import numpy as np
 
 
@@ -416,6 +416,50 @@ def poly3_to_polynomial(poly3: models.Poly3) -> np.polynomial.Polynomial:
     return np.polynomial.Polynomial([poly3.a, poly3.b, poly3.c, poly3.d])
 
 
+def get_arclen_param_poly3_from_geometry(
+    geometry: etree._ElementTree,
+) -> Union[None, models.ParamPoly3]:
+    param_poly3 = None
+
+    for element in geometry.iter("paramPoly3"):
+        param_poly3 = element
+
+    if param_poly3 is None:
+        return None
+
+    if param_poly3.get("pRange") != models.ParamPoly3Range.ARC_LENGTH:
+        return None
+
+    return models.ParamPoly3(
+        u=models.Poly3(
+            a=float(param_poly3.get("aU")),
+            b=float(param_poly3.get("bU")),
+            c=float(param_poly3.get("cU")),
+            d=float(param_poly3.get("dU")),
+        ),
+        v=models.Poly3(
+            a=float(param_poly3.get("aV")),
+            b=float(param_poly3.get("bV")),
+            c=float(param_poly3.get("cV")),
+            d=float(param_poly3.get("dV")),
+        ),
+        range=models.ParamPoly3Range.ARC_LENGTH,
+    )
+
+
+def arc_length_integrand(
+    t: float, du: np.polynomial.Polynomial, dv: np.polynomial.Polynomial
+) -> float:
+    """
+    The equation to calculate the length of a parametric curve represented by u(t), v(t)
+    is integral of sqrt(du^2 + dv^2) dt.
+
+    More info at
+        - https://en.wikipedia.org/wiki/Arc_length
+    """
+    return np.sqrt(du(t) ** 2 + dv(t) ** 2)
+
+
 def get_contact_lane_section_from_linked_road(
     linkage: etree._ElementTree, road_id_map: Dict[int, etree._ElementTree]
 ) -> Union[None, models.ContactingLaneSection]:
@@ -559,16 +603,17 @@ def evaluate_lane_width(lane: etree._Element, ds: float) -> Union[None, float]:
     if len(lane_width_poly3_list) == 0:
         return None
 
-    current_s_offset = lane_width_poly3_list[0].s_offset
-    index = 0
-    while ds >= current_s_offset and index < len(lane_width_poly3_list):
-        current_s_offset = lane_width_poly3_list[index].s_offset
-        index += 1
+    count = 0
+    for lane_width_poly in lane_width_poly3_list:
+        if lane_width_poly.s_offset > ds:
+            break
+        else:
+            count += 1
 
-    if index > 0:
-        index -= 1
-    else:
+    if count == 0:
         return None
+
+    index = count - 1
 
     poly3_to_eval = poly3_to_polynomial(lane_width_poly3_list[index].poly3)
 
@@ -904,3 +949,25 @@ def get_road_plan_view_geometry_list(
 
 def is_line_geometry(geometry: etree._ElementTree) -> bool:
     return geometry.find("line") is not None
+
+
+def get_lane_direction(lane: etree._Element) -> Union[models.LaneDirection, None]:
+    lane_direction = lane.get("direction")
+
+    if lane_direction is None:
+        # By the standard definition, if no direction is provided the standard
+        # based on the traffic hand should be used.
+        return models.LaneDirection.STANDARD
+    elif lane_direction in iter(models.LaneDirection):
+        return models.LaneDirection(lane_direction)
+    else:
+        return None
+
+
+def get_heading_from_geometry(geometry: etree._ElementTree) -> Union[None, float]:
+    heading = geometry.get("hdg")
+
+    if heading is None:
+        return None
+
+    return float(heading)

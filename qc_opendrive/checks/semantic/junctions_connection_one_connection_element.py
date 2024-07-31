@@ -6,7 +6,7 @@ from lxml import etree
 from qc_baselib import IssueSeverity
 
 from qc_opendrive import constants
-from qc_opendrive.checks import utils, models
+from qc_opendrive.base import models, utils
 from qc_opendrive.checks.semantic import semantic_constants
 
 RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.7.0"
@@ -26,6 +26,9 @@ def _check_junctions_connection_one_connection_element(
             connecting_road_id = utils.get_connecting_road_id_from_connection(
                 connection
             )
+
+            if connecting_road_id is None:
+                continue
 
             if connecting_road_id not in connecting_road_id_connections_map:
                 connecting_road_id_connections_map[connecting_road_id] = []

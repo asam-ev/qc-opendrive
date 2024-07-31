@@ -1,6 +1,6 @@
 import pytest
 from lxml import etree
-from qc_opendrive.checks import utils
+from qc_opendrive.base import utils
 
 
 def test_get_road_id_map() -> None:

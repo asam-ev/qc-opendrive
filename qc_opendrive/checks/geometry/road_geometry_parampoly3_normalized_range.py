@@ -15,23 +15,23 @@ TOLERANCE_THRESHOLD = 0.001
 
 def check_rule(checker_data: models.CheckerData) -> None:
     """
-    Rule ID: asam.net:xodr:1.7.0:road.geometry.param_poly3.length_match
+    Rule ID: asam.net:xodr:1.7.0:road.geometry.parampoly3.normalized_range
 
-    Description: The actual curve length, as determined by numerical integration over
-        the parameter range, should match '@Length'.
+    Description: If @prange="normalized", p shall be chosen in [0, 1].
 
-    Severity: WARNING
+    Severity: ERROR
 
     Version range: [1.7.0, )
 
     Remark:
         This check currently relies on the accuracy of the scipy.integrate.quad method.
-        The estimated absolute error of the numerical integration is included in the issue description message.
+        The estimated absolute error of the numerical integration is included in
+        the issue description message.
 
     More info at
-        - https://github.com/asam-ev/qc-opendrive/issues/5
+        - https://github.com/asam-ev/qc-opendrive/issues/39
     """
-    logging.info("Executing road.geometry.param_poly3.length_match check.")
+    logging.info("Executing road.geometry.parampoly3.normalized_range check.")
 
     rule_uid = checker_data.result.register_rule(
         checker_bundle_name=constants.BUNDLE_NAME,
@@ -39,7 +39,7 @@ def check_rule(checker_data: models.CheckerData) -> None:
         emanating_entity="asam.net",
         standard="xodr",
         definition_setting=RULE_INITIAL_SUPPORTED_SCHEMA_VERSION,
-        rule_full_name="road.geometry.param_poly3.length_match",
+        rule_full_name="road.geometry.parampoly3.normalized_range",
     )
 
     if checker_data.schema_version < RULE_INITIAL_SUPPORTED_SCHEMA_VERSION:
@@ -66,7 +66,7 @@ def check_rule(checker_data: models.CheckerData) -> None:
         dv = v.deriv()
 
         integral_length, estimated_error = quad(
-            utils.arc_length_integrand, 0.0, 1.0, args=(du, dv)
+            utils.arc_length_integrand, 0.0, 1, args=(du, dv)
         )
 
         if np.abs(integral_length - length) > TOLERANCE_THRESHOLD:
@@ -74,7 +74,7 @@ def check_rule(checker_data: models.CheckerData) -> None:
                 checker_bundle_name=constants.BUNDLE_NAME,
                 checker_id=geometry_constants.CHECKER_ID,
                 description=f"Length does not match the actual curve length. The estimated absolute error from numerical integration is {estimated_error}",
-                level=IssueSeverity.WARNING,
+                level=IssueSeverity.ERROR,
                 rule_uid=rule_uid,
             )
 

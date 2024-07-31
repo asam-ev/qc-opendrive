@@ -6,7 +6,7 @@ from lxml import etree
 from qc_baselib import IssueSeverity
 
 from qc_opendrive import constants
-from qc_opendrive.checks import utils, models
+from qc_opendrive.base import models, utils
 from qc_opendrive.checks.semantic import semantic_constants
 
 RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.8.0"
@@ -35,7 +35,9 @@ def _raise_lane_linkage_issue(
 
 def _is_rht_lane_direction_valid(
     to_lane_id: int,
+    to_lane_direction: models.LaneDirection,
     from_lane_id: int,
+    from_lane_direction: models.LaneDirection,
     predecessor_road_linkage: models.RoadLinkage,
     successor_road_linkage: models.RoadLinkage,
     connection_contact_point: models.ContactPoint,
@@ -44,33 +46,74 @@ def _is_rht_lane_direction_valid(
     This function checks if RHT incoming traffic to a RHT junction has
     valid driving direction lane linkage.
     """
+    # If both lanes have bidirectional traffic the lane can have incoming traffic
+    # to the junction.
+    if (
+        to_lane_direction == models.LaneDirection.BOTH
+        and from_lane_direction == models.LaneDirection.BOTH
+    ):
+        return True
+
+    # If lanes have reversed driving direction than the expected is that they
+    # should be treated exactly as the opposite side (identified by the id signal)
+    if from_lane_direction == models.LaneDirection.REVERSED:
+        from_lane_id *= -1
+
+    if to_lane_direction == models.LaneDirection.REVERSED:
+        to_lane_id *= -1
+
     if (
         connection_contact_point == models.ContactPoint.START
         and predecessor_road_linkage is not None
     ):
-        if predecessor_road_linkage.contact_point == models.ContactPoint.END:
-            if from_lane_id > 0 or to_lane_id > 0:
+        if from_lane_direction == models.LaneDirection.BOTH:
+            # If incoming lane has both directions it can only have the
+            # connection to the incoming direction on junction.
+            # For this case to RIGHT lanes.
+            if to_lane_id < 0:
                 return False
-        elif predecessor_road_linkage.contact_point == models.ContactPoint.START:
-            if from_lane_id < 0 or to_lane_id > 0:
-                return False
+        else:
+            if predecessor_road_linkage.contact_point == models.ContactPoint.END:
+                if to_lane_direction == models.LaneDirection.BOTH and from_lane_id > 0:
+                    return False
+                elif from_lane_id > 0 or to_lane_id > 0:
+                    return False
+            elif predecessor_road_linkage.contact_point == models.ContactPoint.START:
+                if to_lane_direction == models.LaneDirection.BOTH and from_lane_id < 0:
+                    return False
+                elif from_lane_id < 0 or to_lane_id > 0:
+                    return False
 
     if (
         connection_contact_point == models.ContactPoint.END
         and successor_road_linkage is not None
     ):
-        if successor_road_linkage.contact_point == models.ContactPoint.END:
-            if from_lane_id > 0 or to_lane_id < 0:
+        if from_lane_direction == models.LaneDirection.BOTH:
+            # If incoming lane has both directions it can only have the
+            # connection to the incoming direction on junction.
+            # For this case to LEFT lanes.
+            if to_lane_id > 0:
                 return False
-        elif successor_road_linkage.contact_point == models.ContactPoint.START:
-            if from_lane_id < 0 or to_lane_id < 0:
-                return False
+        else:
+            if successor_road_linkage.contact_point == models.ContactPoint.END:
+                if to_lane_direction == models.LaneDirection.BOTH and from_lane_id > 0:
+                    return False
+                elif from_lane_id > 0 or to_lane_id < 0:
+                    return False
+            elif successor_road_linkage.contact_point == models.ContactPoint.START:
+                if to_lane_direction == models.LaneDirection.BOTH and from_lane_id < 0:
+                    return False
+                elif from_lane_id < 0 or to_lane_id < 0:
+                    return False
+
     return True
 
 
 def _is_lht_lane_direction_valid(
     to_lane_id: int,
+    to_lane_direction: models.LaneDirection,
     from_lane_id: int,
+    from_lane_direction: models.LaneDirection,
     predecessor_road_linkage: models.RoadLinkage,
     successor_road_linkage: models.RoadLinkage,
     connection_contact_point: models.ContactPoint,
@@ -79,26 +122,62 @@ def _is_lht_lane_direction_valid(
     This function checks if LHT incoming traffic to a LHT junction has
     valid driving direction lane linkage.
     """
+    # If both lanes have bidirectional traffic the lane can have incoming traffic
+    # to the junction.
+    if (
+        to_lane_direction == models.LaneDirection.BOTH
+        and from_lane_direction == models.LaneDirection.BOTH
+    ):
+        return True
+
+    # If lanes have reversed driving direction than the expected is that they
+    # should be treated exactly as the opposite side (identified by the id signal)
+    if from_lane_direction == models.LaneDirection.REVERSED:
+        from_lane_id *= -1
+
+    if to_lane_direction == models.LaneDirection.REVERSED:
+        to_lane_id *= -1
+
     if (
         connection_contact_point == models.ContactPoint.START
         and predecessor_road_linkage is not None
     ):
-        if predecessor_road_linkage.contact_point == models.ContactPoint.END:
-            if from_lane_id < 0 or to_lane_id < 0:
+        if from_lane_direction == models.LaneDirection.BOTH:
+            # If incoming lane has both directions it can only have the
+            # connection to the incoming direction on junction.
+            # For this case to LEFT lanes.
+            if to_lane_id < 0:
+                return False
+        elif predecessor_road_linkage.contact_point == models.ContactPoint.END:
+            if to_lane_direction == models.LaneDirection.BOTH and from_lane_id < 0:
+                return False
+            elif from_lane_id < 0 or to_lane_id < 0:
                 return False
         elif predecessor_road_linkage.contact_point == models.ContactPoint.START:
-            if from_lane_id > 0 or to_lane_id < 0:
+            if to_lane_direction == models.LaneDirection.BOTH and from_lane_id > 0:
+                return False
+            elif from_lane_id > 0 or to_lane_id < 0:
                 return False
 
     if (
         connection_contact_point == models.ContactPoint.END
         and successor_road_linkage is not None
     ):
-        if successor_road_linkage.contact_point == models.ContactPoint.END:
-            if from_lane_id < 0 or to_lane_id > 0:
+        if from_lane_direction == models.LaneDirection.BOTH:
+            # If incoming lane has both directions it can only have the
+            # connection to the incoming direction on junction.
+            # For this case to RIGHT lanes.
+            if to_lane_id > 0:
+                return False
+        elif successor_road_linkage.contact_point == models.ContactPoint.END:
+            if to_lane_direction == models.LaneDirection.BOTH and from_lane_id < 0:
+                return False
+            elif from_lane_id < 0 or to_lane_id > 0:
                 return False
         elif successor_road_linkage.contact_point == models.ContactPoint.START:
-            if from_lane_id > 0 or to_lane_id > 0:
+            if to_lane_direction == models.LaneDirection.BOTH and from_lane_id > 0:
+                return False
+            elif from_lane_id > 0 or to_lane_id > 0:
                 return False
 
     return True
@@ -106,7 +185,9 @@ def _is_lht_lane_direction_valid(
 
 def _is_lht_to_rht_lane_direction_valid(
     to_lane_id: int,
+    to_lane_direction: models.LaneDirection,
     from_lane_id: int,
+    from_lane_direction: models.LaneDirection,
     predecessor_road_linkage: models.RoadLinkage,
     successor_road_linkage: models.RoadLinkage,
     connection_contact_point: models.ContactPoint,
@@ -115,26 +196,62 @@ def _is_lht_to_rht_lane_direction_valid(
     This function checks if LHT mixed incoming traffic to a RHT junction has
     valid driving direction lane linkage.
     """
+    # If both lanes have bidirectional traffic the lane can have incoming traffic
+    # to the junction.
+    if (
+        to_lane_direction == models.LaneDirection.BOTH
+        and from_lane_direction == models.LaneDirection.BOTH
+    ):
+        return True
+
+    # If lanes have reversed driving direction than the expected is that they
+    # should be treated exactly as the opposite side (identified by the id signal)
+    if from_lane_direction == models.LaneDirection.REVERSED:
+        from_lane_id *= -1
+
+    if to_lane_direction == models.LaneDirection.REVERSED:
+        to_lane_id *= -1
+
     if (
         connection_contact_point == models.ContactPoint.START
         and predecessor_road_linkage is not None
     ):
-        if predecessor_road_linkage.contact_point == models.ContactPoint.END:
-            if from_lane_id < 0 or to_lane_id > 0:
+        if from_lane_direction == models.LaneDirection.BOTH:
+            # If incoming lane has both directions it can only have the
+            # connection to the incoming direction on junction.
+            # For this case to RIGHT lanes.
+            if to_lane_id > 0:
+                return False
+        elif predecessor_road_linkage.contact_point == models.ContactPoint.END:
+            if to_lane_direction == models.LaneDirection.BOTH and from_lane_id < 0:
+                return False
+            elif from_lane_id < 0 or to_lane_id > 0:
                 return False
         elif predecessor_road_linkage.contact_point == models.ContactPoint.START:
-            if from_lane_id > 0 or to_lane_id > 0:
+            if to_lane_direction == models.LaneDirection.BOTH and from_lane_id > 0:
+                return False
+            elif from_lane_id > 0 or to_lane_id > 0:
                 return False
 
     if (
         connection_contact_point == models.ContactPoint.END
         and successor_road_linkage is not None
     ):
-        if successor_road_linkage.contact_point == models.ContactPoint.END:
-            if from_lane_id < 0 or to_lane_id < 0:
+        if from_lane_direction == models.LaneDirection.BOTH:
+            # If incoming lane has both directions it can only have the
+            # connection to the incoming direction on junction.
+            # For this case to LEFT lanes.
+            if to_lane_id < 0:
+                return False
+        elif successor_road_linkage.contact_point == models.ContactPoint.END:
+            if to_lane_direction == models.LaneDirection.BOTH and from_lane_id < 0:
+                return False
+            elif from_lane_id < 0 or to_lane_id < 0:
                 return False
         elif successor_road_linkage.contact_point == models.ContactPoint.START:
-            if from_lane_id > 0 or to_lane_id < 0:
+            if to_lane_direction == models.LaneDirection.BOTH and from_lane_id > 0:
+                return False
+            elif from_lane_id > 0 or to_lane_id < 0:
                 return False
 
     return True
@@ -142,7 +259,9 @@ def _is_lht_to_rht_lane_direction_valid(
 
 def _is_rht_to_lht_lane_direction_valid(
     to_lane_id: int,
+    to_lane_direction: models.LaneDirection,
     from_lane_id: int,
+    from_lane_direction: models.LaneDirection,
     predecessor_road_linkage: models.RoadLinkage,
     successor_road_linkage: models.RoadLinkage,
     connection_contact_point: models.ContactPoint,
@@ -151,26 +270,62 @@ def _is_rht_to_lht_lane_direction_valid(
     This function checks if RHT mixed incoming traffic to a LHT junction has
     valid driving direction lane linkage.
     """
+    # If both lanes have bidirectional traffic the lane can have incoming traffic
+    # to the junction.
+    if (
+        to_lane_direction == models.LaneDirection.BOTH
+        and from_lane_direction == models.LaneDirection.BOTH
+    ):
+        return True
+
+    # If lanes have reversed driving direction than the expected is that they
+    # should be treated exactly as the opposite side (identified by the id signal)
+    if from_lane_direction == models.LaneDirection.REVERSED:
+        from_lane_id *= -1
+
+    if to_lane_direction == models.LaneDirection.REVERSED:
+        to_lane_id *= -1
+
     if (
         connection_contact_point == models.ContactPoint.START
         and predecessor_road_linkage is not None
     ):
-        if predecessor_road_linkage.contact_point == models.ContactPoint.END:
-            if from_lane_id > 0 or to_lane_id < 0:
+        if from_lane_direction == models.LaneDirection.BOTH:
+            # If incoming lane has both directions it can only have the
+            # connection to the incoming direction on junction.
+            # For this case to LEFT lanes.
+            if to_lane_id < 0:
+                return False
+        elif predecessor_road_linkage.contact_point == models.ContactPoint.END:
+            if to_lane_direction == models.LaneDirection.BOTH and from_lane_id > 0:
+                return False
+            elif from_lane_id > 0 or to_lane_id < 0:
                 return False
         elif predecessor_road_linkage.contact_point == models.ContactPoint.START:
-            if from_lane_id < 0 or to_lane_id < 0:
+            if to_lane_direction == models.LaneDirection.BOTH and from_lane_id < 0:
+                return False
+            elif from_lane_id < 0 or to_lane_id < 0:
                 return False
 
     if (
         connection_contact_point == models.ContactPoint.END
         and successor_road_linkage is not None
     ):
-        if successor_road_linkage.contact_point == models.ContactPoint.END:
-            if from_lane_id > 0 or to_lane_id > 0:
+        if from_lane_direction == models.LaneDirection.BOTH:
+            # If incoming lane has both directions it can only have the
+            # connection to the incoming direction on junction.
+            # For this case to RIGHT lanes.
+            if to_lane_id > 0:
+                return False
+        elif successor_road_linkage.contact_point == models.ContactPoint.END:
+            if to_lane_direction == models.LaneDirection.BOTH and from_lane_id > 0:
+                return False
+            elif from_lane_id > 0 or to_lane_id > 0:
                 return False
         elif successor_road_linkage.contact_point == models.ContactPoint.START:
-            if from_lane_id < 0 or to_lane_id > 0:
+            if to_lane_direction == models.LaneDirection.BOTH and from_lane_id < 0:
+                return False
+            elif from_lane_id < 0 or to_lane_id > 0:
                 return False
 
     return True
@@ -210,6 +365,15 @@ def _check_connection_lane_link_same_direction(
     incoming_traffic_hand = utils.get_traffic_hand_rule_from_road(incoming_road)
     lane_links = utils.get_lane_links_from_connection(connection)
 
+    contacting_lane_sections = (
+        utils.get_incoming_and_connection_contacting_lane_sections(
+            connection, road_id_map
+        )
+    )
+
+    if contacting_lane_sections is None:
+        return
+
     for lane_link in lane_links:
         from_lane_id = utils.get_from_attribute_from_lane_link(lane_link)
         to_lane_id = utils.get_to_attribute_from_lane_link(lane_link)
@@ -217,11 +381,29 @@ def _check_connection_lane_link_same_direction(
         if from_lane_id is None or to_lane_id is None:
             continue
 
+        from_lane = utils.get_lane_from_lane_section(
+            contacting_lane_sections.incoming, from_lane_id
+        )
+        to_lane = utils.get_lane_from_lane_section(
+            contacting_lane_sections.connection, to_lane_id
+        )
+
+        if from_lane is None or to_lane is None:
+            continue
+
+        from_lane_direction = utils.get_lane_direction(from_lane)
+        to_lane_direction = utils.get_lane_direction(to_lane)
+
+        if from_lane_direction is None or to_lane_direction is None:
+            continue
+
         if connection_traffic_hand == models.TrafficHandRule.RHT:
             if incoming_traffic_hand == models.TrafficHandRule.RHT:
                 if not _is_rht_lane_direction_valid(
                     to_lane_id,
+                    to_lane_direction,
                     from_lane_id,
+                    from_lane_direction,
                     connecting_road_predecessor,
                     connecting_road_successor,
                     connection_contact_point,
@@ -230,7 +412,9 @@ def _check_connection_lane_link_same_direction(
             else:
                 if not _is_lht_to_rht_lane_direction_valid(
                     to_lane_id,
+                    to_lane_direction,
                     from_lane_id,
+                    from_lane_direction,
                     connecting_road_predecessor,
                     connecting_road_successor,
                     connection_contact_point,
@@ -241,7 +425,9 @@ def _check_connection_lane_link_same_direction(
             if incoming_traffic_hand == models.TrafficHandRule.LHT:
                 if not _is_lht_lane_direction_valid(
                     to_lane_id,
+                    to_lane_direction,
                     from_lane_id,
+                    from_lane_direction,
                     connecting_road_predecessor,
                     connecting_road_successor,
                     connection_contact_point,
@@ -250,7 +436,9 @@ def _check_connection_lane_link_same_direction(
             else:
                 if not _is_rht_to_lht_lane_direction_valid(
                     to_lane_id,
+                    to_lane_direction,
                     from_lane_id,
+                    from_lane_direction,
                     connecting_road_predecessor,
                     connecting_road_successor,
                     connection_contact_point,
@@ -274,6 +462,9 @@ def _check_junctions_connection_one_link_to_incoming(
             connecting_road_id = utils.get_connecting_road_id_from_connection(
                 connection
             )
+
+            if incoming_road_id is None or connecting_road_id is None:
+                continue
 
             if incoming_road_id not in connection_road_link_map:
                 connection_road_link_map[incoming_road_id] = {}
