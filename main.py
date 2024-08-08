@@ -2,6 +2,7 @@ import argparse
 import logging
 
 from qc_baselib import Configuration, Result
+from qc_baselib.models.common import ParamType
 
 from qc_opendrive import constants
 from qc_opendrive.checks.semantic import semantic_checker
@@ -44,6 +45,12 @@ def main():
             summary="",
         )
         result.set_result_version(version=constants.BUNDLE_VERSION)
+
+        input_file_path = config.get_config_param("InputFile")
+        input_param = ParamType(name="InputFile", value=input_file_path)
+        result.get_checker_bundle_result(constants.BUNDLE_NAME).params.append(
+            input_param
+        )
 
         semantic_checker.run_checks(config=config, result=result)
         geometry_checker.run_checks(config=config, result=result)
