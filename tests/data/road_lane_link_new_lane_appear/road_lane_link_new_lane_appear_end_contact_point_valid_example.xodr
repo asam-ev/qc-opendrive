@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OpenDRIVE>
+    <header revMajor="1" revMinor="6" name="a38b7dae-e9c1-48ef-9b6b-7172e50f60d4" version="0.13" date="2024-06-25T10:22:09" north="1.3912618695e+03" south="-1.0009308948e+03" east="7.8002782833e+02" west="-7.3600373395e+02" vendor="AnteMotion SRL, all rights reserved">
+    </header>
+    <road name="Road 28645916416" length="1.1831080978e+01" id="228" junction="-1" rule="RHT">
+        <link>
+            <successor elementId="767" elementType="road" contactPoint="end"/>
+        </link>
+        <type s="0.0000000000e+00" type="town" country="DE">
+            <speed max="50" unit="km/h"/>
+        </type>
+        <planView>
+            <geometry s="0.0000000000e+00" x="3.4496087102e+02" y="-7.9719449340e+02" hdg="2.2676196847e+00" length="11.831080978158123">
+                <spiral curvStart="8.2516208705e-04" curvEnd="3.5757614245e-04"/>
+            </geometry>
+        </planView>
+        <elevationProfile>
+            <elevation s="0.0000000000e+00" a="5.5112000000e+02" b="2.0883946276e-02" c="7.8366892662e-04" d="-3.4282376283e-05"/>
+        </elevationProfile>
+        <lanes>
+            <laneOffset s="0.0000000000e+00" a="4.7596835561e-03" b="5.2385796159e-03" c="0.0000000000e+00" d="0.0000000000e+00"/>
+            <laneSection s="0.0000000000e+00" singleSide="false">
+                <left>
+                    <lane type="connectingRamp" id="3">
+                        <link>
+                            <successor id="-3"/>
+                        </link>
+                        <width sOffset="0.0000000000e+00" a="2.8615171966e+00" b="6.7763895637e-03" c="0.0000000000e+00" d="0.0000000000e+00"/>
+                        <speed sOffset="0.0000000000e+00" max="5.0000000000e+01" unit="km/h"/>
+                    </lane>
+                    <lane type="onRamp" id="2">
+                        <link>
+                            <successor id="-2"/>
+                        </link>
+                        <width sOffset="0.0000000000e+00" a="3.6746513316e+00" b="2.0310005367e-03" c="0.0000000000e+00" d="0.0000000000e+00"/>
+                        <roadMark sOffset="0.0000000000e+00" type="solid" weight="standard" color="white" material="standard" width="1.5000000000e-01" laneChange="none" height="1.0000000000e-03"/>
+                        <speed sOffset="0.0000000000e+00" max="5.0000000000e+01" unit="km/h"/>
+                    </lane>
+                    <lane type="connectingRamp" id="1">
+                        <link>
+                            <successor id="-1"/>
+                        </link>
+                        <width sOffset="0.0000000000e+00" a="3.4558218724e+00" b="-7.2695802826e-03" c="0.0000000000e+00" d="0.0000000000e+00"/>
+                        <roadMark sOffset="0.0000000000e+00" type="broken" weight="standard" color="white" material="standard" width="1.5000000000e-01" laneChange="both" height="1.0000000000e-03"/>
+                        <speed sOffset="0.0000000000e+00" max="5.0000000000e+01" unit="km/h"/>
+                    </lane>
+                </left>
+                <center>
+                    <lane type="driving" id="0">
+                        <roadMark sOffset="0.0000000000e+00" type="solid" weight="standard" color="white" material="standard" width="1.5000000000e-01" laneChange="none" height="1.0000000000e-03"/>
+                    </lane>
+                </center>
+            </laneSection>
+        </lanes>
+        <signals/>
+    </road>
+
+    <road name="Road 91559732330" length="3.4707652757e+01" id="767" junction="-1" rule="RHT">
+        <link>
+            <successor elementId="228" elementType="road" contactPoint="end"/>
+        </link>
+        <type s="0.0000000000e+00" type="town" country="DE">
+            <speed max="50" unit="km/h"/>
+        </type>
+        <planView>
+            <geometry s="0.0000000000e+00" x="3.1446773806e+02" y="-7.6204174497e+02" hdg="-8.3250753433e-01" length="19.69984191892492">
+                <spiral curvStart="-1.2663537281e-03" curvEnd="-9.9932007314e-04"/>
+            </geometry>
+            <geometry s="1.9699841919e+01" x="3.2755606082e+02" y="-7.7676463387e+02" hdg="-8.5482424219e-01" length="15.0078108377385">
+                <spiral curvStart="-9.9932007315e-04" curvEnd="-6.2012874804e-04"/>
+            </geometry>
+        </planView>
+        <elevationProfile>
+            <elevation s="0.0000000000e+00" a="5.5229000000e+02" b="-2.5132709718e-02" c="-4.0303837549e-05" d="1.4748749937e-06"/>
+            <elevation s="1.9720800744e+01" a="5.5179000000e+02" b="-2.5001576796e-02" c="6.4690539257e-05" d="-2.9217309043e-06"/>
+        </elevationProfile>
+        <lanes>
+            <laneOffset s="0.0000000000e+00" a="-1.5534314973e-01" b="3.6293954388e-03" c="-2.4842789301e-05" d="-1.0380290551e-06"/>
+            <laneOffset s="5.3394692606e+00" a="-1.3683038757e-01" b="3.2753184059e-03" c="-1.5972067709e-05" d="-1.4342840631e-06"/>
+            <laneOffset s="1.2511721563e+01" a="-1.1468977805e-01" b="2.8248631137e-03" c="-2.3677353999e-05" d="-9.8788688989e-07"/>
+            <laneOffset s="1.9699843898e+01" a="-9.5974609021e-02" b="2.3313419920e-03" c="-2.1175662382e-05" d="-2.5501055213e-07"/>
+            <laneOffset s="3.0023578150e+01" a="-7.4443932802e-02" b="1.8125814869e-03" c="-4.2130697849e-05" d="1.3651059810e-06"/>
+            <laneSection s="0.0000000000e+00" singleSide="false">
+                <center>
+                    <lane type="driving" id="0">
+                        <roadMark sOffset="0.0000000000e+00" type="solid" weight="standard" color="white" material="standard" width="1.5000000000e-01" laneChange="none" height="1.0000000000e-03"/>
+                    </lane>
+                </center>
+                <right>
+                    <lane type="connectingRamp" id="-1">
+                        <link>
+                            <successor id="1"/>
+                        </link>
+                        <width sOffset="0.0000000000e+00" a="3.3224389426e+00" b="-2.0436674263e-03" c="1.4760240835e-05" d="1.4665862810e-05"/>
+                        <width sOffset="5.3394692606e+00" a="3.3141802102e+00" b="-6.3167546823e-04" c="1.6240553782e-05" d="2.5836148571e-06"/>
+                        <width sOffset="1.2511721563e+01" a="3.3114383309e+00" b="0.0000000000e+00" c="3.1060146187e-04" d="-1.7298677121e-05"/>
+                        <width sOffset="1.9699843898e+01" a="3.3210620347e+00" b="1.7838612362e-03" c="1.4908835139e-04" d="-4.4161794855e-06"/>
+                        <width sOffset="3.0023578150e+01" a="3.3505087895e+00" b="3.4501358185e-03" c="2.0214329695e-04" d="-1.2549622848e-05"/>
+                        <roadMark sOffset="0.0000000000e+00" type="broken" weight="standard" color="white" material="standard" width="1.5000000000e-01" laneChange="both" height="1.0000000000e-03"/>
+                        <speed sOffset="0.0000000000e+00" max="5.0000000000e+01" unit="km/h"/>
+                    </lane>
+                    <lane type="onRamp" id="-2">
+                        <link>
+                            <successor id="2"/>
+                        </link>
+                        <width sOffset="0.0000000000e+00" a="3.6574507953e+00" b="5.6730628651e-03" c="-8.2819046092e-05" d="-7.6102005547e-06"/>
+                        <width sOffset="5.3394692606e+00" a="3.6842222898e+00" b="4.1377444629e-03" c="3.8795324388e-05" d="-1.8403983375e-05"/>
+                        <width sOffset="1.2511721563e+01" a="3.7091047787e+00" b="1.8540750329e-03" c="1.1994772877e-05" d="-1.3073672764e-05"/>
+                        <width sOffset="1.9699843898e+01" a="3.7181962438e+00" b="0.0000000000e+00" c="-1.0137520191e-04" d="2.6251413862e-06"/>
+                        <width sOffset="3.0023578150e+01" a="3.7102801653e+00" b="-1.2537826067e-03" c="-4.0813633990e-04" d="3.1406160849e-05"/>
+                        <roadMark sOffset="0.0000000000e+00" type="solid" weight="standard" color="white" material="standard" width="1.5000000000e-01" laneChange="none" height="1.0000000000e-03"/>
+                        <speed sOffset="0.0000000000e+00" max="5.0000000000e+01" unit="km/h"/>
+                    </lane>
+                    <lane type="connectingRamp" id="-3">
+                        <link>
+                            <successor id="3"/>
+                        </link>
+                        <width sOffset="0.0000000000e+00" a="-0.0000000000e+00" b="0.0000000000e+00" c="7.0950072093e-03" d="-4.3918070835e-04"/>
+                        <width sOffset="5.3394692606e+00" a="1.3542261362e-01" b="3.8204109423e-02" c="1.1380162948e-02" d="-6.4795525344e-04"/>
+                        <width sOffset="1.2511721563e+01" a="7.5577876985e-01" b="1.0145211588e-01" c="6.9100107734e-03" d="-5.5037405088e-04"/>
+                        <width sOffset="1.9699843898e+01" a="1.6376520153e+00" b="1.1548012135e-01" c="3.7859789577e-03" d="-4.3398155868e-04"/>
+                        <width sOffset="3.0023578150e+01" a="2.7558366218e+00" b="5.4890404478e-02" c="-1.9223147341e-03" d="-2.8297336164e-04"/>
+                        <speed sOffset="0.0000000000e+00" max="5.0000000000e+01" unit="km/h"/>
+                    </lane>
+                </right>
+            </laneSection>
+        </lanes>
+        <signals/>
+    </road>
+</OpenDRIVE>

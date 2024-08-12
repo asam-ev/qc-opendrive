@@ -774,6 +774,7 @@ def test_road_lane_link_new_lane_appear_inside_junction(
     "target_file,issue_count,issue_xpath",
     [
         ("valid", 0, []),
+        ("valid_example", 0, []),
         (
             "invalid",
             1,
