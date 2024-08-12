@@ -784,7 +784,7 @@ def test_road_lane_link_new_lane_appear_inside_junction(
         ),
     ],
 )
-def test_road_lane_link_new_lane_appear_junction(
+def test_road_lane_link_new_lane_appear_end_contact_point(
     target_file: str,
     issue_count: int,
     issue_xpath: List[str],
