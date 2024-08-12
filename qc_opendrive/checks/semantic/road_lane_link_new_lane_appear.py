@@ -151,9 +151,9 @@ def _check_appearing_successor_road(
 
     next_lane_section_length = 0.0
     lane_sections_length = utils.calculate_road_lane_sections_length(successor_road)
-    if successor_linkage == models.ContactPoint.START:
+    if successor_linkage.contact_point == models.ContactPoint.START:
         next_lane_section_length = lane_sections_length[0]
-    elif successor_linkage == models.ContactPoint.END:
+    elif successor_linkage.contact_point == models.ContactPoint.END:
         next_lane_section_length = lane_sections_length[len(lane_sections_length) - 1]
 
     _check_successor_with_width_zero_between_lane_sections(
