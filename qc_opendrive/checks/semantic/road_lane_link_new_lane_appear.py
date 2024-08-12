@@ -51,6 +51,8 @@ def _check_successor_with_width_zero_between_lane_sections(
     rule_uid: str,
     current_lane_section: etree._ElementTree,
     next_lane_section: etree._ElementTree,
+    contact_point: models.ContactPoint,
+    next_lane_section_length: float,
 ) -> None:
     current_lanes = utils.get_left_and_right_lanes_from_lane_section(
         current_lane_section
@@ -71,11 +73,18 @@ def _check_successor_with_width_zero_between_lane_sections(
             if successor_lane is None:
                 continue
 
-            start_lane_width = utils.evaluate_lane_width(successor_lane, 0.0)
+            target_lane_width = None
+
+            if contact_point == models.ContactPoint.START:
+                target_lane_width = utils.evaluate_lane_width(successor_lane, 0.0)
+            elif contact_point == models.ContactPoint.END:
+                target_lane_width = utils.evaluate_lane_width(
+                    successor_lane, next_lane_section_length
+                )
 
             if (
-                start_lane_width is not None
-                and abs(start_lane_width) < FLOAT_COMPARISON_THRESHOLD
+                target_lane_width is not None
+                and abs(target_lane_width) < FLOAT_COMPARISON_THRESHOLD
             ):
                 _raise_issue(
                     checker_data,
@@ -94,11 +103,19 @@ def _check_appearing_successor_with_width_zero_on_road(
     if len(lane_sections) < 2:
         return
 
+    lane_sections_length = utils.calculate_road_lane_sections_length(road)
+
     for index in range(len(lane_sections) - 1):
         current_lane_section = lane_sections[index]
         next_lane_section = lane_sections[index + 1]
+
         _check_successor_with_width_zero_between_lane_sections(
-            checker_data, rule_uid, current_lane_section, next_lane_section
+            checker_data,
+            rule_uid,
+            current_lane_section,
+            next_lane_section,
+            models.ContactPoint.START,
+            lane_sections_length[index + 1],
         )
 
 
@@ -132,11 +149,20 @@ def _check_appearing_successor_road(
     if successor_road_target_lane_section is None:
         return
 
+    next_lane_section_length = 0.0
+    lane_sections_length = utils.calculate_road_lane_sections_length(successor_road)
+    if successor_linkage == models.ContactPoint.START:
+        next_lane_section_length = lane_sections_length[0]
+    elif successor_linkage == models.ContactPoint.END:
+        next_lane_section_length = lane_sections_length[len(lane_sections_length) - 1]
+
     _check_successor_with_width_zero_between_lane_sections(
         checker_data,
         rule_uid,
         current_road_last_lane_section,
         successor_road_target_lane_section.lane_section,
+        successor_linkage.contact_point,
+        next_lane_section_length,
     )
 
 
