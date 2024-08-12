@@ -1,11 +1,22 @@
-from typing import List, Dict, Union
-
-from lxml import etree
-from qc_opendrive.base import models
+import re
 import numpy as np
+from io import BytesIO
+from typing import List, Dict, Union
+from lxml import etree
 
+from qc_opendrive.base import models
 
 EPSILON = 1.0e-6
+
+
+def get_root(path: str) -> etree._ElementTree:
+    with open(path, "rb") as raw_file:
+        xml_string = raw_file.read().decode()
+
+        if "xmlns" in xml_string:
+            xml_string = re.sub(' xmlns="[^"]+"', "", xml_string)
+
+        return etree.parse(BytesIO(xml_string.encode()))
 
 
 def get_lanes(root: etree._ElementTree) -> List[etree._ElementTree]:
