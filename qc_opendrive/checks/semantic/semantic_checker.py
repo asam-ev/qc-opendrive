@@ -27,7 +27,7 @@ from qc_opendrive.checks.semantic import (
 def run_checks(config: Configuration, result: Result) -> None:
     logging.info("Executing semantic checks")
 
-    root = etree.parse(config.get_config_param("InputFile"))
+    root = utils.get_root(config.get_config_param("InputFile"))
 
     result.register_checker(
         checker_bundle_name=constants.BUNDLE_NAME,
