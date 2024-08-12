@@ -745,29 +745,6 @@ def get_s_coordinate_from_lane_section(
         return float(s_coordinate)
 
 
-def calculate_road_lane_sections_length(road: etree._ElementTree) -> Dict[int, float]:
-    lane_sections = get_lane_sections(road)
-    lane_section_lengths = {}
-
-    for index in range(len(lane_sections)):
-        current_lane_section = lane_sections[index]
-
-        if index < len(lane_sections) - 1:
-            next_lane_section = lane_sections[index + 1]
-            lane_section_length = get_s_coordinate_from_lane_section(
-                next_lane_section
-            ) - get_s_coordinate_from_lane_section(current_lane_section)
-        else:
-            road_length = get_road_length(road)
-            lane_section_length = road_length - get_s_coordinate_from_lane_section(
-                current_lane_section
-            )
-
-        lane_section_lengths[index] = lane_section_length
-
-    return lane_section_lengths
-
-
 def get_borders_from_lane(lane: etree._ElementTree) -> List[models.OffsetPoly3]:
     border_list = []
     for border in lane.iter("border"):
