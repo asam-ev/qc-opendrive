@@ -31,7 +31,7 @@ It is possible to install this project as a Python module to be used in third
 party implementations. For that, run:
 
 ```
-pip install qc_opendrive @ git+https://github.com/asam-ev/qc-opendrive@main
+pip install asam-qc-opendrive @ git+https://github.com/asam-ev/qc-opendrive@main
 ```
 
 **Note**: To install from different sources, you can replace `@main` with
@@ -108,7 +108,7 @@ python main.py \
 ## Tests
 
 To run the tests, you need to have installed the main dependencies mentioned
-at [Instalation](#installation).
+at [Installation](#installation).
 
 **Install Python tests and development dependencies:**
 
