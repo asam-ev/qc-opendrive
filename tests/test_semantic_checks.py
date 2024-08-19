@@ -684,6 +684,14 @@ def test_road_lane_link_zero_width_at_end_inside_junction(
                 "/OpenDRIVE/road/lanes/laneSection[2]/right/lane[2]",
             ],
         ),
+        (
+            "both_start_contact_point_invalid",
+            1,
+            [
+                "/OpenDRIVE/road[1]/lanes/laneSection/left/lane",
+                "/OpenDRIVE/road[2]/lanes/laneSection/right/lane[2]",
+            ],
+        ),
     ],
 )
 def test_road_lane_link_new_lane_appear(
