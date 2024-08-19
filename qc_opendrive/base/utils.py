@@ -9,7 +9,7 @@ from qc_opendrive.base import models
 EPSILON = 1.0e-6
 
 
-def get_root(path: str) -> etree._ElementTree:
+def get_root_without_default_namespace(path: str) -> etree._ElementTree:
     with open(path, "rb") as raw_file:
         xml_string = raw_file.read().decode()
 

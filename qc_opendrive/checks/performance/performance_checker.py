@@ -16,7 +16,9 @@ from qc_opendrive.checks.performance import (
 def run_checks(config: Configuration, result: Result) -> None:
     logging.info("Executing performance checks")
 
-    root = utils.get_root(config.get_config_param("InputFile"))
+    root = utils.get_root_without_default_namespace(
+        config.get_config_param("InputFile")
+    )
 
     result.register_checker(
         checker_bundle_name=constants.BUNDLE_NAME,
