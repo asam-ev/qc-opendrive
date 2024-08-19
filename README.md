@@ -51,7 +51,9 @@ The checker can be used as a Python command/script:
 **Default python**
 
 ```
-qc_opendrive --help // or python qc_opendrive/main.py --help
+// python qc_opendrive/main.py --help
+// python -m qc_opendrive.main --help
+qc_opendrive --help
 
 usage: QC OpenDrive Checker [-h] (-d | -c CONFIG_PATH)
 
