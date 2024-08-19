@@ -3,7 +3,7 @@ import sys
 
 from typing import List
 
-import main
+import qc_opendrive.main as main
 
 from qc_opendrive import constants
 from qc_baselib import Configuration, Result, IssueSeverity

@@ -31,14 +31,14 @@ It is possible to install this project as a Python module to be used in third
 party implementations. For that, run:
 
 ```
-pip install qc_opendrive @ git+https://github.com/asam-ev/qc-opendrive@main
+pip install asam-qc-opendrive @ git+https://github.com/asam-ev/qc-opendrive@main
 ```
 
 **Note**: To install from different sources, you can replace `@main` with
 your desired target. For example, `develop` branch as `@develop`.
 
 After installation, the usage is similar to the one expressed in the
-[`main.py`](./main.py) script:
+[`main.py`](./qc_opendrive/main.py) script:
 
 ```Python3
 from qc_opendrive.base import utils, models
@@ -46,12 +46,14 @@ from qc_opendrive.base import utils, models
 
 ## Usage
 
-The checker can be used as a Python script:
+The checker can be used as a Python command/script:
 
 **Default python**
 
 ```
-python main.py --help
+// python qc_opendrive/main.py --help
+// python -m qc_opendrive.main --help
+qc_opendrive --help
 
 usage: QC OpenDrive Checker [-h] (-d | -c CONFIG_PATH)
 
@@ -67,7 +69,7 @@ options:
 **Poetry**
 
 ```
-poetry run python main.py --help
+poetry run qc_opendrive --help
 
 usage: QC OpenDrive Checker [-h] (-d | -c CONFIG_PATH)
 
@@ -108,7 +110,7 @@ python main.py \
 ## Tests
 
 To run the tests, you need to have installed the main dependencies mentioned
-at [Instalation](#installation).
+at [Installation](#installation).
 
 **Install Python tests and development dependencies:**
 
