@@ -1,6 +1,6 @@
-# qc-opendrive
+# asam-qc-opendrive
 
-This project implements the OpenDrive Checker for the ASAM Quality Checker project.
+This project implements the [OpenDrive Checker Bundle](checker_bundle_doc.md) for the ASAM Quality Checker project.
 
 ## Installation
 
