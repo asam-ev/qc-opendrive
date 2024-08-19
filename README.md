@@ -38,7 +38,7 @@ pip install asam-qc-opendrive @ git+https://github.com/asam-ev/qc-opendrive@main
 your desired target. For example, `develop` branch as `@develop`.
 
 After installation, the usage is similar to the one expressed in the
-[`main.py`](./main.py) script:
+[`main.py`](./qc_opendrive/main.py) script:
 
 ```Python3
 from qc_opendrive.base import utils, models
@@ -46,12 +46,12 @@ from qc_opendrive.base import utils, models
 
 ## Usage
 
-The checker can be used as a Python script:
+The checker can be used as a Python command/script:
 
 **Default python**
 
 ```
-python main.py --help
+qc_opendrive --help // or python qc_opendrive/main.py --help
 
 usage: QC OpenDrive Checker [-h] (-d | -c CONFIG_PATH)
 
@@ -67,7 +67,7 @@ options:
 **Poetry**
 
 ```
-poetry run python main.py --help
+poetry run qc_opendrive --help
 
 usage: QC OpenDrive Checker [-h] (-d | -c CONFIG_PATH)
 
