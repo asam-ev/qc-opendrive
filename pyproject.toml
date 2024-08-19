@@ -22,7 +22,7 @@ pytest = "^8.2.2"
 black = "^24.4.2"
 
 [tool.poetry.scripts]
-qc_opendrive = 'main:main'
+qc_opendrive = 'qc_opendrive.main:main'
 
 [build-system]
 requires = ["poetry-core"]
