@@ -62,6 +62,9 @@ def main():
             )
         )
 
+        # Uncomment the follow line to generate the checker bundle documentation.
+        # result.write_markdown_doc("checker_bundle_doc.md")
+
     logging.info("Done")
 
 
