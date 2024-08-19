@@ -14,3 +14,4 @@ htmlcov
 coverage.xml
 .coverage*
 .python-version
+generated_checker_bundle_doc.md

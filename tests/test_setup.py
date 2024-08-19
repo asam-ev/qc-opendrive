@@ -52,11 +52,7 @@ def launch_main(monkeypatch):
     monkeypatch.setattr(
         sys,
         "argv",
-        [
-            "main.py",
-            "-c",
-            CONFIG_FILE_PATH,
-        ],
+        ["main.py", "-c", CONFIG_FILE_PATH, "--generate_markdown"],
     )
     main.main()
 

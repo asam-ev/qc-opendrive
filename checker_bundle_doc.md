@@ -9,7 +9,7 @@
 
 ## Checkers
 
-### Checker: semantic_xodr
+### semantic_xodr
 
 * Description: Evaluates elements in the file and their semantics to guarantee they are in conformity with the standard.
 * Addressed rules:
@@ -26,7 +26,7 @@
   * asam.net:xodr:1.7.0:junctions.connection.start_along_linkage
   * asam.net:xodr:1.7.0:junctions.connection.end_opposite_linkage
 
-### Checker: geometry_xodr
+### geometry_xodr
 
 * Description: Evaluates elements in the file and their geometrys to guarantee they are in conformity with the standard.
 * Addressed rules:
@@ -35,7 +35,7 @@
   * asam.net:xodr:1.7.0:road.geometry.parampoly3.arclength_range
   * asam.net:xodr:1.7.0:road.geometry.parampoly3.normalized_range
 
-### Checker: performance_xodr
+### performance_xodr
 
 * Description: Evaluates elements in the file to guarantee they are optimized.
 * Addressed rules:
