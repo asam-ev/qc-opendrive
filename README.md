@@ -1,41 +1,24 @@
 # asam-qc-opendrive
 
-This project implements the [OpenDrive Checker Bundle](checker_bundle_doc.md) for the ASAM Quality Checker project.
+This project implements the [ASAM OpenDrive Checker Bundle](checker_bundle_doc.md).
 
-## Installation
+## Installation and usage
 
-There are two options of usage of the project:
+asam-qc-opendrive can be installed using pip or from source.
 
-1. Default python on the machine
-2. [Poetry](https://python-poetry.org/)
+### Installation using pip
 
-To install the project, run:
+asam-qc-opendrive can be installed using pip, so that it can be used as a library or
+as an application.
 
-**Default python**
-
-```
-pip install -r requirements.txt
-```
-
-This will install the needed dependencies to your local Python.
-
-**Poetry**
-
-```
-poetry install
-```
-
-## Installation as library
-
-It is possible to install this project as a Python module to be used in third
-party implementations. For that, run:
-
-```
-pip install asam-qc-opendrive @ git+https://github.com/asam-ev/qc-opendrive@main
+```bash
+pip install asam-qc-opendrive@git+https://github.com/asam-ev/qc-opendrive@main
 ```
 
 **Note**: To install from different sources, you can replace `@main` with
 your desired target. For example, `develop` branch as `@develop`.
+
+#### To use as a library
 
 After installation, the usage is similar to the one expressed in the
 [`main.py`](./qc_opendrive/main.py) script:
@@ -44,15 +27,9 @@ After installation, the usage is similar to the one expressed in the
 from qc_opendrive.base import utils, models
 ```
 
-## Usage
+#### To use as an application
 
-The checker can be used as a Python command/script:
-
-**Default python**
-
-```
-// python qc_opendrive/main.py --help
-// python -m qc_opendrive.main --help
+```bash
 qc_opendrive --help
 
 usage: QC OpenDrive Checker [-h] (-d | -c CONFIG_PATH)
@@ -66,9 +43,46 @@ options:
 
 ```
 
-**Poetry**
+The following commands are equivalent:
 
+```bash
+qc_opendrive --help
+python qc_opendrive/main.py --help
+python -m qc_opendrive.main --help
 ```
+
+### Installation from source
+
+After cloning the repository, there are two options to install from source.
+
+1. Default Python on the machine
+2. [Poetry](https://python-poetry.org/)
+
+#### Default Python
+
+```bash
+pip install -r requirements.txt
+```
+
+This will install the needed dependencies to your local Python environment.
+
+#### Poetry
+
+```bash
+poetry install
+```
+
+After installing from source, the usage are similar to above.
+
+```bash
+qc_opendrive --help
+python qc_opendrive/main.py --help
+python -m qc_opendrive.main --help
+```
+
+It is also possible to execute the qc_opendrive application using Poetry.
+
+```bash
 poetry run qc_opendrive --help
 
 usage: QC OpenDrive Checker [-h] (-d | -c CONFIG_PATH)
@@ -81,13 +95,13 @@ options:
   -c CONFIG_PATH, --config_path CONFIG_PATH
 ```
 
-### Example
+### Example output
 
 - No issues found
 
-```
-$ python python main.py \
-    -c example_config/config.xml
+```bash
+$ python qc_opendrive/main.py -c example_config/config.xml
+
 2024-06-05 18:29:23,551 - Initializing checks
 2024-06-05 18:29:23,551 - Executing semantic checks
 2024-06-05 18:29:23,552 - Executing road.lane.access.no_mix_of_deny_or_allow check
@@ -95,11 +109,11 @@ $ python python main.py \
 2024-06-05 18:29:23,552 - Done
 ```
 
-- Issues found on file
+- Issues found
 
-```
-python main.py \
-    -c example_config/config.xml
+```bash
+python qc_opendrive/main.py -c example_config/config.xml
+
 2024-06-05 18:29:53,950 - Initializing checks
 2024-06-05 18:29:53,950 - Executing semantic checks
 2024-06-05 18:29:53,951 - Executing road.lane.access.no_mix_of_deny_or_allow check
@@ -109,40 +123,36 @@ python main.py \
 
 ## Tests
 
-To run the tests, you need to have installed the main dependencies mentioned
-at [Installation](#installation).
+To run the tests, you need to install the extra test dependency after installing from source.
 
-**Install Python tests and development dependencies:**
+### Install using pip
 
-**Default python**
-
-```
+```bash
 pip install -r requirements-tests.txt
 ```
 
-**Poetry**
+### Install using poetry
 
-```
+```bash
 poetry install --with dev
 ```
 
-**Execute tests:**
+### Execute tests
 
-**Default python**
 
-```
+```bash
 python -m pytest -vv
 ```
 
-**Poetry**
+or
 
-```
+```bash
 poetry run pytest -vv
 ```
 
 They should output something similar to:
 
-```
+```bash
 ===================== test session starts =====================
 platform linux -- Python 3.11.9, pytest-8.2.2, pluggy-1.5.0 -- /home/tripel/asam/qc-opendrive/.venv/bin/python
 cachedir: .pytest_cache
@@ -165,15 +175,13 @@ You can check more options for pytest at its [own documentation](https://docs.py
 For contributing, you need to install the development requirements besides the
 test and installation requirements, for that run:
 
-Default machine python:
-
-```
+```bash
 pip install -r requirements-dev.txt
 ```
 
-Using poetry:
+or
 
-```
+```bash
 poetry install --with dev
 ```
 
