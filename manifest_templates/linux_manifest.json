@@ -1,10 +1,10 @@
 {
-    "module": [
-      {
-        "name": "xodrBundle",
-        "exec_type": "executable",
-        "module_type": "checker_bundle",
-        "exec_command": "cd $ASAM_QC_FRAMEWORK_WORKING_DIR && /home/user/.venv/bin/python -m qc_opendrive.main -c $ASAM_QC_FRAMEWORK_CONFIG_FILE"
-      }
-    ]
-  }
+  "module": [
+    {
+      "name": "xodrBundle",
+      "exec_type": "executable",
+      "module_type": "checker_bundle",
+      "exec_command": "cd $ASAM_QC_FRAMEWORK_WORKING_DIR && /home/user/.venv/bin/python -m qc_opendrive.main -c $ASAM_QC_FRAMEWORK_CONFIG_FILE"
+    }
+  ]
+}
