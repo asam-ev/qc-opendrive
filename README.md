@@ -144,7 +144,7 @@ Manifest file templates are provided in the [manifest_templates](manifest_templa
 
 ### Linux Manifest Template
 
-To register this Checker Bundle in Linux, use the [linux_manifest.json](manifest_templates/linux_manifest.json) template file. Replace the path of the Python executable `/home/user/.venv/bin/python` in the `exec_command` with the path of the Python executable where the Checker Bundle is installed.
+To register this Checker Bundle in Linux, use the [linux_manifest.json](manifest_templates/linux_manifest.json) template file. Replace the path to the Python executable `/home/user/.venv/bin/python` in the `exec_command` with the path to the Python executable where the Checker Bundle is installed.
 
 ## Tests
 
