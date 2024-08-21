@@ -2,6 +2,23 @@
 
 This project implements the [ASAM OpenDrive Checker Bundle](checker_bundle_doc.md).
 
+- [asam-qc-opendrive](#asam-qc-opendrive)
+  - [Installation and usage](#installation-and-usage)
+    - [Installation using pip](#installation-using-pip)
+      - [To use as a library](#to-use-as-a-library)
+      - [To use as an application](#to-use-as-an-application)
+    - [Installation from source](#installation-from-source)
+      - [Default Python](#default-python)
+      - [Poetry](#poetry)
+    - [Example output](#example-output)
+  - [Register Checker Bundle to ASAM Quality Checker Framework](#register-checker-bundle-to-asam-quality-checker-framework)
+    - [Linux Manifest Template](#linux-manifest-template)
+  - [Tests](#tests)
+    - [Install using pip](#install-using-pip)
+    - [Install using poetry](#install-using-poetry)
+    - [Execute tests](#execute-tests)
+  - [Contributing](#contributing)
+
 ## Installation and usage
 
 asam-qc-opendrive can be installed using pip or from source.
@@ -120,6 +137,14 @@ python qc_opendrive/main.py -c example_config/config.xml
 2024-06-05 18:29:53,951 - Issues found - 1
 2024-06-05 18:29:53,951 - Done
 ```
+
+## Register Checker Bundle to ASAM Quality Checker Framework
+
+Manifest file templates are provided in the [manifest_templates](manifest_templates/) folder to register the ASAM OpenDrive Checker Bundle with the [ASAM Quality Checker Framework](https://github.com/asam-ev/qc-framework/tree/main).
+
+### Linux Manifest Template
+
+To register this Checker Bundle in Linux, use the [linux_manifest.json](manifest_templates/linux_manifest.json) template file. Replace the path to the Python executable `/home/user/.venv/bin/python` in the `exec_command` with the path to the Python executable where the Checker Bundle is installed.
 
 ## Tests
 
