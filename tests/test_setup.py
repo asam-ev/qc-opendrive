@@ -3,7 +3,7 @@ import sys
 
 from typing import List
 
-import main
+import qc_opendrive.main as main
 
 from qc_opendrive import constants
 from qc_baselib import Configuration, Result, IssueSeverity
@@ -14,7 +14,7 @@ REPORT_FILE_PATH = "xodr_bundle_report.xqar"
 
 def create_test_config(target_file_path: str):
     test_config = Configuration()
-    test_config.set_config_param(name="XodrFile", value=target_file_path)
+    test_config.set_config_param(name="InputFile", value=target_file_path)
     test_config.register_checker_bundle(checker_bundle_name=constants.BUNDLE_NAME)
     test_config.set_checker_bundle_param(
         checker_bundle_name=constants.BUNDLE_NAME,
@@ -52,11 +52,7 @@ def launch_main(monkeypatch):
     monkeypatch.setattr(
         sys,
         "argv",
-        [
-            "main.py",
-            "-c",
-            CONFIG_FILE_PATH,
-        ],
+        ["main.py", "-c", CONFIG_FILE_PATH, "--generate_markdown"],
     )
     main.main()
 

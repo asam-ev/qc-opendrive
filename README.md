@@ -1,57 +1,53 @@
-# qc-opendrive
+# asam-qc-opendrive
 
-This project implements the OpenDrive Checker for the ASAM Quality Checker project.
+This project implements the [ASAM OpenDrive Checker Bundle](checker_bundle_doc.md).
 
-## Installation
+- [asam-qc-opendrive](#asam-qc-opendrive)
+  - [Installation and usage](#installation-and-usage)
+    - [Installation using pip](#installation-using-pip)
+      - [To use as a library](#to-use-as-a-library)
+      - [To use as an application](#to-use-as-an-application)
+    - [Installation from source](#installation-from-source)
+      - [Default Python](#default-python)
+      - [Poetry](#poetry)
+    - [Example output](#example-output)
+  - [Register Checker Bundle to ASAM Quality Checker Framework](#register-checker-bundle-to-asam-quality-checker-framework)
+    - [Linux Manifest Template](#linux-manifest-template)
+  - [Tests](#tests)
+    - [Install using pip](#install-using-pip)
+    - [Install using poetry](#install-using-poetry)
+    - [Execute tests](#execute-tests)
+  - [Contributing](#contributing)
 
-There are two options of usage of the project:
+## Installation and usage
 
-1. Default python on the machine
-2. [Poetry](https://python-poetry.org/)
+asam-qc-opendrive can be installed using pip or from source.
 
-To install the project, run:
+### Installation using pip
 
-**Default python**
+asam-qc-opendrive can be installed using pip, so that it can be used as a library or
+as an application.
 
-```
-pip install -r requirements.txt
-```
-
-This will install the needed dependencies to your local Python.
-
-**Poetry**
-
-```
-poetry install
-```
-
-## Installation as library
-
-It is possible to install this project as a Python module to be used in third
-party implementations. For that, run:
-
-```
-pip install qc_opendrive @ git+https://github.com/asam-ev/qc-opendrive@main
+```bash
+pip install asam-qc-opendrive@git+https://github.com/asam-ev/qc-opendrive@main
 ```
 
 **Note**: To install from different sources, you can replace `@main` with
 your desired target. For example, `develop` branch as `@develop`.
 
+#### To use as a library
+
 After installation, the usage is similar to the one expressed in the
-[`main.py`](./main.py) script:
+[`main.py`](./qc_opendrive/main.py) script:
 
 ```Python3
 from qc_opendrive.base import utils, models
 ```
 
-## Usage
+#### To use as an application
 
-The checker can be used as a Python script:
-
-**Default python**
-
-```
-python main.py --help
+```bash
+qc_opendrive --help
 
 usage: QC OpenDrive Checker [-h] (-d | -c CONFIG_PATH)
 
@@ -64,10 +60,47 @@ options:
 
 ```
 
-**Poetry**
+The following commands are equivalent:
 
+```bash
+qc_opendrive --help
+python qc_opendrive/main.py --help
+python -m qc_opendrive.main --help
 ```
-poetry run python main.py --help
+
+### Installation from source
+
+After cloning the repository, there are two options to install from source.
+
+1. Default Python on the machine
+2. [Poetry](https://python-poetry.org/)
+
+#### Default Python
+
+```bash
+pip install -r requirements.txt
+```
+
+This will install the needed dependencies to your local Python environment.
+
+#### Poetry
+
+```bash
+poetry install
+```
+
+After installing from source, the usage are similar to above.
+
+```bash
+qc_opendrive --help
+python qc_opendrive/main.py --help
+python -m qc_opendrive.main --help
+```
+
+It is also possible to execute the qc_opendrive application using Poetry.
+
+```bash
+poetry run qc_opendrive --help
 
 usage: QC OpenDrive Checker [-h] (-d | -c CONFIG_PATH)
 
@@ -79,13 +112,13 @@ options:
   -c CONFIG_PATH, --config_path CONFIG_PATH
 ```
 
-### Example
+### Example output
 
 - No issues found
 
-```
-$ python python main.py \
-    -c example_config/config.xml
+```bash
+$ python qc_opendrive/main.py -c example_config/config.xml
+
 2024-06-05 18:29:23,551 - Initializing checks
 2024-06-05 18:29:23,551 - Executing semantic checks
 2024-06-05 18:29:23,552 - Executing road.lane.access.no_mix_of_deny_or_allow check
@@ -93,11 +126,11 @@ $ python python main.py \
 2024-06-05 18:29:23,552 - Done
 ```
 
-- Issues found on file
+- Issues found
 
-```
-python main.py \
-    -c example_config/config.xml
+```bash
+python qc_opendrive/main.py -c example_config/config.xml
+
 2024-06-05 18:29:53,950 - Initializing checks
 2024-06-05 18:29:53,950 - Executing semantic checks
 2024-06-05 18:29:53,951 - Executing road.lane.access.no_mix_of_deny_or_allow check
@@ -105,42 +138,46 @@ python main.py \
 2024-06-05 18:29:53,951 - Done
 ```
 
+## Register Checker Bundle to ASAM Quality Checker Framework
+
+Manifest file templates are provided in the [manifest_templates](manifest_templates/) folder to register the ASAM OpenDrive Checker Bundle with the [ASAM Quality Checker Framework](https://github.com/asam-ev/qc-framework/tree/main).
+
+### Linux Manifest Template
+
+To register this Checker Bundle in Linux, use the [linux_manifest.json](manifest_templates/linux_manifest.json) template file. Replace the path to the Python executable `/home/user/.venv/bin/python` in the `exec_command` with the path to the Python executable where the Checker Bundle is installed.
+
 ## Tests
 
-To run the tests, you need to have installed the main dependencies mentioned
-at [Instalation](#installation).
+To run the tests, you need to install the extra test dependency after installing from source.
 
-**Install Python tests and development dependencies:**
+### Install using pip
 
-**Default python**
-
-```
+```bash
 pip install -r requirements-tests.txt
 ```
 
-**Poetry**
+### Install using poetry
 
-```
+```bash
 poetry install --with dev
 ```
 
-**Execute tests:**
+### Execute tests
 
-**Default python**
 
-```
+```bash
 python -m pytest -vv
 ```
 
-**Poetry**
+or
 
-```
+```bash
 poetry run pytest -vv
 ```
 
 They should output something similar to:
 
-```
+```bash
 ===================== test session starts =====================
 platform linux -- Python 3.11.9, pytest-8.2.2, pluggy-1.5.0 -- /home/tripel/asam/qc-opendrive/.venv/bin/python
 cachedir: .pytest_cache
@@ -163,15 +200,13 @@ You can check more options for pytest at its [own documentation](https://docs.py
 For contributing, you need to install the development requirements besides the
 test and installation requirements, for that run:
 
-Default machine python:
-
-```
+```bash
 pip install -r requirements-dev.txt
 ```
 
-Using poetry:
+or
 
-```
+```bash
 poetry install --with dev
 ```
 
