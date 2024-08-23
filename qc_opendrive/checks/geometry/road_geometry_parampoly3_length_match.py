@@ -15,7 +15,7 @@ TOLERANCE_THRESHOLD = 0.001
 
 def check_rule(checker_data: models.CheckerData) -> None:
     """
-    Rule ID: asam.net:xodr:1.7.0:road.geometry.param_poly3.length_match
+    Rule ID: asam.net:xodr:1.7.0:road.geometry.parampoly3.length_match
 
     Description: The actual curve length, as determined by numerical integration over
         the parameter range, should match '@Length'.
@@ -31,7 +31,7 @@ def check_rule(checker_data: models.CheckerData) -> None:
     More info at
         - https://github.com/asam-ev/qc-opendrive/issues/5
     """
-    logging.info("Executing road.geometry.param_poly3.length_match check.")
+    logging.info("Executing road.geometry.parampoly3.length_match check.")
 
     rule_uid = checker_data.result.register_rule(
         checker_bundle_name=constants.BUNDLE_NAME,
@@ -39,7 +39,7 @@ def check_rule(checker_data: models.CheckerData) -> None:
         emanating_entity="asam.net",
         standard="xodr",
         definition_setting=RULE_INITIAL_SUPPORTED_SCHEMA_VERSION,
-        rule_full_name="road.geometry.param_poly3.length_match",
+        rule_full_name="road.geometry.parampoly3.length_match",
     )
 
     if checker_data.schema_version < RULE_INITIAL_SUPPORTED_SCHEMA_VERSION:

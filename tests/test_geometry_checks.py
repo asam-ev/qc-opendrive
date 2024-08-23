@@ -43,7 +43,7 @@ def test_road_geometry_param_poly3_length_match(
 ) -> None:
     base_path = "tests/data/road_geometry_param_poly3_length_match/"
     target_file_name = f"road_geometry_param_poly3_length_match_{target_file}.xodr"
-    rule_uid = "asam.net:xodr:1.7.0:road.geometry.param_poly3.length_match"
+    rule_uid = "asam.net:xodr:1.7.0:road.geometry.parampoly3.length_match"
     issue_severity = IssueSeverity.WARNING
 
     target_file_path = os.path.join(base_path, target_file_name)
