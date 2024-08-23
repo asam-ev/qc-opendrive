@@ -36,6 +36,20 @@ def _check_road_superelevations(
                 description=f"",
             )
 
+            inertial_point = utils.get_point_xyz_from_road_reference_line(
+                road, next_superelevation.s_offset
+            )
+            if inertial_point is not None:
+                checker_data.result.add_inertial_location(
+                    checker_bundle_name=constants.BUNDLE_NAME,
+                    checker_id=performance_constants.CHECKER_ID,
+                    issue_id=issue_id,
+                    x=inertial_point.x,
+                    y=inertial_point.y,
+                    z=inertial_point.z,
+                    description="Redudant superelevation declaration.",
+                )
+
 
 def _check_road_elevations(
     checker_data: models.CheckerData, road: etree._ElementTree, rule_uid: str
@@ -60,6 +74,20 @@ def _check_road_elevations(
                 xpath=checker_data.input_file_xml_root.getpath(road),
                 description=f"",
             )
+
+            inertial_point = utils.get_point_xyz_from_road_reference_line(
+                road, next_elevation.s_offset
+            )
+            if inertial_point is not None:
+                checker_data.result.add_inertial_location(
+                    checker_bundle_name=constants.BUNDLE_NAME,
+                    checker_id=performance_constants.CHECKER_ID,
+                    issue_id=issue_id,
+                    x=inertial_point.x,
+                    y=inertial_point.y,
+                    z=inertial_point.z,
+                    description="Redudant elevation declaration.",
+                )
 
 
 def _check_lane_offsets(
@@ -121,6 +149,22 @@ def _check_road_plan_view(
                 xpath=checker_data.input_file_xml_root.getpath(road),
                 description=f"",
             )
+
+            s_offset = utils.get_s_from_geometry(next_geometry)
+            if s_offset is not None:
+                inertial_point = utils.get_point_xyz_from_road_reference_line(
+                    road, s_offset
+                )
+                if inertial_point is not None:
+                    checker_data.result.add_inertial_location(
+                        checker_bundle_name=constants.BUNDLE_NAME,
+                        checker_id=performance_constants.CHECKER_ID,
+                        issue_id=issue_id,
+                        x=inertial_point.x,
+                        y=inertial_point.y,
+                        z=inertial_point.z,
+                        description="Redundant line geometry declaration.",
+                    )
 
 
 def _check_lane_widths(

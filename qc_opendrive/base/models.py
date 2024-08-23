@@ -83,3 +83,16 @@ class LaneDirection(str, Enum):
     STANDARD = "standard"
     REVERSED = "reversed"
     BOTH = "both"
+
+
+@dataclass
+class Point3D:
+    x: float
+    y: float
+    z: float
+
+
+@dataclass
+class Point2D:
+    x: float
+    y: float

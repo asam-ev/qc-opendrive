@@ -2,6 +2,7 @@ import logging
 
 from typing import Dict, Set, List
 from lxml import etree
+from typing import Union
 
 from qc_baselib import IssueSeverity
 
@@ -17,6 +18,7 @@ def _raise_road_linkage_is_junction_needed_issue(
     rule_uid: str,
     road_linkage_elements: List[etree._Element],
     linkage_tag: models.LinkageTag,
+    problematic_road: Union[None, etree._ElementTree],
 ) -> None:
     issue_id = checker_data.result.register_issue(
         checker_bundle_name=constants.BUNDLE_NAME,
@@ -35,6 +37,28 @@ def _raise_road_linkage_is_junction_needed_issue(
             description="",
         )
 
+    if problematic_road is not None:
+        inertial_point = None
+        if linkage_tag == models.LinkageTag.PREDECESSOR:
+            inertial_point = utils.get_start_point_xyz_from_road_reference_line(
+                problematic_road
+            )
+        elif linkage_tag == models.LinkageTag.SUCCESSOR:
+            inertial_point = utils.get_end_point_xyz_from_road_reference_line(
+                problematic_road
+            )
+
+        if inertial_point is not None:
+            checker_data.result.add_inertial_location(
+                checker_bundle_name=constants.BUNDLE_NAME,
+                checker_id=semantic_constants.CHECKER_ID,
+                issue_id=issue_id,
+                x=inertial_point.x,
+                y=inertial_point.y,
+                z=inertial_point.z,
+                description="Point where the linkage is not clear.",
+            )
+
 
 def _create_contact_point_id_from_road_linkage(road_linkage: models.RoadLinkage) -> str:
     return f"{road_linkage.id}-{road_linkage.contact_point.value}"
@@ -45,7 +69,7 @@ def _get_road_linkage_from_contact_point_id(
 ) -> models.RoadLinkage:
     contact_point_id_split = contact_point_id.split("-")
     return models.RoadLinkage(
-        id=contact_point_id_split[0],
+        id=int(contact_point_id_split[0]),
         contact_point=models.ContactPoint(contact_point_id_split[1]),
     )
 
@@ -53,14 +77,14 @@ def _get_road_linkage_from_contact_point_id(
 def _check_road_linkage_is_junction_needed(
     checker_data: models.CheckerData, rule_uid: str
 ) -> None:
-    roads = utils.get_roads(checker_data.input_file_xml_root)
+    road_id_map = utils.get_road_id_map(checker_data.input_file_xml_root)
 
-    if len(roads) < 2:
+    if len(road_id_map) < 2:
         return
 
     road_contact_point_map: Dict[str, List[etree._Element]] = {}
 
-    for road in roads:
+    for _, road in road_id_map.items():
         # Verify if road is not part of a junction to proceed.
         # Junction connecting roads can share common successors or predecessors
         # and they are used to distinguish ambiguity.
@@ -113,11 +137,10 @@ def _check_road_linkage_is_junction_needed(
             else:
                 continue
 
+            problematic_road = road_id_map.get(road_linkage.id)
+
             _raise_road_linkage_is_junction_needed_issue(
-                checker_data,
-                rule_uid,
-                elements,
-                linkage_tag,
+                checker_data, rule_uid, elements, linkage_tag, problematic_road
             )
 
 
