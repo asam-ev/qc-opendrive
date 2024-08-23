@@ -128,7 +128,7 @@ Manifest file templates are provided in the [manifest_templates](manifest_templa
 
 ### Linux Manifest Template
 
-To register this Checker Bundle in Linux, use the [linux_manifest.json](manifest_templates/linux_manifest.json) template file.
+To register this Checker Bundle in Linux, use the [linux_xodr_manifest.json](manifest_templates/linux_xodr_manifest.json) template file.
 
 If the asam-qc-opendrive is installed in a virtual environment, the `exec_command` needs to be adjusted as follows:
 
@@ -140,7 +140,7 @@ Replace `<venv>/bin/activate` by the path to your virtual environment.
 
 ### Windows Manifest Template
 
-To register this Checker Bundle in Linux, use the [windows_manifest.json](manifest_templates/windows_manifest.json) template file.
+To register this Checker Bundle in Linux, use the [windows_xodr_manifest.json](manifest_templates/windows_xodr_manifest.json) template file.
 
 If the asam-qc-opendrive is installed in a virtual environment, the `exec_command` needs to be adjusted as follows:
 
