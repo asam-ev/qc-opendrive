@@ -30,7 +30,7 @@
 
 * Description: Evaluates elements in the file and their geometrys to guarantee they are in conformity with the standard.
 * Addressed rules:
-  * asam.net:xodr:1.7.0:road.geometry.param_poly3.length_match
+  * asam.net:xodr:1.7.0:road.geometry.parampoly3.length_match
   * asam.net:xodr:1.4.0:road.lane.border.overlap_with_inner_lanes
   * asam.net:xodr:1.7.0:road.geometry.parampoly3.arclength_range
   * asam.net:xodr:1.7.0:road.geometry.parampoly3.normalized_range
