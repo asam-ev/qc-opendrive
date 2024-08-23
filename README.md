@@ -140,7 +140,7 @@ Replace `<venv>/bin/activate` by the path to your virtual environment.
 
 ### Windows Manifest Template
 
-To register this Checker Bundle in Linux, use the [windows_xodr_manifest.json](manifest_templates/windows_xodr_manifest.json) template file.
+To register this Checker Bundle in Windows, use the [windows_xodr_manifest.json](manifest_templates/windows_xodr_manifest.json) template file.
 
 If the asam-qc-opendrive is installed in a virtual environment, the `exec_command` needs to be adjusted as follows:
 
