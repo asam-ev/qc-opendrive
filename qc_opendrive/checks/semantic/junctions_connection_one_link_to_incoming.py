@@ -500,6 +500,55 @@ def _check_junctions_connection_one_link_to_incoming(
                         description=f"Connection with reused (incoming_road_id, connecting_road_id) = ({incoming_road_id}, {connecting_road_id}) pair.",
                     )
 
+                has_start_contact_point = False
+                has_end_contact_point = False
+                for connection in connections:
+                    contact_point = utils.get_contact_point_from_connection(connection)
+                    if contact_point is None:
+                        continue
+                    if contact_point == models.ContactPoint.START:
+                        has_start_contact_point = True
+                    elif contact_point == models.ContactPoint.END:
+                        has_end_contact_point = True
+
+                if connecting_road_id is None:
+                    continue
+
+                connecting_road = road_id_map.get(connecting_road_id)
+
+                if connecting_road is None:
+                    continue
+
+                if has_start_contact_point:
+                    inertial_point = utils.get_start_point_xyz_from_road_reference_line(
+                        connecting_road
+                    )
+                    if inertial_point is not None:
+                        checker_data.result.add_inertial_location(
+                            checker_bundle_name=constants.BUNDLE_NAME,
+                            checker_id=semantic_constants.CHECKER_ID,
+                            issue_id=issue_id,
+                            x=inertial_point.x,
+                            y=inertial_point.y,
+                            z=inertial_point.z,
+                            description="Multiple connection elements to the same incoming road.",
+                        )
+
+                if has_end_contact_point:
+                    inertial_point = utils.get_end_point_xyz_from_road_reference_line(
+                        connecting_road
+                    )
+                    if inertial_point is not None:
+                        checker_data.result.add_inertial_location(
+                            checker_bundle_name=constants.BUNDLE_NAME,
+                            checker_id=semantic_constants.CHECKER_ID,
+                            issue_id=issue_id,
+                            x=inertial_point.x,
+                            y=inertial_point.y,
+                            z=inertial_point.z,
+                            description="Multiple connection elements to the same incoming road.",
+                        )
+
     return
 
 

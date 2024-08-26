@@ -35,6 +35,8 @@ def _check_junctions_connection_one_connection_element(
 
             connecting_road_id_connections_map[connecting_road_id].append(connection)
 
+    road_id_map = utils.get_road_id_map(checker_data.input_file_xml_root)
+
     for connecting_road_id, connections in connecting_road_id_connections_map.items():
         # connecting road id cannot be appear in more than 1 <connection> element
         if len(connections) > 1:
@@ -46,6 +48,7 @@ def _check_junctions_connection_one_connection_element(
                 level=IssueSeverity.ERROR,
                 rule_uid=rule_uid,
             )
+
             for connection in connections:
                 checker_data.result.add_xml_location(
                     checker_bundle_name=constants.BUNDLE_NAME,
@@ -54,6 +57,23 @@ def _check_junctions_connection_one_connection_element(
                     xpath=checker_data.input_file_xml_root.getpath(connection),
                     description="Connection with reused connecting road id.",
                 )
+
+            connecting_road = road_id_map.get(connecting_road_id)
+            if connecting_road is not None:
+                inertial_point = utils.get_middle_point_xyz_from_road_reference_line(
+                    connecting_road
+                )
+
+                if inertial_point is not None:
+                    checker_data.result.add_inertial_location(
+                        checker_bundle_name=constants.BUNDLE_NAME,
+                        checker_id=semantic_constants.CHECKER_ID,
+                        issue_id=issue_id,
+                        x=inertial_point.x,
+                        y=inertial_point.y,
+                        z=inertial_point.z,
+                        description="Connecting road being reused.",
+                    )
 
 
 def check_rule(checker_data: models.CheckerData) -> None:
