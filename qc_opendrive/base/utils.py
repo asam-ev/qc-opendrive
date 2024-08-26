@@ -1269,14 +1269,25 @@ def calculate_elevation_value(elevation: models.OffsetPoly3, s: float) -> float:
     return f_elevation(s - elevation.s_offset)
 
 
-def get_point_xyz_from_road_reference_line(
+def get_point_xy_from_road_reference_line(
     road: etree._ElementTree, s: float
-) -> Union[None, models.Point3D]:
+) -> Union[None, models.Point2D]:
     geometry = get_corresponding_road_geometry_by_s(road, s)
     if geometry is None:
         return None
 
     point_2d = get_point_xy_from_geometry(geometry, s)
+    if point_2d is None:
+        return None
+
+    return models.Point2D(x=point_2d.x, y=point_2d.y)
+
+
+def get_point_xyz_from_road_reference_line(
+    road: etree._ElementTree, s: float
+) -> Union[None, models.Point3D]:
+    point_2d = get_point_xy_from_road_reference_line(road, s)
+
     if point_2d is None:
         return None
 
@@ -1529,21 +1540,22 @@ def get_point_xyz_from_road(
     road: etree._ElementTree, s: float, t: float, h: float
 ) -> Union[None, models.Point3D]:
     yaw = get_heading_from_road_reference_line(road, s)
-    pitch = get_pitch_from_road_reference_line(road, s)
+    # A reference line doesn't have pitch.
+    pitch = 0.0
     roll = get_roll_from_road_reference_line(road, s)
 
     if yaw is None or pitch is None or roll is None:
         return None
 
-    ref_line_point = get_point_xyz_from_road_reference_line(road, s)
-    if ref_line_point is None:
-        return None
-
     rotation = transforms3d.euler.euler2mat(yaw, pitch, roll, "rzyx")
     d_point = rotation.dot(np.array([0.0, t, h]))
+
+    ref_line_point = get_point_xy_from_road_reference_line(road, s)
+    if ref_line_point is None:
+        return None
 
     return models.Point3D(
         x=ref_line_point.x + d_point[0],
         y=ref_line_point.y + d_point[1],
-        z=ref_line_point.z + d_point[2],
+        z=d_point[2],
     )
