@@ -12,7 +12,10 @@ RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.7.0"
 
 
 def _raise_issue(
-    checker_data: models.CheckerData, rule_uid: str, connection: etree._Element
+    checker_data: models.CheckerData,
+    rule_uid: str,
+    connection: etree._Element,
+    connection_road: etree._Element,
 ):
     issue_id = checker_data.result.register_issue(
         checker_bundle_name=constants.BUNDLE_NAME,
@@ -28,6 +31,18 @@ def _raise_issue(
         xpath=checker_data.input_file_xml_root.getpath(connection),
         description=f"Contact point 'start' not used on predecessor road connection.",
     )
+
+    inertial_point = utils.get_start_point_xyz_from_road_reference_line(connection_road)
+    if inertial_point is not None:
+        checker_data.result.add_inertial_location(
+            checker_bundle_name=constants.BUNDLE_NAME,
+            checker_id=semantic_constants.CHECKER_ID,
+            issue_id=issue_id,
+            x=inertial_point.x,
+            y=inertial_point.y,
+            z=inertial_point.z,
+            description="Contact point 'start' not used on predecessor road connection.",
+        )
 
 
 def _check_junction_connection_start_along_linkage(
@@ -69,7 +84,7 @@ def _check_junction_connection_start_along_linkage(
                     continue
 
                 if predecessor_linkage.id != incoming_road_id:
-                    _raise_issue(checker_data, rule_uid, connection)
+                    _raise_issue(checker_data, rule_uid, connection, connection_road)
 
 
 def check_rule(checker_data: models.CheckerData) -> None:
