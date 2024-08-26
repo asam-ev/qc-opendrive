@@ -595,7 +595,9 @@ def get_lane_width_poly3_list(lane: etree._Element) -> List[models.OffsetPoly3]:
     return width_poly3
 
 
-def evaluate_lane_width(lane: etree._Element, ds: float) -> Union[None, float]:
+def evaluate_lane_width(
+    lane: etree._Element, s_start_from_lane_section: float
+) -> Union[None, float]:
     # This function follows the assumption that the width elements for a given
     # lane follow the standard rules for width elements.
     #
@@ -606,8 +608,8 @@ def evaluate_lane_width(lane: etree._Element, ds: float) -> Union[None, float]:
     #   polynomial function change.
     # - <width> elements shall be defined in ascending order according to the
     #   s-coordinate.
-    # - Width (ds) shall be greater than or equal to zero.
-    #
+    # - Width (s_start_from_lane_section) shall be greater than or equal to zero.
+    #   where s_start_from_lane_section = s - s_section
 
     lane_id = get_lane_id(lane)
 
@@ -621,7 +623,7 @@ def evaluate_lane_width(lane: etree._Element, ds: float) -> Union[None, float]:
 
     count = 0
     for lane_width_poly in lane_width_poly3_list:
-        if lane_width_poly.s_offset > ds:
+        if lane_width_poly.s_offset > s_start_from_lane_section:
             break
         else:
             count += 1
@@ -631,9 +633,10 @@ def evaluate_lane_width(lane: etree._Element, ds: float) -> Union[None, float]:
 
     index = count - 1
 
-    poly3_to_eval = poly3_to_polynomial(lane_width_poly3_list[index].poly3)
+    lane_width = lane_width_poly3_list[index]
+    poly3 = poly3_to_polynomial(lane_width.poly3)
 
-    return poly3_to_eval(ds)
+    return poly3(s_start_from_lane_section - lane_width.s_offset)
 
 
 def get_connections_between_road_and_junction(
@@ -734,15 +737,6 @@ def get_traffic_hand_rule_from_road(road: etree._Element) -> models.TrafficHandR
         return models.TrafficHandRule(rule)
 
 
-def get_lane_section_s_offset(lane_section: etree._Element) -> Union[None, float]:
-    s_offset = lane_section.get("sOffset")
-
-    if s_offset is None:
-        return None
-    else:
-        return float(s_offset)
-
-
 def get_road_length(road: etree._ElementTree) -> Union[None, float]:
     length = road.get("length")
     if length is None:
@@ -751,7 +745,7 @@ def get_road_length(road: etree._ElementTree) -> Union[None, float]:
         return float(length)
 
 
-def get_s_coordinate_from_lane_section(
+def get_s_from_lane_section(
     lane_section: etree._ElementTree,
 ) -> Union[None, float]:
     s_coordinate = lane_section.get("s")
@@ -789,29 +783,27 @@ def get_sorted_lane_sections_with_length_from_road(
     lane_sections = get_lane_sections(road)
 
     for lane_section in lane_sections:
-        s_coordinate = get_s_coordinate_from_lane_section(lane_section)
+        s_coordinate = get_s_from_lane_section(lane_section)
         if s_coordinate is None:
             return []
 
     sorted_lane_sections = sorted(
         lane_sections,
-        key=lambda lane_section: get_s_coordinate_from_lane_section(lane_section),
+        key=lambda lane_section: get_s_from_lane_section(lane_section),
     )
 
     sorted_lane_sections_with_length = []
     for i in range(0, len(sorted_lane_sections)):
         lane_section = sorted_lane_sections[i]
 
-        lane_section_start_point = get_s_coordinate_from_lane_section(lane_section)
+        lane_section_start_point = get_s_from_lane_section(lane_section)
         if lane_section_start_point is None:
             return []
 
         lane_section_end_point = None
         if i < len(sorted_lane_sections) - 1:
             next_lane_section = sorted_lane_sections[i + 1]
-            lane_section_end_point = get_s_coordinate_from_lane_section(
-                next_lane_section
-            )
+            lane_section_end_point = get_s_from_lane_section(next_lane_section)
         else:
             road_length = get_road_length(road)
             if road_length is None:
@@ -1013,7 +1005,7 @@ def get_y_from_geometry(geometry: etree._ElementTree) -> Union[None, float]:
         return float(y)
 
 
-def get_corresponding_road_geometry_by_s(
+def get_geometry_from_road_by_s(
     road: etree._ElementTree, s: float
 ) -> Union[None, etree._ElementTree]:
     length = get_road_length(road)
@@ -1026,18 +1018,11 @@ def get_corresponding_road_geometry_by_s(
     if len(geometries) == 0:
         return None
 
-    previous_geometry = None
-    for geometry in geometries:
-        geometry_s = get_s_from_geometry(geometry)
-        if geometry_s is None:
-            continue
+    geometry_indexes = [get_s_from_geometry(g) for g in geometries]
+    geometry_index = np.searchsorted(geometry_indexes, s, side="right") - 1
+    geometry_index = max(geometry_index, 0)
 
-        if geometry_s > s:
-            return previous_geometry
-
-        previous_geometry = geometry
-
-    return geometries[-1]
+    return geometries[geometry_index]
 
 
 def get_geometry_arc(geometry: etree._Element) -> Union[None, etree._Element]:
@@ -1240,7 +1225,7 @@ def get_point_xy_from_geometry(
         return None
 
 
-def get_corresponding_road_elevation_by_s(
+def get_elevation_from_road_by_s(
     road: etree._ElementTree, s: float
 ) -> Union[None, models.OffsetPoly3]:
     length = get_road_length(road)
@@ -1253,15 +1238,11 @@ def get_corresponding_road_elevation_by_s(
     if len(elevation_list) == 0:
         return ZERO_OFFSET_POLY3
 
-    previous_elevation = ZERO_OFFSET_POLY3
+    elevation_indexes = [e.s_offset for e in elevation_list]
+    elevation_index = np.searchsorted(elevation_indexes, s, side="right") - 1
+    elevation_index = max(elevation_index, 0)
 
-    for elevation in elevation_list:
-        if elevation.s_offset > s:
-            return previous_elevation
-
-        previous_elevation = elevation
-
-    return elevation_list[-1]
+    return elevation_list[elevation_index]
 
 
 def calculate_elevation_value(elevation: models.OffsetPoly3, s: float) -> float:
@@ -1272,7 +1253,7 @@ def calculate_elevation_value(elevation: models.OffsetPoly3, s: float) -> float:
 def get_point_xy_from_road_reference_line(
     road: etree._ElementTree, s: float
 ) -> Union[None, models.Point2D]:
-    geometry = get_corresponding_road_geometry_by_s(road, s)
+    geometry = get_geometry_from_road_by_s(road, s)
     if geometry is None:
         return None
 
@@ -1291,7 +1272,7 @@ def get_point_xyz_from_road_reference_line(
     if point_2d is None:
         return None
 
-    elevation = get_corresponding_road_elevation_by_s(road, s)
+    elevation = get_elevation_from_road_by_s(road, s)
 
     if elevation is None:
         return None
@@ -1469,7 +1450,7 @@ def get_heading_from_geometry_by_s(
 def get_heading_from_road_reference_line(
     road: etree._ElementTree, s: float
 ) -> Union[None, float]:
-    geometry = get_corresponding_road_geometry_by_s(road, s)
+    geometry = get_geometry_from_road_by_s(road, s)
 
     if geometry is None:
         return None
@@ -1490,7 +1471,7 @@ def calculate_elevation_angle(
 def get_pitch_from_road_reference_line(
     road: etree._ElementTree, s: float
 ) -> Union[None, float]:
-    elevation = get_corresponding_road_elevation_by_s(road, s)
+    elevation = get_elevation_from_road_by_s(road, s)
 
     if elevation is None:
         return None
@@ -1499,7 +1480,7 @@ def get_pitch_from_road_reference_line(
     return -calculate_elevation_angle(elevation, s)
 
 
-def get_corresponding_road_superelevation_by_s(
+def get_superelevation_from_road_by_s(
     road: etree._ElementTree, s: float
 ) -> Union[None, models.OffsetPoly3]:
     length = get_road_length(road)
@@ -1512,21 +1493,17 @@ def get_corresponding_road_superelevation_by_s(
     if len(superelevations) == 0:
         return ZERO_OFFSET_POLY3
 
-    previous_superelevation = ZERO_OFFSET_POLY3
+    superelevation_indexes = [e.s_offset for e in superelevations]
+    superelevation_index = np.searchsorted(superelevation_indexes, s, side="right") - 1
+    superelevation_index = max(superelevation_index, 0)
 
-    for superelevation in superelevations:
-        if superelevation.s_offset > s:
-            return previous_superelevation
-
-        previous_superelevation = superelevation
-
-    return superelevations[-1]
+    return superelevations[superelevation_index]
 
 
 def get_roll_from_road_reference_line(
     road: etree._ElementTree, s: float
 ) -> Union[None, float]:
-    superelevation = get_corresponding_road_superelevation_by_s(road, s)
+    superelevation = get_superelevation_from_road_by_s(road, s)
 
     if superelevation is None:
         return None
