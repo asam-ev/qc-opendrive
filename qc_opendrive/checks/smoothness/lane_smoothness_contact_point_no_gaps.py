@@ -15,7 +15,7 @@ RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.7.0"
 # This parameter needs to be configurable later
 TOLERANCE_THRESHOLD = 0.01  # meters
 
-DEBUG = False
+DEBUG = True
 
 
 def _raise_geometry_gap_issue(
@@ -138,38 +138,46 @@ def _get_cumulative_width(lane_id, lane_section, s) -> float:
 
 
 def _compare_outer_border_points(
-    road: etree._Element,
+    current_road: etree._Element,
+    next_road: etree._Element,
     current_lane_section: models.LaneSectionWithLength,
     current_lane_id: int,
     next_lane_section: models.LaneSectionWithLength,
     next_lane_id: int,
+    current_road_contact_point: models.ContactPoint,
+    next_road_contact_point: models.ContactPoint,
     checker_data: models.CheckerData,
     rule_uid: str,
 ):
-    current_lane_section_s0 = utils.get_s_coordinate_from_lane_section(
+    current_lane_section_s0 = utils.get_s_from_lane_section(
         current_lane_section.lane_section
     )
-    next_lane_section_s0 = utils.get_s_coordinate_from_lane_section(
-        next_lane_section.lane_section
-    )
+    next_lane_section_s0 = utils.get_s_from_lane_section(next_lane_section.lane_section)
     # current lane c1
-    current_lane_s = current_lane_section_s0 + current_lane_section.length
+    if current_road_contact_point == models.ContactPoint.START:
+        current_lane_s = current_lane_section_s0
+    else:
+        current_lane_s = current_lane_section_s0 + current_lane_section.length
     current_lane_t = _get_cumulative_width(
         current_lane_id,
         current_lane_section.lane_section,
         current_lane_section.length,
     )
     current_xy = utils.get_point_xyz_from_road(
-        road=road, s=current_lane_s, t=current_lane_t, h=0
+        road=current_road, s=current_lane_s, t=current_lane_t, h=0
     )
 
     # next lane c1
-    next_lane_s = next_lane_section_s0
+    if next_road_contact_point == models.ContactPoint.START:
+        next_lane_s = next_lane_section_s0
+    else:
+        next_lane_s = next_lane_section_s0 + next_lane_section.length
+
     next_lane_t = _get_cumulative_width(
         next_lane_id, next_lane_section.lane_section, 0.0
     )
     next_xy = utils.get_point_xyz_from_road(
-        road=road, s=next_lane_s, t=next_lane_t, h=0
+        road=next_road, s=next_lane_s, t=next_lane_t, h=0
     )
 
     if DEBUG:
@@ -204,22 +212,26 @@ def _compare_outer_border_points(
 
 
 def _compare_inner_border_points(
-    road: etree._Element,
+    current_road: etree._Element,
+    next_road: etree._Element,
     current_lane_section: models.LaneSectionWithLength,
     current_lane_id: int,
     next_lane_section: models.LaneSectionWithLength,
     next_lane_id: int,
+    current_road_contact_point: models.ContactPoint,
+    next_road_contact_point: models.ContactPoint,
     checker_data: models.CheckerData,
     rule_uid: str,
 ):
-    current_lane_section_s0 = utils.get_s_coordinate_from_lane_section(
+    current_lane_section_s0 = utils.get_s_from_lane_section(
         current_lane_section.lane_section
     )
-    next_lane_section_s0 = utils.get_s_coordinate_from_lane_section(
-        next_lane_section.lane_section
-    )
+    next_lane_section_s0 = utils.get_s_from_lane_section(next_lane_section.lane_section)
     # current lane c1
-    current_lane_s = current_lane_section_s0 + current_lane_section.length
+    if current_road_contact_point == models.ContactPoint.START:
+        current_lane_s = current_lane_section_s0
+    else:
+        current_lane_s = current_lane_section_s0 + current_lane_section.length
     sign = -1 if current_lane_id < 0 else 1
     current_lane_t = _get_cumulative_width(
         current_lane_id - 1 * sign,
@@ -227,17 +239,20 @@ def _compare_inner_border_points(
         current_lane_section.length,
     )
     current_xy = utils.get_point_xyz_from_road(
-        road=road, s=current_lane_s, t=current_lane_t, h=0
+        road=current_road, s=current_lane_s, t=current_lane_t, h=0
     )
 
     # next lane c1
-    next_lane_s = next_lane_section_s0
+    if next_road_contact_point == models.ContactPoint.START:
+        next_lane_s = next_lane_section_s0
+    else:
+        next_lane_s = next_lane_section_s0 + next_lane_section.length
     sign = -1 if next_lane_id < 0 else 1
     next_lane_t = _get_cumulative_width(
         next_lane_id - 1 * sign, next_lane_section.lane_section, 0.0
     )
     next_xy = utils.get_point_xyz_from_road(
-        road=road, s=next_lane_s, t=next_lane_t, h=0
+        road=next_road, s=next_lane_s, t=next_lane_t, h=0
     )
 
     if DEBUG:
@@ -271,10 +286,13 @@ def _compare_inner_border_points(
 
 
 def _validate_lane_successors(
-    road: etree._Element,
+    current_road: etree._Element,
+    next_road: etree._Element,
     lane: etree._Element,
     current_lane_section: models.LaneSectionWithLength,
     next_lane_section: models.LaneSectionWithLength,
+    current_road_contact_point: models.ContactPoint,
+    next_road_contact_point: models.ContactPoint,
     checker_data: models.CheckerData,
     rule_uid: str,
 ) -> None:
@@ -285,20 +303,26 @@ def _validate_lane_successors(
         next_lane_id = successors[0]
 
         _compare_outer_border_points(
-            road,
+            current_road,
+            next_road,
             current_lane_section,
             lane_id,
             next_lane_section,
             next_lane_id,
+            current_road_contact_point,
+            next_road_contact_point,
             checker_data,
             rule_uid,
         )
         _compare_inner_border_points(
-            road,
+            current_road,
+            next_road,
             current_lane_section,
             lane_id,
             next_lane_section,
             next_lane_id,
+            current_road_contact_point,
+            next_road_contact_point,
             checker_data,
             rule_uid,
         )
@@ -309,20 +333,26 @@ def _validate_lane_successors(
         bottom_successor_id = successors[-1]
 
         _compare_outer_border_points(
-            road,
+            current_road,
+            next_road,
             current_lane_section,
             lane_id,
             next_lane_section,
             bottom_successor_id,
+            current_road_contact_point,
+            next_road_contact_point,
             checker_data,
             rule_uid,
         )
         _compare_inner_border_points(
-            road,
+            current_road,
+            next_road,
             current_lane_section,
             lane_id,
             next_lane_section,
             upper_successor_id,
+            current_road_contact_point,
+            next_road_contact_point,
             checker_data,
             rule_uid,
         )
@@ -342,10 +372,13 @@ def _validate_lane_successors(
 
 
 def _validate_lane_predecessors(
-    road: etree._Element,
+    prev_road: etree._Element,
+    current_road: etree._Element,
     lane: etree._Element,
     prev_lane_section: models.LaneSectionWithLength,
     current_lane_section: models.LaneSectionWithLength,
+    current_road_contact_point: models.ContactPoint,
+    next_road_contact_point: models.ContactPoint,
     checker_data: models.CheckerData,
     rule_uid: str,
 ) -> None:
@@ -355,20 +388,26 @@ def _validate_lane_predecessors(
     if len(predecessors) == 1:
         prev_lane_id = predecessors[0]
         _compare_outer_border_points(
-            road,
+            prev_road,
+            current_road,
             prev_lane_section,
             prev_lane_id,
             current_lane_section,
             lane_id,
+            current_road_contact_point,
+            next_road_contact_point,
             checker_data,
             rule_uid,
         )
         _compare_inner_border_points(
-            road,
+            prev_road,
+            current_road,
             prev_lane_section,
             prev_lane_id,
             current_lane_section,
             lane_id,
+            current_road_contact_point,
+            next_road_contact_point,
             checker_data,
             rule_uid,
         )
@@ -379,20 +418,26 @@ def _validate_lane_predecessors(
         bottom_prev_id = predecessors[-1]
 
         _compare_outer_border_points(
-            road,
+            prev_road,
+            current_road,
             prev_lane_section,
             upper_prev_id,
             current_lane_section,
             lane_id,
+            current_road_contact_point,
+            next_road_contact_point,
             checker_data,
             rule_uid,
         )
         _compare_inner_border_points(
-            road,
+            prev_road,
+            current_road,
             prev_lane_section,
             bottom_prev_id,
             current_lane_section,
             lane_id,
+            current_road_contact_point,
+            next_road_contact_point,
             checker_data,
             rule_uid,
         )
@@ -426,7 +471,7 @@ def _check_road_lane_sections_gaps(
         current_lane_section = lane_sections[index]
         next_lane_section = lane_sections[index + 1]
 
-        print(f"i = {index}, j = {index + 1}")
+        # print(f"i = {index}, j = {index + 1}")
 
         current_lanes = utils.get_left_and_right_lanes_from_lane_section(
             current_lane_section.lane_section
@@ -438,9 +483,12 @@ def _check_road_lane_sections_gaps(
         for lane in current_lanes:
             _validate_lane_successors(
                 road,
+                road,
                 lane,
                 current_lane_section,
                 next_lane_section,
+                models.ContactPoint.END,
+                models.ContactPoint.START,
                 checker_data,
                 rule_uid,
             )
@@ -448,9 +496,12 @@ def _check_road_lane_sections_gaps(
         for lane in next_lanes:
             _validate_lane_predecessors(
                 road,
+                road,
                 lane,
                 current_lane_section,
                 next_lane_section,
+                models.ContactPoint.END,
+                models.ContactPoint.START,
                 checker_data,
                 rule_uid,
             )
@@ -468,8 +519,88 @@ def _check_roads_internal_smoothness(
         if len(geometries) > 2:
             _check_plan_view_gaps(geometries, checker_data, rule_uid)
 
-        print(f"road id = {road_id}")
+        # print(f"road id = {road_id}")
         _check_road_lane_sections_gaps(road, geometries, checker_data, rule_uid)
+
+
+def _check_inter_roads_smoothness(
+    checker_data: models.CheckerData, rule_uid: str
+) -> None:
+    road_id_map = utils.get_road_id_map(checker_data.input_file_xml_root)
+
+    for road_id, road in road_id_map.items():
+        successor = utils.get_road_linkage(road, models.LinkageTag.SUCCESSOR)
+        predecessor = utils.get_road_linkage(road, models.LinkageTag.PREDECESSOR)
+        print(road_id)
+        road_lane_sections = utils.get_sorted_lane_sections_with_length_from_road(road)
+
+        if successor is not None:
+            print("successor")
+            print(successor)
+            print("-" * 10)
+            # current_lane_section
+            last_lane_section = road_lane_sections[-1]
+
+            # next_lane_section
+            successor_road = road_id_map[successor.id]
+            successor_lane_sections = (
+                utils.get_sorted_lane_sections_with_length_from_road(successor_road)
+            )
+            successor_lane_section = None
+            if successor.contact_point == models.ContactPoint.END:
+                successor_lane_section = successor_lane_sections[-1]
+            elif successor.contact_point == models.ContactPoint.START:
+                successor_lane_section = successor_lane_sections[0]
+
+            lanes = utils.get_left_and_right_lanes_from_lane_section(
+                last_lane_section.lane_section
+            )
+            for lane in lanes:
+                _validate_lane_successors(
+                    road,
+                    successor_road,
+                    lane,
+                    last_lane_section,
+                    successor_lane_section,
+                    models.ContactPoint.END,
+                    successor.contact_point,
+                    checker_data,
+                    rule_uid,
+                )
+
+        if predecessor is not None:
+            print("predecessor")
+            print(predecessor)
+            print("-" * 10)
+            # current_lane_section
+            first_lane_section = road_lane_sections[0]
+
+            # next_lane_section
+            predecessor_road = road_id_map[predecessor.id]
+            predecessor_lane_sections = (
+                utils.get_sorted_lane_sections_with_length_from_road(predecessor_road)
+            )
+            predecessor_lane_section = None
+            if predecessor.contact_point == models.ContactPoint.END:
+                predecessor_lane_section = predecessor_lane_sections[-1]
+            elif predecessor.contact_point == models.ContactPoint.START:
+                predecessor_lane_section = predecessor_lane_sections[0]
+
+            lanes = utils.get_left_and_right_lanes_from_lane_section(
+                first_lane_section.lane_section
+            )
+            for lane in lanes:
+                _validate_lane_predecessors(
+                    predecessor_road,
+                    road,
+                    lane,
+                    predecessor_lane_section,
+                    first_lane_section,
+                    predecessor.contact_point,
+                    models.ContactPoint.START,
+                    checker_data,
+                    rule_uid,
+                )
 
 
 def check_rule(checker_data: models.CheckerData) -> None:
@@ -504,9 +635,6 @@ def check_rule(checker_data: models.CheckerData) -> None:
         )
         return
 
-    _check_roads_internal_smoothness(checker_data=checker_data, rule_uid=rule_uid)
-    # _check_inter_roads_smoothness(checker_data=checker_data, rule_uid=rule_uid)
-    # implement the check in between roads
-    # implement the "virtual contact point", need to base the rule in the lanes
-    # connection as well
-    # add lanes types check as well - list of possible lane types
+    # _check_roads_internal_smoothness(checker_data=checker_data, rule_uid=rule_uid)
+    _check_inter_roads_smoothness(checker_data=checker_data, rule_uid=rule_uid)
+    # _check_junctions_smoothness()
