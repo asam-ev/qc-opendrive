@@ -748,12 +748,21 @@ def test_road_lane_link_new_lane_appear_junction(
     "target_file,issue_count,issue_xpath",
     [
         ("valid", 0, []),
+        ("valid_2", 0, []),
         (
             "invalid",
             1,
             [
                 "/OpenDRIVE/road[1]/lanes/laneSection/right/lane",
                 "/OpenDRIVE/road[2]/lanes/laneSection/right/lane[2]",
+            ],
+        ),
+        (
+            "invalid_2",
+            1,
+            [
+                "/OpenDRIVE/road[2]/lanes/laneSection/left/lane[1]",
+                "/OpenDRIVE/road[3]/lanes/laneSection/left/lane",
             ],
         ),
     ],
