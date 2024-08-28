@@ -548,10 +548,8 @@ def _validate_inter_road_smoothness(
     checker_data: models.CheckerData,
     rule_uid: str,
 ):
-    # current_lane_section
     lane_section = road_lane_section
 
-    # target_lane_section
     target_road = road_id_map.get(linkage.id)
     if target_road is None:
         return
@@ -620,6 +618,11 @@ def _validate_inter_road_smoothness(
         if current_c0 is None or current_c1 is None:
             continue
 
+        # For connected drivable lanes:
+        #  - lanes with single successor/predecessor should match on both contact
+        #    points.
+        #  - lanes with multiple successor/predecessor can match only on one
+        #    contact point.
         if len(connections) > 1:
             matches_threshold = 1
         else:
@@ -643,7 +646,8 @@ def _validate_inter_road_smoothness(
                 continue
 
             matches = 0
-
+            # The method will evaluate all pairs to check if we can get the
+            # desired number of points matched for the horizontal gap.
             if (
                 distance.euclidean(
                     (current_c0.x, current_c0.y), (target_c0.x, target_c0.y)
