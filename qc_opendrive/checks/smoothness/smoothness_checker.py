@@ -8,8 +8,8 @@ from qc_opendrive import constants
 from qc_opendrive.base import utils, models
 
 from qc_opendrive.checks.smoothness import (
+    lane_smoothness_contact_point_no_horizontal_gaps,
     smoothness_constants,
-    lane_smoothness_contact_point_no_gaps,
 )
 
 
@@ -28,7 +28,7 @@ def run_checks(config: Configuration, result: Result) -> None:
     odr_schema_version = utils.get_standard_schema_version(root)
 
     rule_list = [
-        lane_smoothness_contact_point_no_gaps.check_rule,
+        lane_smoothness_contact_point_no_horizontal_gaps.check_rule,
     ]
 
     checker_data = models.CheckerData(
