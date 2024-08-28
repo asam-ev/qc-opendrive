@@ -15,6 +15,21 @@ RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.7.0"
 # This parameter needs to be configurable later
 TOLERANCE_THRESHOLD = 0.01  # meters
 
+DRIVABLE_LANE_TYPES = {
+    "driving",
+    "entry",
+    "exit",
+    "onRamp",
+    "offRamp",
+    "connectingRamp",
+    "slipLane",
+    "parking",
+    "biking",
+    "border",
+    "stop",
+    "restricted",
+}
+
 
 def _raise_geometry_gap_issue(
     checker_data: models.CheckerData,
@@ -429,7 +444,6 @@ def _validate_same_road_lane_predecessors(
 
 def _check_road_lane_sections_gaps(
     road: etree._ElementTree,
-    geometries: etree._ElementTree,
     checker_data: models.CheckerData,
     rule_uid: str,
 ) -> None:
@@ -479,6 +493,8 @@ def _check_road_lane_sections_gaps(
         successor_outer_points[0] = successor_lane_offset
 
         for lane in current_lanes:
+            if utils.get_type_from_lane(lane) not in DRIVABLE_LANE_TYPES:
+                continue
             _validate_same_road_lane_successors(
                 road,
                 lane,
@@ -492,6 +508,8 @@ def _check_road_lane_sections_gaps(
             )
 
         for lane in next_lanes:
+            if utils.get_type_from_lane(lane) not in DRIVABLE_LANE_TYPES:
+                continue
             _validate_same_road_lane_predecessors(
                 road,
                 lane,
@@ -517,7 +535,7 @@ def _check_roads_internal_smoothness(
         if len(geometries) > 2:
             _check_plan_view_gaps(geometries, checker_data, rule_uid)
 
-        _check_road_lane_sections_gaps(road, geometries, checker_data, rule_uid)
+        _check_road_lane_sections_gaps(road, checker_data, rule_uid)
 
 
 def _validate_inter_road_smoothness(
@@ -577,6 +595,8 @@ def _validate_inter_road_smoothness(
     target_lanes_outer_points[0] = target_lane_offset
 
     for lane in lanes:
+        if utils.get_type_from_lane(lane) not in DRIVABLE_LANE_TYPES:
+            continue
         connections = []
         if road_relation == models.LinkageTag.PREDECESSOR:
             connections = utils.get_predecessor_lane_ids(lane)
@@ -714,20 +734,27 @@ def _check_inter_roads_smoothness(
 
 def check_rule(checker_data: models.CheckerData) -> None:
     """
-    Rule ID:
+    Rule ID: asam.net:xodr:1.7.0:lane_smoothness.contact_point_no_horizontal_gaps
 
-    Description:
+    Description: Two connected drivable lanes shall have no horizontal gaps.
+    There is no gap between two connected lanes in s-direction if the x,y values
+    of the contact points of the two connected lanes match. There shall be no
+    plan view gaps in its reference line geometry definition
 
-    Severity:
+    Severity: ERROR
 
-    Version range: []
+    Version range: [1.7.0, )
 
     Remark:
+        - Only lanes of drivable types would be checked.
+        - The rule will trigger one issue for each logical link. If lanes are
+        connected as successor and predecessor, the rule will trigger 2 issues
+        for the given connection.
 
     More info at
-        -
+        - Not available yet.
     """
-    logging.info("Executing lane_smoothness.contact_point_no_gaps check.")
+    logging.info("Executing lane_smoothness.contact_point_no_horizontal_gaps check.")
 
     rule_uid = checker_data.result.register_rule(
         checker_bundle_name=constants.BUNDLE_NAME,
@@ -735,7 +762,7 @@ def check_rule(checker_data: models.CheckerData) -> None:
         emanating_entity="asam.net",
         standard="xodr",
         definition_setting=RULE_INITIAL_SUPPORTED_SCHEMA_VERSION,
-        rule_full_name="lane_smoothness.contact_point_no_gaps",
+        rule_full_name="lane_smoothness.contact_point_no_horizontal_gaps",
     )
 
     if checker_data.schema_version < RULE_INITIAL_SUPPORTED_SCHEMA_VERSION:
