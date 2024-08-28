@@ -494,7 +494,7 @@ def _check_roads_internal_smoothness(
 ) -> None:
     road_id_map = utils.get_road_id_map(checker_data.input_file_xml_root)
 
-    for road_id, road in road_id_map.items():
+    for road in road_id_map.values():
         geometries = utils.get_road_plan_view_geometry_list(road)
 
         # we can only calculate gaps with 2 or more geometries
@@ -504,12 +504,152 @@ def _check_roads_internal_smoothness(
         _check_road_lane_sections_gaps(road, geometries, checker_data, rule_uid)
 
 
+def _validate_inter_road_smoothness(
+    road: etree._ElementTree,
+    linkage: models.RoadLinkage,
+    road_relation: models.LinkageTag,
+    road_lane_section: models.LaneSectionWithLength,
+    road_s: float,
+    road_id_map: Dict[int, etree._ElementTree],
+    checker_data: models.CheckerData,
+    rule_uid: str,
+):
+    # current_lane_section
+    lane_section = road_lane_section
+
+    # target_lane_section
+    target_road = road_id_map[linkage.id]
+    target_road_length = utils.get_road_length(target_road)
+    target_lane_sections = utils.get_sorted_lane_sections_with_length_from_road(
+        target_road
+    )
+
+    target_lane_section = None
+    target_s = 0.0
+    if linkage.contact_point == models.ContactPoint.END:
+        target_lane_section = target_lane_sections[-1]
+        target_s = target_road_length
+    elif linkage.contact_point == models.ContactPoint.START:
+        target_lane_section = target_lane_sections[0]
+        target_s = 0.0
+
+    lanes = utils.get_left_and_right_lanes_from_lane_section(lane_section.lane_section)
+    target_lanes = utils.get_left_and_right_lanes_from_lane_section(
+        target_lane_section.lane_section
+    )
+
+    lane_offset = utils.get_lane_offset_value_from_road_by_s(road, road_s)
+    target_lane_offset = utils.get_lane_offset_value_from_road_by_s(
+        target_road, target_s
+    )
+
+    lanes_outer_points = utils.get_outer_border_points_from_lane_group_by_s(
+        lanes,
+        lane_offset,
+        utils.get_s_from_lane_section(lane_section.lane_section),
+        road_s,
+    )
+    lanes_outer_points[0] = lane_offset
+    target_lanes_outer_points = utils.get_outer_border_points_from_lane_group_by_s(
+        target_lanes,
+        target_lane_offset,
+        utils.get_s_from_lane_section(target_lane_section.lane_section),
+        target_s,
+    )
+    target_lanes_outer_points[0] = target_lane_offset
+
+    for lane in lanes:
+        connections = []
+        if road_relation == models.LinkageTag.PREDECESSOR:
+            connections = utils.get_predecessor_lane_ids(lane)
+        elif road_relation == models.LinkageTag.SUCCESSOR:
+            connections = utils.get_successor_lane_ids(lane)
+
+        lane_id = utils.get_lane_id(lane)
+
+        current_c0 = _compute_inner_point(
+            lanes_outer_points,
+            lane_id,
+            road,
+            road_s,
+        )
+        current_c1 = _compute_outer_point(
+            lanes_outer_points,
+            lane_id,
+            road,
+            road_s,
+        )
+
+        if len(connections) > 1:
+            matches_threshold = 1
+        else:
+            matches_threshold = 2
+
+        for conn_lane_id in connections:
+            prev_c0 = _compute_inner_point(
+                target_lanes_outer_points,
+                conn_lane_id,
+                target_road,
+                target_s,
+            )
+            prev_c1 = _compute_outer_point(
+                target_lanes_outer_points,
+                conn_lane_id,
+                target_road,
+                target_s,
+            )
+
+            matches = 0
+
+            if (
+                distance.euclidean((current_c0.x, current_c0.y), (prev_c0.x, prev_c0.y))
+                < TOLERANCE_THRESHOLD
+            ):
+                matches += 1
+            if (
+                distance.euclidean((current_c0.x, current_c0.y), (prev_c1.x, prev_c1.y))
+                < TOLERANCE_THRESHOLD
+            ):
+                matches += 1
+            if (
+                distance.euclidean((current_c1.x, current_c1.y), (prev_c0.x, prev_c0.y))
+                < TOLERANCE_THRESHOLD
+            ):
+                matches += 1
+            if (
+                distance.euclidean((current_c1.x, current_c1.y), (prev_c1.x, prev_c1.y))
+                < TOLERANCE_THRESHOLD
+            ):
+                matches += 1
+
+            if matches < matches_threshold:
+                target_lane = next(
+                    target_lane
+                    for target_lane in target_lanes
+                    if utils.get_lane_id(target_lane) == conn_lane_id
+                )
+                if road_relation == models.LinkageTag.PREDECESSOR:
+                    _raise_lane_linkage_gap_issue(
+                        checker_data,
+                        rule_uid,
+                        target_lane,
+                        lane,
+                    )
+                elif road_relation == models.LinkageTag.SUCCESSOR:
+                    _raise_lane_linkage_gap_issue(
+                        checker_data,
+                        rule_uid,
+                        lane,
+                        target_lane,
+                    )
+
+
 def _check_inter_roads_smoothness(
     checker_data: models.CheckerData, rule_uid: str
 ) -> None:
     road_id_map = utils.get_road_id_map(checker_data.input_file_xml_root)
 
-    for road_id, road in road_id_map.items():
+    for road in road_id_map.values():
         successor = utils.get_road_linkage(road, models.LinkageTag.SUCCESSOR)
         predecessor = utils.get_road_linkage(road, models.LinkageTag.PREDECESSOR)
 
@@ -517,151 +657,28 @@ def _check_inter_roads_smoothness(
         road_length = utils.get_road_length(road)
 
         if successor is not None:
-            # current_lane_section
-            last_lane_section = road_lane_sections[-1]
-
-            # next_lane_section
-            successor_road = road_id_map[successor.id]
-            successor_road_length = utils.get_road_length(successor_road)
-            successor_lane_sections = (
-                utils.get_sorted_lane_sections_with_length_from_road(successor_road)
+            _validate_inter_road_smoothness(
+                road=road,
+                linkage=successor,
+                road_relation=models.LinkageTag.SUCCESSOR,
+                road_lane_section=road_lane_sections[-1],
+                road_s=road_length,
+                road_id_map=road_id_map,
+                checker_data=checker_data,
+                rule_uid=rule_uid,
             )
 
-            successor_lane_section = None
-            successor_s = 0.0
-            if successor.contact_point == models.ContactPoint.END:
-                successor_lane_section = successor_lane_sections[-1]
-                successor_s = successor_road_length
-            elif successor.contact_point == models.ContactPoint.START:
-                successor_lane_section = successor_lane_sections[0]
-                successor_s = 0.0
-
-            lanes = utils.get_left_and_right_lanes_from_lane_section(
-                last_lane_section.lane_section
+        if predecessor is not None:
+            _validate_inter_road_smoothness(
+                road=road,
+                linkage=predecessor,
+                road_relation=models.LinkageTag.PREDECESSOR,
+                road_lane_section=road_lane_sections[0],
+                road_s=0.0,
+                road_id_map=road_id_map,
+                checker_data=checker_data,
+                rule_uid=rule_uid,
             )
-            successor_lanes = utils.get_left_and_right_lanes_from_lane_section(
-                successor_lane_section.lane_section
-            )
-
-            lane_offset = utils.get_lane_offset_value_from_road_by_s(road, road_length)
-            successor_lane_offset = utils.get_lane_offset_value_from_road_by_s(
-                successor_road, successor_s
-            )
-
-            lanes_outer_points = utils.get_outer_border_points_from_lane_group_by_s(
-                lanes,
-                lane_offset,
-                utils.get_s_from_lane_section(last_lane_section.lane_section),
-                road_length,
-            )
-            lanes_outer_points[0] = lane_offset
-            successor_lanes_outer_points = (
-                utils.get_outer_border_points_from_lane_group_by_s(
-                    successor_lanes,
-                    successor_lane_offset,
-                    utils.get_s_from_lane_section(successor_lane_section.lane_section),
-                    successor_s,
-                )
-            )
-            successor_lanes_outer_points[0] = successor_lane_offset
-
-            for lane in lanes:
-                successors = utils.get_successor_lane_ids(lane)
-                lane_id = utils.get_lane_id(lane)
-
-                current_c0 = _compute_inner_point(
-                    lanes_outer_points,
-                    lane_id,
-                    road,
-                    road_length,
-                )
-                current_c1 = _compute_outer_point(
-                    lanes_outer_points,
-                    lane_id,
-                    road,
-                    road_length,
-                )
-
-                if len(successors) > 1:
-                    matches_threshold = 1
-                else:
-                    matches_threshold = 2
-
-                for next_lane_id in successors:
-                    next_c0 = _compute_inner_point(
-                        successor_lanes_outer_points,
-                        next_lane_id,
-                        successor_road,
-                        successor_s,
-                    )
-                    next_c1 = _compute_outer_point(
-                        successor_lanes_outer_points,
-                        next_lane_id,
-                        successor_road,
-                        successor_s,
-                    )
-
-                    matches = 0
-
-                    if (
-                        distance.euclidean(
-                            (current_c0.x, current_c0.y), (next_c0.x, next_c0.y)
-                        )
-                        < TOLERANCE_THRESHOLD
-                    ):
-                        matches += 1
-                    if (
-                        distance.euclidean(
-                            (current_c0.x, current_c0.y), (next_c1.x, next_c1.y)
-                        )
-                        < TOLERANCE_THRESHOLD
-                    ):
-                        matches += 1
-                    if (
-                        distance.euclidean(
-                            (current_c1.x, current_c1.y), (next_c0.x, next_c0.y)
-                        )
-                        < TOLERANCE_THRESHOLD
-                    ):
-                        matches += 1
-                    if (
-                        distance.euclidean(
-                            (current_c1.x, current_c1.y), (next_c1.x, next_c1.y)
-                        )
-                        < TOLERANCE_THRESHOLD
-                    ):
-                        matches += 1
-
-                    if matches < matches_threshold:
-                        print("ISSUE")
-                        print(f"road id      - {road_id}      --  lane ={lane_id}")
-                        print(
-                            f"successor id - {successor.id}      --  lane ={next_lane_id}"
-                        )
-                        print(f"matches = {matches} < {matches_threshold}")
-                        print(current_c0, current_c1)
-                        print(next_c0, next_c1)
-
-        # if predecessor is not None:
-        #     # current_lane_section
-        #     first_lane_section = road_lane_sections[0]
-
-        #     # next_lane_section
-        #     predecessor_road = road_id_map[predecessor.id]
-        #     predecessor_lane_sections = (
-        #         utils.get_sorted_lane_sections_with_length_from_road(predecessor_road)
-        #     )
-        #     predecessor_lane_section = None
-        #     if predecessor.contact_point == models.ContactPoint.END:
-        #         predecessor_lane_section = predecessor_lane_sections[-1]
-        #     elif predecessor.contact_point == models.ContactPoint.START:
-        #         predecessor_lane_section = predecessor_lane_sections[0]
-
-        #     lanes = utils.get_left_and_right_lanes_from_lane_section(
-        #         first_lane_section.lane_section
-        #     )
-        #     for lane in lanes:
-        #         print(lane)
 
 
 def check_rule(checker_data: models.CheckerData) -> None:
