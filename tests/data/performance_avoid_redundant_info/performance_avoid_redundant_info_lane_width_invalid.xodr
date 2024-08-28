@@ -5,6 +5,11 @@
     west="0.0000000000000000e+00">
   </header>
   <road name="" length="1.5250000000000000e+02" id="1" junction="-1" rule="RHT">
+    <planView>
+      <geometry s="0.0000000000000000e+00" x="0.0" y="0.0" hdg="0.0" length="1.0000000000000000e+03">
+        <line/>
+      </geometry>
+    </planView>
     <lanes>
       <laneSection s="0.0000000000000000e+00">
         <left>

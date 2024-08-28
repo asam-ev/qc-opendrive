@@ -17,13 +17,15 @@ FLOAT_COMPARISON_THRESHOLD = 1e-6
 def _raise_issue(
     checker_data: models.CheckerData,
     rule_uid: str,
+    road: etree._ElementTree,
+    lane_section_with_length: models.LaneSectionWithLength,
     lane: etree._Element,
     issue_severity: IssueSeverity,
 ) -> None:
     issue_id = checker_data.result.register_issue(
         checker_bundle_name=constants.BUNDLE_NAME,
         checker_id=semantic_constants.CHECKER_ID,
-        description=f" Lanes that have a width of zero at the end of the lane section shall have no predecessor element.",
+        description=f" Lanes that have a width of zero at the end of the lane section shall have no successor element.",
         level=issue_severity,
         rule_uid=rule_uid,
     )
@@ -36,10 +38,33 @@ def _raise_issue(
         description="Lane with width zero and successors.",
     )
 
+    s_section = utils.get_s_from_lane_section(lane_section_with_length.lane_section)
+
+    if s_section is None:
+        return
+
+    s = s_section + lane_section_with_length.length
+
+    inertial_point = utils.get_middle_point_xyz_at_height_zero_from_lane_by_s(
+        road, lane_section_with_length.lane_section, lane, s
+    )
+    if inertial_point is not None:
+        checker_data.result.add_inertial_location(
+            checker_bundle_name=constants.BUNDLE_NAME,
+            checker_id=semantic_constants.CHECKER_ID,
+            issue_id=issue_id,
+            x=inertial_point.x,
+            y=inertial_point.y,
+            z=inertial_point.z,
+            description="Lane with width zero and successors.",
+        )
+
 
 def _raise_issue_based_on_lane_id(
     lane: etree._Element,
     lane_id: int,
+    road: etree._ElementTree,
+    lane_section_with_length: models.LaneSectionWithLength,
     checker_data: models.CheckerData,
     rule_uid: str,
 ) -> None:
@@ -49,9 +74,23 @@ def _raise_issue_based_on_lane_id(
         # a width (see Rule 77) but it might have a predecessor).
         # In this case the severity level should be changed
         # to "WARNING"
-        _raise_issue(checker_data, rule_uid, lane, IssueSeverity.WARNING)
+        _raise_issue(
+            checker_data,
+            rule_uid,
+            road,
+            lane_section_with_length,
+            lane,
+            IssueSeverity.WARNING,
+        )
     else:
-        _raise_issue(checker_data, rule_uid, lane, IssueSeverity.ERROR)
+        _raise_issue(
+            checker_data,
+            rule_uid,
+            road,
+            lane_section_with_length,
+            lane,
+            IssueSeverity.ERROR,
+        )
 
 
 def _check_road_lane_link_zero_width_at_end(
@@ -85,6 +124,8 @@ def _check_road_lane_link_zero_width_at_end(
                         _raise_issue_based_on_lane_id(
                             lane,
                             lane_id,
+                            road,
+                            lane_section,
                             checker_data,
                             rule_uid,
                         )
@@ -152,6 +193,8 @@ def _check_incoming_road_junction_successor_lane_width_zero(
                 _raise_issue_based_on_lane_id(
                     lane,
                     lane_id,
+                    road,
+                    last_lane_section,
                     checker_data,
                     rule_uid,
                 )
@@ -216,6 +259,8 @@ def _check_connecting_road_lane_width_zero_with_successor(
                 _raise_issue_based_on_lane_id(
                     lane,
                     lane_id,
+                    road,
+                    last_lane_section,
                     checker_data,
                     rule_uid,
                 )
