@@ -12,6 +12,7 @@ This project implements the [ASAM OpenDrive Checker Bundle](checker_bundle_doc.m
   - [Register Checker Bundle to ASAM Quality Checker Framework](#register-checker-bundle-to-asam-quality-checker-framework)
     - [Linux Manifest Template](#linux-manifest-template)
     - [Windows Manifest Template](#windows-manifest-template)
+    - [Example Configuration File](#example-configuration-file)
   - [Tests](#tests)
     - [Execute tests](#execute-tests)
   - [Contributing](#contributing)
@@ -149,6 +150,31 @@ If the asam-qc-opendrive is installed in a virtual environment, the `exec_comman
 ```
 
 Replace `C:\\> <venv>\\Scripts\\activate.bat` by the path to your virtual environment.
+
+### Example Configuration File
+
+An example configuration file for using this Checker Bundle within the ASAM Quality Checker Framework is as follows.
+
+```xml
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Config>
+
+    <Param name="InputFile" value="test.xodr" />
+
+    <CheckerBundle application="xodrBundle">
+        <Param name="resultFile" value="xodr_bundle_report.xqar" />
+        <Checker checkerId="semantic_xodr" maxLevel="1" minLevel="3" />
+        <Checker checkerId="geometry_xodr" maxLevel="1" minLevel="3" />
+        <Checker checkerId="performance_xodr" maxLevel="1" minLevel="3" />
+    </CheckerBundle>
+
+    <ReportModule application="TextReport">
+        <Param name="strInputFile" value="Result.xqar" />
+        <Param name="strReportFile" value="Report.txt" />
+    </ReportModule>
+
+</Config>
+```
 
 ## Tests
 
