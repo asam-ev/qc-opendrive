@@ -18,6 +18,8 @@ RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.7.0"
 def _check_true_level_on_side(
     root: etree._ElementTree,
     side_lanes: List[etree._Element],
+    road: etree._ElementTree,
+    lane_section_with_length: models.LaneSectionWithLength,
     result: Result,
     rule_uid: str,
 ) -> None:
@@ -58,6 +60,30 @@ def _check_true_level_on_side(
                     xpath=path,
                     description=f"Lane id {index} @level=False where previous lane id @level=True.",
                 )
+
+                s_section = utils.get_s_from_lane_section(
+                    lane_section_with_length.lane_section
+                )
+                if s_section is None:
+                    continue
+
+                s = s_section + lane_section_with_length.length / 2.0
+
+                inertial_point = (
+                    utils.get_middle_point_xyz_at_height_zero_from_lane_by_s(
+                        road, lane_section_with_length.lane_section, lane, s
+                    )
+                )
+                if inertial_point is not None:
+                    result.add_inertial_location(
+                        checker_bundle_name=constants.BUNDLE_NAME,
+                        checker_id=semantic_constants.CHECKER_ID,
+                        issue_id=issue_id,
+                        x=inertial_point.x,
+                        y=inertial_point.y,
+                        z=inertial_point.z,
+                        description="Lane level false when previous lane level is True.",
+                    )
 
 
 def _get_linkage_level_warnings(
@@ -206,6 +232,32 @@ def _check_level_change_linkage_roads(
                     description="",
                 )
 
+                s = None
+                if linkage_tag == models.LinkageTag.PREDECESSOR:
+                    s = 0
+                if linkage_tag == models.LinkageTag.SUCCESSOR:
+                    s = utils.get_road_length(road)
+
+                if s is None:
+                    continue
+
+                inertial_point = (
+                    utils.get_middle_point_xyz_at_height_zero_from_lane_by_s(
+                        road, current_lane_section, lane, s
+                    )
+                )
+
+                if inertial_point is not None:
+                    result.add_inertial_location(
+                        checker_bundle_name=constants.BUNDLE_NAME,
+                        checker_id=semantic_constants.CHECKER_ID,
+                        issue_id=issue_id,
+                        x=inertial_point.x,
+                        y=inertial_point.y,
+                        z=inertial_point.z,
+                        description="Lane levels are not the same between two connected roads.",
+                    )
+
 
 def _check_level_among_lane_sections(
     checker_data: models.CheckerData,
@@ -257,9 +309,12 @@ def _check_level_in_lane_section(
 ) -> None:
     roads = utils.get_roads(checker_data.input_file_xml_root)
     for road in roads:
-        lane_sections = utils.get_lane_sections(road)
+        lane_sections_with_length = (
+            utils.get_sorted_lane_sections_with_length_from_road(road)
+        )
 
-        for lane_section in lane_sections:
+        for lane_section_with_length in lane_sections_with_length:
+            lane_section = lane_section_with_length.lane_section
             left_lanes_list = utils.get_left_lanes_from_lane_section(lane_section)
             right_lanes_list = utils.get_right_lanes_from_lane_section(lane_section)
 
@@ -272,6 +327,8 @@ def _check_level_in_lane_section(
             _check_true_level_on_side(
                 checker_data.input_file_xml_root,
                 sorted_left_lane,
+                road,
+                lane_section_with_length,
                 checker_data.result,
                 rule_uid,
             )
@@ -285,6 +342,8 @@ def _check_level_in_lane_section(
             _check_true_level_on_side(
                 checker_data.input_file_xml_root,
                 sorted_right_lane,
+                road,
+                lane_section_with_length,
                 checker_data.result,
                 rule_uid,
             )
