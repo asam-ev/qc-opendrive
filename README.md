@@ -166,6 +166,7 @@ An example configuration file for using this Checker Bundle within the ASAM Qual
         <Checker checkerId="semantic_xodr" maxLevel="1" minLevel="3" />
         <Checker checkerId="geometry_xodr" maxLevel="1" minLevel="3" />
         <Checker checkerId="performance_xodr" maxLevel="1" minLevel="3" />
+        <Checker checkerId="smoothness_xodr" maxLevel="1" minLevel="3" />
     </CheckerBundle>
 
     <ReportModule application="TextReport">
