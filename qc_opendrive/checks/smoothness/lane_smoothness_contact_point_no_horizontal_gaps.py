@@ -115,6 +115,7 @@ def _check_geometries_gap(
             (x0, y0),
         )
         if gap_size > TOLERANCE_THRESHOLD:
+            print(f"geometry gap size = {gap_size}")
             _raise_geometry_gap_issue(
                 checker_data, rule_uid, previous_geometry, current_geometry
             )
@@ -187,6 +188,7 @@ def _equal_outer_border_points(
         (current_xy.x, current_xy.y),
     )
     if gap_size > TOLERANCE_THRESHOLD:
+        print(f"same road outer gap size = {gap_size}")
         return False
     return True
 
@@ -214,6 +216,7 @@ def _equal_inner_border_points(
         (current_xy.x, current_xy.y),
     )
     if gap_size > TOLERANCE_THRESHOLD:
+        print(f"same road inner gap size = {gap_size}")
         return False
     return True
 
@@ -680,6 +683,10 @@ def _validate_inter_road_smoothness(
                 matches += 1
 
             if matches < matches_threshold:
+                print("-" * 10)
+                print(f"matches = {matches} < {matches_threshold}")
+                print(f"c inner = {current_c0}, outer = {current_c1}")
+                print(f"t inner = {target_c0}, outer = {target_c1}")
                 target_lane = next(
                     target_lane
                     for target_lane in target_lanes
@@ -849,6 +856,12 @@ def _validate_junction_connection_gaps(
             matches += 1
 
         if matches < 2:
+            print("-" * 10)
+            print(f"from_id = {from_id} / to_id = {to_id}")
+            print(f"matches = {matches} < {2}")
+            print(f"c inner = {current_c0}, outer = {current_c1}")
+            print(f"t inner = {target_c0}, outer = {target_c1}")
+
             target_lane = next(
                 target_lane
                 for target_lane in target_lanes
@@ -858,8 +871,8 @@ def _validate_junction_connection_gaps(
                 _raise_lane_linkage_gap_issue(
                     checker_data,
                     rule_uid,
-                    target_lane,
                     from_lane,
+                    target_lane,
                 )
             elif road_relation == models.LinkageTag.SUCCESSOR:
                 _raise_lane_linkage_gap_issue(
