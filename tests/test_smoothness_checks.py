@@ -53,6 +53,21 @@ from test_setup import *
             0,
             [],
         ),
+        (
+            "junction_invalid_conn_smoothness",
+            2,
+            [
+                "/OpenDRIVE/road[1]/lanes/laneSection/right/lane",
+                "/OpenDRIVE/road[3]/lanes/laneSection/left/lane",
+                "/OpenDRIVE/road[2]/lanes/laneSection/left/lane",
+                "/OpenDRIVE/road[2]/lanes/laneSection/right/lane",
+            ],
+        ),
+        (
+            "junction_valid_conn_smoothness",
+            0,
+            [],
+        ),
     ],
 )
 def test_road_lane_access_no_mix_of_deny_or_allow_examples(

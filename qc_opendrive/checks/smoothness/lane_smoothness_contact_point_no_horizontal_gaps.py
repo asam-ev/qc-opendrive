@@ -699,12 +699,182 @@ def _validate_inter_road_smoothness(
                     )
 
 
+def _validate_junction_connection_gaps(
+    incoming_road: etree._ElementTree,
+    incoming_lane_section: models.LaneSectionWithLength,
+    incoming_road_s: float,
+    connection: etree._ElementTree,
+    road_relation: models.ContactPoint,
+    road_id_map: Dict[int, etree._ElementTree],
+    checker_data: models.CheckerData,
+    rule_uid: str,
+):
+    connection_contact_point = utils.get_contact_point_from_connection(connection)
+    connection_road_id = utils.get_connecting_road_id_from_connection(connection)
+    if connection_contact_point is None or connection_road_id is None:
+        return
+
+    connection_road = road_id_map.get(connection_road_id)
+    if connection_road is None:
+        return
+
+    contact_lane_sections = (
+        utils.get_contact_lane_section_from_junction_connection_road(
+            connection_road, connection_contact_point
+        )
+    )
+    if contact_lane_sections is None:
+        return
+
+    lane_links = utils.get_lane_links_from_connection(connection)
+
+    if len(lane_links) == 0:
+        return
+
+    target_road = connection_road
+    target_road_length = utils.get_road_length(target_road)
+    target_lane_sections = utils.get_sorted_lane_sections_with_length_from_road(
+        target_road
+    )
+
+    target_lane_section = None
+    target_s = 0.0
+    if connection_contact_point == models.ContactPoint.END:
+        target_lane_section = target_lane_sections[-1]
+        target_s = target_road_length
+    elif connection_contact_point == models.ContactPoint.START:
+        target_lane_section = target_lane_sections[0]
+        target_s = 0.0
+
+    lanes = utils.get_left_and_right_lanes_from_lane_section(
+        incoming_lane_section.lane_section
+    )
+    target_lanes = utils.get_left_and_right_lanes_from_lane_section(
+        target_lane_section.lane_section
+    )
+
+    lane_offset = utils.get_lane_offset_value_from_road_by_s(
+        incoming_road, incoming_road_s
+    )
+    target_lane_offset = utils.get_lane_offset_value_from_road_by_s(
+        target_road, target_s
+    )
+
+    lanes_outer_points = utils.get_outer_border_points_from_lane_group_by_s(
+        lanes,
+        lane_offset,
+        utils.get_s_from_lane_section(incoming_lane_section.lane_section),
+        incoming_road_s,
+    )
+    lanes_outer_points[0] = lane_offset
+    target_lanes_outer_points = utils.get_outer_border_points_from_lane_group_by_s(
+        target_lanes,
+        target_lane_offset,
+        utils.get_s_from_lane_section(target_lane_section.lane_section),
+        target_s,
+    )
+    target_lanes_outer_points[0] = target_lane_offset
+
+    for link in lane_links:
+        # incoming road lane id
+        from_id = utils.get_from_attribute_from_lane_link(link)
+        # connection road lane id
+        to_id = utils.get_to_attribute_from_lane_link(link)
+
+        if from_id is None or to_id is None:
+            continue
+
+        from_lane = utils.get_lane_from_lane_section(
+            incoming_lane_section.lane_section, from_id
+        )
+
+        if utils.get_type_from_lane(from_lane) not in DRIVABLE_LANE_TYPES:
+            continue
+
+        current_c0 = _compute_inner_point(
+            lanes_outer_points,
+            from_id,
+            incoming_road,
+            incoming_road_s,
+        )
+        current_c1 = _compute_outer_point(
+            lanes_outer_points,
+            from_id,
+            incoming_road,
+            incoming_road_s,
+        )
+        if current_c0 is None or current_c1 is None:
+            continue
+
+        target_c0 = _compute_inner_point(
+            target_lanes_outer_points,
+            to_id,
+            target_road,
+            target_s,
+        )
+        target_c1 = _compute_outer_point(
+            target_lanes_outer_points,
+            to_id,
+            target_road,
+            target_s,
+        )
+
+        if target_c0 is None or target_c1 is None:
+            continue
+
+        matches = 0
+        # The method will evaluate all pairs to check if we can get the
+        # desired number of points matched for the horizontal gap.
+        if (
+            distance.euclidean((current_c0.x, current_c0.y), (target_c0.x, target_c0.y))
+            < TOLERANCE_THRESHOLD
+        ):
+            matches += 1
+        if (
+            distance.euclidean((current_c0.x, current_c0.y), (target_c1.x, target_c1.y))
+            < TOLERANCE_THRESHOLD
+        ):
+            matches += 1
+        if (
+            distance.euclidean((current_c1.x, current_c1.y), (target_c0.x, target_c0.y))
+            < TOLERANCE_THRESHOLD
+        ):
+            matches += 1
+        if (
+            distance.euclidean((current_c1.x, current_c1.y), (target_c1.x, target_c1.y))
+            < TOLERANCE_THRESHOLD
+        ):
+            matches += 1
+
+        if matches < 2:
+            target_lane = next(
+                target_lane
+                for target_lane in target_lanes
+                if utils.get_lane_id(target_lane) == to_id
+            )
+            if road_relation == models.LinkageTag.PREDECESSOR:
+                _raise_lane_linkage_gap_issue(
+                    checker_data,
+                    rule_uid,
+                    target_lane,
+                    from_lane,
+                )
+            elif road_relation == models.LinkageTag.SUCCESSOR:
+                _raise_lane_linkage_gap_issue(
+                    checker_data,
+                    rule_uid,
+                    from_lane,
+                    target_lane,
+                )
+
+
 def _check_inter_roads_smoothness(
     checker_data: models.CheckerData, rule_uid: str
 ) -> None:
     road_id_map = utils.get_road_id_map(checker_data.input_file_xml_root)
+    junction_id_map = utils.get_junction_id_map(checker_data.input_file_xml_root)
 
-    for road in road_id_map.values():
+    for road_id, road in road_id_map.items():
         successor = utils.get_road_linkage(road, models.LinkageTag.SUCCESSOR)
         predecessor = utils.get_road_linkage(road, models.LinkageTag.PREDECESSOR)
 
@@ -734,6 +904,59 @@ def _check_inter_roads_smoothness(
                 checker_data=checker_data,
                 rule_uid=rule_uid,
             )
+
+        successor_junction_id = utils.get_linked_junction_id(
+            road, models.LinkageTag.SUCCESSOR
+        )
+        predecessor_junction_id = utils.get_linked_junction_id(
+            road, models.LinkageTag.PREDECESSOR
+        )
+
+        if successor_junction_id is not None:
+            connections = utils.get_connections_between_road_and_junction(
+                road_id,
+                successor_junction_id,
+                road_id_map,
+                junction_id_map,
+                models.ContactPoint.END,
+            )
+
+            incoming_road_lane_section = road_lane_sections[-1]
+
+            for connection in connections:
+                _validate_junction_connection_gaps(
+                    incoming_road=road,
+                    incoming_lane_section=incoming_road_lane_section,
+                    incoming_road_s=road_length,
+                    connection=connection,
+                    road_relation=models.LinkageTag.SUCCESSOR,
+                    road_id_map=road_id_map,
+                    checker_data=checker_data,
+                    rule_uid=rule_uid,
+                )
+
+        if predecessor_junction_id is not None:
+            connections = utils.get_connections_between_road_and_junction(
+                road_id,
+                predecessor_junction_id,
+                road_id_map,
+                junction_id_map,
+                models.ContactPoint.START,
+            )
+
+            incoming_road_lane_section = road_lane_sections[0]
+
+            for connection in connections:
+                _validate_junction_connection_gaps(
+                    incoming_road=road,
+                    incoming_lane_section=incoming_road_lane_section,
+                    incoming_road_s=0.0,
+                    connection=connection,
+                    road_relation=models.LinkageTag.PREDECESSOR,
+                    road_id_map=road_id_map,
+                    checker_data=checker_data,
+                    rule_uid=rule_uid,
+                )
 
 
 def check_rule(checker_data: models.CheckerData) -> None:
