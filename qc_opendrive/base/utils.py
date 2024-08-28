@@ -277,6 +277,10 @@ def get_lane_level_from_lane(lane: etree._ElementTree) -> bool:
     return lane.get("level") == "true"
 
 
+def get_type_from_lane(lane: etree._Element) -> Union[str, None]:
+    return lane.get("type")
+
+
 def get_junctions(root: etree._ElementTree) -> List[etree._ElementTree]:
     return list(root.iter("junction"))
 
