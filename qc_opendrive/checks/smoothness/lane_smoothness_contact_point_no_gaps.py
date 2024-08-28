@@ -129,9 +129,11 @@ def _compute_inner_point(
     lane_id: int,
     road: etree._Element,
     road_s: float,
-) -> models.Point3D:
+) -> Union[None, models.Point3D]:
     sign = -1 if lane_id < 0 else 1
-    current_lane_t = current_lane_t = lanes_outer_points[lane_id - 1 * sign]
+    current_lane_t = current_lane_t = lanes_outer_points.get(lane_id - 1 * sign)
+    if current_lane_t is None:
+        return None
     return utils.get_point_xyz_from_road(road=road, s=road_s, t=current_lane_t, h=0)
 
 
@@ -140,8 +142,10 @@ def _compute_outer_point(
     lane_id: int,
     road: etree._Element,
     road_s: float,
-) -> models.Point3D:
-    current_lane_t = lanes_outer_points[lane_id]
+) -> Union[None, models.Point3D]:
+    current_lane_t = lanes_outer_points.get(lane_id)
+    if current_lane_t is None:
+        return None
     return utils.get_point_xyz_from_road(road=road, s=road_s, t=current_lane_t, h=0)
 
 
@@ -153,12 +157,15 @@ def _equal_outer_border_points(
     next_lane_id: int,
     successor_outer_points: Dict[int, float],
     successor_s: float,
-):
+) -> bool:
     current_xy = _compute_outer_point(current_outer_points, lane_id, road, current_s)
 
     next_xy = _compute_outer_point(
         successor_outer_points, next_lane_id, road, successor_s
     )
+
+    if current_xy is None or next_xy is None:
+        return False
 
     gap_size = distance.euclidean(
         (next_xy.x, next_xy.y),
@@ -177,12 +184,15 @@ def _equal_inner_border_points(
     next_lane_id: int,
     successor_outer_points: Dict[int, float],
     successor_s: float,
-):
+) -> bool:
     current_xy = _compute_inner_point(current_outer_points, lane_id, road, current_s)
 
     next_xy = _compute_inner_point(
         successor_outer_points, next_lane_id, road, successor_s
     )
+
+    if current_xy is None or next_xy is None:
+        return False
 
     gap_size = distance.euclidean(
         (next_xy.x, next_xy.y),
@@ -227,17 +237,18 @@ def _validate_same_road_lane_successors(
             successor_outer_points,
             successor_road_s,
         ):
-            next_lane = next(
-                prev_lane
-                for prev_lane in successor_lanes
-                if utils.get_lane_id(prev_lane) == next_lane_id
-            )
-            _raise_lane_linkage_gap_issue(
-                checker_data,
-                rule_uid,
-                lane,
-                next_lane,
-            )
+            next_lane = [
+                next_lane
+                for next_lane in successor_lanes
+                if utils.get_lane_id(next_lane) == next_lane_id
+            ]
+            if len(next_lane) == 1:
+                _raise_lane_linkage_gap_issue(
+                    checker_data,
+                    rule_uid,
+                    lane,
+                    next_lane[0],
+                )
 
     elif len(successors) == 2:
         successors = sorted(successors)
@@ -253,17 +264,18 @@ def _validate_same_road_lane_successors(
             successor_outer_points,
             successor_road_s,
         ):
-            next_lane = next(
-                prev_lane
-                for prev_lane in successor_lanes
-                if utils.get_lane_id(prev_lane) == bottom_successor_id
-            )
-            _raise_lane_linkage_gap_issue(
-                checker_data,
-                rule_uid,
-                lane,
-                next_lane,
-            )
+            next_lane = [
+                next_lane
+                for next_lane in successor_lanes
+                if utils.get_lane_id(next_lane) == bottom_successor_id
+            ]
+            if len(next_lane) == 1:
+                _raise_lane_linkage_gap_issue(
+                    checker_data,
+                    rule_uid,
+                    lane,
+                    next_lane[0],
+                )
 
         if not _equal_inner_border_points(
             road,
@@ -274,31 +286,33 @@ def _validate_same_road_lane_successors(
             successor_outer_points,
             successor_road_s,
         ):
-            next_lane = next(
-                prev_lane
-                for prev_lane in successor_lanes
-                if utils.get_lane_id(prev_lane) == upper_successor_id
-            )
-            _raise_lane_linkage_gap_issue(
-                checker_data,
-                rule_uid,
-                lane,
-                next_lane,
-            )
+            next_lane = [
+                next_lane
+                for next_lane in successor_lanes
+                if utils.get_lane_id(next_lane) == upper_successor_id
+            ]
+            if len(next_lane) == 1:
+                _raise_lane_linkage_gap_issue(
+                    checker_data,
+                    rule_uid,
+                    lane,
+                    next_lane[0],
+                )
 
     else:
         for extra_lane_id in successors[1:-1]:
-            next_lane = next(
-                prev_lane
-                for prev_lane in successor_lanes
-                if utils.get_lane_id(prev_lane) == extra_lane_id
-            )
-            _raise_lane_linkage_gap_issue(
-                checker_data,
-                rule_uid,
-                lane,
-                next_lane,
-            )
+            next_lane = [
+                next_lane
+                for next_lane in successor_lanes
+                if utils.get_lane_id(next_lane) == extra_lane_id
+            ]
+            if len(next_lane) == 1:
+                _raise_lane_linkage_gap_issue(
+                    checker_data,
+                    rule_uid,
+                    lane,
+                    next_lane[0],
+                )
 
 
 def _validate_same_road_lane_predecessors(
@@ -335,17 +349,18 @@ def _validate_same_road_lane_predecessors(
             current_outer_points,
             current_road_s,
         ):
-            prev_lane = next(
+            prev_lane = [
                 prev_lane
                 for prev_lane in prev_lanes
                 if utils.get_lane_id(prev_lane) == prev_lane_id
-            )
-            _raise_lane_linkage_gap_issue(
-                checker_data,
-                rule_uid,
-                prev_lane,
-                lane,
-            )
+            ]
+            if len(prev_lane) == 1:
+                _raise_lane_linkage_gap_issue(
+                    checker_data,
+                    rule_uid,
+                    prev_lane[0],
+                    lane,
+                )
 
     elif len(predecessors) == 2:
         predecessors = sorted(predecessors)
@@ -361,17 +376,18 @@ def _validate_same_road_lane_predecessors(
             current_outer_points,
             current_road_s,
         ):
-            prev_lane = next(
+            prev_lane = [
                 prev_lane
                 for prev_lane in prev_lanes
                 if utils.get_lane_id(prev_lane) == upper_prev_id
-            )
-            _raise_lane_linkage_gap_issue(
-                checker_data,
-                rule_uid,
-                prev_lane,
-                lane,
-            )
+            ]
+            if len(prev_lane) == 1:
+                _raise_lane_linkage_gap_issue(
+                    checker_data,
+                    rule_uid,
+                    prev_lane[0],
+                    lane,
+                )
 
         if not _equal_inner_border_points(
             road,
@@ -382,31 +398,33 @@ def _validate_same_road_lane_predecessors(
             current_outer_points,
             current_road_s,
         ):
-            prev_lane = next(
+            prev_lane = [
                 prev_lane
                 for prev_lane in prev_lanes
                 if utils.get_lane_id(prev_lane) == bottom_prev_id
-            )
-            _raise_lane_linkage_gap_issue(
-                checker_data,
-                rule_uid,
-                prev_lane,
-                lane,
-            )
+            ]
+            if len(prev_lane) == 1:
+                _raise_lane_linkage_gap_issue(
+                    checker_data,
+                    rule_uid,
+                    prev_lane[0],
+                    lane,
+                )
 
     else:
         for extra_lane_id in predecessors[1:-1]:
-            prev_lane = next(
+            prev_lane = [
                 prev_lane
                 for prev_lane in prev_lanes
                 if utils.get_lane_id(prev_lane) == extra_lane_id
-            )
-            _raise_lane_linkage_gap_issue(
-                checker_data,
-                rule_uid,
-                prev_lane,
-                lane,
-            )
+            ]
+            if len(prev_lane) == 1:
+                _raise_lane_linkage_gap_issue(
+                    checker_data,
+                    rule_uid,
+                    prev_lane[0],
+                    lane,
+                )
 
 
 def _check_road_lane_sections_gaps(
@@ -516,7 +534,9 @@ def _validate_inter_road_smoothness(
     lane_section = road_lane_section
 
     # target_lane_section
-    target_road = road_id_map[linkage.id]
+    target_road = road_id_map.get(linkage.id)
+    if target_road is None:
+        return
     target_road_length = utils.get_road_length(target_road)
     target_lane_sections = utils.get_sorted_lane_sections_with_length_from_road(
         target_road
@@ -577,6 +597,8 @@ def _validate_inter_road_smoothness(
             road,
             road_s,
         )
+        if current_c0 is None or current_c1 is None:
+            continue
 
         if len(connections) > 1:
             matches_threshold = 1
@@ -584,38 +606,49 @@ def _validate_inter_road_smoothness(
             matches_threshold = 2
 
         for conn_lane_id in connections:
-            prev_c0 = _compute_inner_point(
+            target_c0 = _compute_inner_point(
                 target_lanes_outer_points,
                 conn_lane_id,
                 target_road,
                 target_s,
             )
-            prev_c1 = _compute_outer_point(
+            target_c1 = _compute_outer_point(
                 target_lanes_outer_points,
                 conn_lane_id,
                 target_road,
                 target_s,
             )
+
+            if target_c0 is None or target_c1 is None:
+                continue
 
             matches = 0
 
             if (
-                distance.euclidean((current_c0.x, current_c0.y), (prev_c0.x, prev_c0.y))
+                distance.euclidean(
+                    (current_c0.x, current_c0.y), (target_c0.x, target_c0.y)
+                )
                 < TOLERANCE_THRESHOLD
             ):
                 matches += 1
             if (
-                distance.euclidean((current_c0.x, current_c0.y), (prev_c1.x, prev_c1.y))
+                distance.euclidean(
+                    (current_c0.x, current_c0.y), (target_c1.x, target_c1.y)
+                )
                 < TOLERANCE_THRESHOLD
             ):
                 matches += 1
             if (
-                distance.euclidean((current_c1.x, current_c1.y), (prev_c0.x, prev_c0.y))
+                distance.euclidean(
+                    (current_c1.x, current_c1.y), (target_c0.x, target_c0.y)
+                )
                 < TOLERANCE_THRESHOLD
             ):
                 matches += 1
             if (
-                distance.euclidean((current_c1.x, current_c1.y), (prev_c1.x, prev_c1.y))
+                distance.euclidean(
+                    (current_c1.x, current_c1.y), (target_c1.x, target_c1.y)
+                )
                 < TOLERANCE_THRESHOLD
             ):
                 matches += 1
