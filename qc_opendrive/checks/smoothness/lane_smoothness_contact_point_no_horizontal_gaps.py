@@ -266,7 +266,8 @@ def _validate_same_road_lane_successors(
                 )
 
     elif len(successors) == 2:
-        successors = sorted(successors)
+        reverse = True if lane_id < 0 else False
+        successors = sorted(successors, reverse=reverse)
         upper_successor_id = successors[0]
         bottom_successor_id = successors[-1]
 
@@ -378,7 +379,8 @@ def _validate_same_road_lane_predecessors(
                 )
 
     elif len(predecessors) == 2:
-        predecessors = sorted(predecessors)
+        reverse = True if lane_id < 0 else False
+        predecessors = sorted(predecessors, reverse=reverse)
         upper_prev_id = predecessors[0]
         bottom_prev_id = predecessors[-1]
 
