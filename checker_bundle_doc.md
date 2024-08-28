@@ -40,3 +40,9 @@
 * Description: Evaluates elements in the file to guarantee they are optimized.
 * Addressed rules:
   * asam.net:xodr:1.7.0:performance.avoid_redundant_info
+
+### smoothness_xodr
+
+* Description: Evaluates elements in the file and their geometries to guarantee they are in conformity with the standard definition of smoothness.
+* Addressed rules:
+  * asam.net:xodr:1.7.0:lane_smoothness.contact_point_no_horizontal_gaps
