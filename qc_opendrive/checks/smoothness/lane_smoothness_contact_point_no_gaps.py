@@ -126,151 +126,83 @@ def _check_plan_view_gaps(
         previous_geometry = geometry
 
 
-def _get_cumulative_width(lane_id, lane_section, s) -> float:
-    lane_width = 0.0
+def _compute_inner_point(
+    lanes_outer_points: Dict[int, float],
+    lane_id: int,
+    road: etree._Element,
+    road_s: float,
+) -> models.Point3D:
     sign = -1 if lane_id < 0 else 1
-
-    for i in range(1, abs(lane_id) + 1):
-        lane = utils.get_lane_from_lane_section(lane_section, i * sign)
-        lane_width += utils.evaluate_lane_width(lane, s)
-
-    return lane_width
+    current_lane_t = current_lane_t = lanes_outer_points[lane_id - 1 * sign]
+    return utils.get_point_xyz_from_road(road=road, s=road_s, t=current_lane_t, h=0)
 
 
-def _compare_outer_border_points(
+def _compute_outer_point(
+    lanes_outer_points: Dict[int, float],
+    lane_id: int,
     road: etree._Element,
-    current_lane_section: models.LaneSectionWithLength,
-    current_lane_id: int,
-    next_lane_section: models.LaneSectionWithLength,
+    road_s: float,
+) -> models.Point3D:
+    current_lane_t = lanes_outer_points[lane_id]
+    return utils.get_point_xyz_from_road(road=road, s=road_s, t=current_lane_t, h=0)
+
+
+def _equal_outer_border_points(
+    road: etree._Element,
+    lane_id: int,
+    current_outer_points: Dict[int, float],
+    current_s: float,
     next_lane_id: int,
-    checker_data: models.CheckerData,
-    rule_uid: str,
+    successor_outer_points: Dict[int, float],
+    successor_s: float,
 ):
-    current_lane_section_s0 = utils.get_s_from_lane_section(
-        current_lane_section.lane_section
-    )
-    next_lane_section_s0 = utils.get_s_from_lane_section(next_lane_section.lane_section)
-    # current lane c1
-    current_lane_s = current_lane_section_s0 + current_lane_section.length
-    current_lane_t = _get_cumulative_width(
-        current_lane_id,
-        current_lane_section.lane_section,
-        current_lane_section.length,
-    ) + utils.get_lane_offset_value_from_road_by_s(road, current_lane_s)
-    current_xy = utils.get_point_xyz_from_road(
-        road=road, s=current_lane_s, t=current_lane_t, h=0
-    )
+    current_xy = _compute_outer_point(current_outer_points, lane_id, road, current_s)
 
-    # next lane c1
-    next_lane_s = next_lane_section_s0
-    next_lane_t = _get_cumulative_width(
-        next_lane_id, next_lane_section.lane_section, 0.0
-    ) + utils.get_lane_offset_value_from_road_by_s(road, next_lane_s)
-    next_xy = utils.get_point_xyz_from_road(
-        road=road, s=next_lane_s, t=next_lane_t, h=0
+    next_xy = _compute_outer_point(
+        successor_outer_points, next_lane_id, road, successor_s
     )
-
-    if DEBUG:
-        print(f"lane id = {current_lane_id} next lane id = {next_lane_id}")
-        print("-" * 10)
-        print(f"c1 current width = {current_lane_t}")
-        print(f"c1 next width    = {next_lane_t}")
-        print("-" * 10)
-        print(f"c1 current xy = {current_xy}")
-        print(f"c1 next xy    = {next_xy}")
-        print("-" * 10)
 
     gap_size = distance.euclidean(
         (next_xy.x, next_xy.y),
         (current_xy.x, current_xy.y),
     )
     if gap_size > TOLERANCE_THRESHOLD:
-        print(
-            f"ISSUE gap_size   = {gap_size} / clane_id = {current_lane_id} / nlane_id = {next_lane_id}"
-        )
-
-        _raise_lane_linkage_gap_issue(
-            checker_data,
-            rule_uid,
-            utils.get_lane_from_lane_section(
-                current_lane_section.lane_section, current_lane_id
-            ),
-            utils.get_lane_from_lane_section(
-                next_lane_section.lane_section, next_lane_id
-            ),
-        )
+        return False
+    return True
 
 
-def _compare_inner_border_points(
+def _equal_inner_border_points(
     road: etree._Element,
-    current_lane_section: models.LaneSectionWithLength,
-    current_lane_id: int,
-    next_lane_section: models.LaneSectionWithLength,
+    lane_id: int,
+    current_outer_points: Dict[int, float],
+    current_s: float,
     next_lane_id: int,
-    checker_data: models.CheckerData,
-    rule_uid: str,
+    successor_outer_points: Dict[int, float],
+    successor_s: float,
 ):
-    current_lane_section_s0 = utils.get_s_from_lane_section(
-        current_lane_section.lane_section
-    )
-    next_lane_section_s0 = utils.get_s_from_lane_section(next_lane_section.lane_section)
-    # current lane c1
-    current_lane_s = current_lane_section_s0 + current_lane_section.length
-    sign = -1 if current_lane_id < 0 else 1
-    current_lane_t = _get_cumulative_width(
-        current_lane_id - 1 * sign,
-        current_lane_section.lane_section,
-        current_lane_section.length,
-    ) + utils.get_lane_offset_value_from_road_by_s(road, current_lane_s)
-    current_xy = utils.get_point_xyz_from_road(
-        road=road, s=current_lane_s, t=current_lane_t, h=0
-    )
+    current_xy = _compute_inner_point(current_outer_points, lane_id, road, current_s)
 
-    # next lane c1
-    next_lane_s = next_lane_section_s0
-    sign = -1 if next_lane_id < 0 else 1
-    next_lane_t = _get_cumulative_width(
-        next_lane_id - 1 * sign, next_lane_section.lane_section, 0.0
-    ) + utils.get_lane_offset_value_from_road_by_s(road, next_lane_s)
-    next_xy = utils.get_point_xyz_from_road(
-        road=road, s=next_lane_s, t=next_lane_t, h=0
+    next_xy = _compute_inner_point(
+        successor_outer_points, next_lane_id, road, successor_s
     )
-
-    if DEBUG:
-        print(f"lane id = {current_lane_id} next lane id = {next_lane_id}")
-        print("-" * 10)
-        print(f"c0 current width = {current_lane_t}")
-        print(f"c0 next width    = {next_lane_t}")
-        print("-" * 10)
-        print(f"c0 current xy = {current_xy}")
-        print(f"c0 next xy    = {next_xy}")
-        print("-" * 10)
 
     gap_size = distance.euclidean(
         (next_xy.x, next_xy.y),
         (current_xy.x, current_xy.y),
     )
     if gap_size > TOLERANCE_THRESHOLD:
-        print(
-            f"ISSUE gap_size   = {gap_size} / clane_id = {current_lane_id} / nlane_id = {next_lane_id}"
-        )
-        _raise_lane_linkage_gap_issue(
-            checker_data,
-            rule_uid,
-            utils.get_lane_from_lane_section(
-                current_lane_section.lane_section, current_lane_id
-            ),
-            utils.get_lane_from_lane_section(
-                next_lane_section.lane_section, next_lane_id
-            ),
-        )
+        return False
+    return True
 
 
 def _validate_same_road_lane_successors(
-    road: etree._Element,
-    lane: etree._Element,
-    current_lane_section: models.LaneSectionWithLength,
-    next_lane_section: models.LaneSectionWithLength,
+    road: etree._ElementTree,
+    lane: etree._ElementTree,
+    current_outer_points: Dict[int, float],
+    current_road_s: float,
+    successor_outer_points: Dict[int, float],
+    successor_road_s: float,
+    successor_lanes: List[etree._Element],
     checker_data: models.CheckerData,
     rule_uid: str,
 ) -> None:
@@ -280,67 +212,105 @@ def _validate_same_road_lane_successors(
     if len(successors) == 1:
         next_lane_id = successors[0]
 
-        _compare_outer_border_points(
+        if not _equal_outer_border_points(
             road,
-            current_lane_section,
             lane_id,
-            next_lane_section,
+            current_outer_points,
+            current_road_s,
             next_lane_id,
-            checker_data,
-            rule_uid,
-        )
-        _compare_inner_border_points(
+            successor_outer_points,
+            successor_road_s,
+        ) or not _equal_inner_border_points(
             road,
-            current_lane_section,
             lane_id,
-            next_lane_section,
+            current_outer_points,
+            current_road_s,
             next_lane_id,
-            checker_data,
-            rule_uid,
-        )
-    elif len(successors) > 1:
+            successor_outer_points,
+            successor_road_s,
+        ):
+            next_lane = next(
+                prev_lane
+                for prev_lane in successor_lanes
+                if utils.get_lane_id(prev_lane) == next_lane_id
+            )
+            _raise_lane_linkage_gap_issue(
+                checker_data,
+                rule_uid,
+                lane,
+                next_lane,
+            )
+
+    elif len(successors) == 2:
         successors = sorted(successors)
         upper_successor_id = successors[0]
         bottom_successor_id = successors[-1]
 
-        _compare_outer_border_points(
+        if not _equal_outer_border_points(
             road,
-            current_lane_section,
             lane_id,
-            next_lane_section,
+            current_outer_points,
+            current_road_s,
             bottom_successor_id,
-            checker_data,
-            rule_uid,
-        )
-        _compare_inner_border_points(
-            road,
-            current_lane_section,
-            lane_id,
-            next_lane_section,
-            upper_successor_id,
-            checker_data,
-            rule_uid,
-        )
+            successor_outer_points,
+            successor_road_s,
+        ):
+            next_lane = next(
+                prev_lane
+                for prev_lane in successor_lanes
+                if utils.get_lane_id(prev_lane) == bottom_successor_id
+            )
+            _raise_lane_linkage_gap_issue(
+                checker_data,
+                rule_uid,
+                lane,
+                next_lane,
+            )
 
-        if len(successors) > 2:
-            for extra_lane_id in successors[1:-1]:
-                _raise_lane_linkage_gap_issue(
-                    checker_data,
-                    rule_uid,
-                    utils.get_lane_from_lane_section(
-                        current_lane_section.lane_section, lane_id
-                    ),
-                    utils.get_lane_from_lane_section(
-                        next_lane_section.lane_section, extra_lane_id
-                    ),
-                )
+        if not _equal_inner_border_points(
+            road,
+            lane_id,
+            current_outer_points,
+            current_road_s,
+            upper_successor_id,
+            successor_outer_points,
+            successor_road_s,
+        ):
+            next_lane = next(
+                prev_lane
+                for prev_lane in successor_lanes
+                if utils.get_lane_id(prev_lane) == upper_successor_id
+            )
+            _raise_lane_linkage_gap_issue(
+                checker_data,
+                rule_uid,
+                lane,
+                next_lane,
+            )
+
+    else:
+        for extra_lane_id in successors[1:-1]:
+            next_lane = next(
+                prev_lane
+                for prev_lane in successor_lanes
+                if utils.get_lane_id(prev_lane) == extra_lane_id
+            )
+            _raise_lane_linkage_gap_issue(
+                checker_data,
+                rule_uid,
+                lane,
+                next_lane,
+            )
 
 
 def _validate_same_road_lane_predecessors(
-    road: etree._Element,
-    lane: etree._Element,
-    prev_lane_section: models.LaneSectionWithLength,
-    current_lane_section: models.LaneSectionWithLength,
+    road: etree._ElementTree,
+    lane: etree._ElementTree,
+    prev_outer_points: Dict[int, float],
+    prev_road_s: float,
+    current_outer_points: Dict[int, float],
+    current_road_s: float,
+    prev_lanes: List[etree._Element],
     checker_data: models.CheckerData,
     rule_uid: str,
 ) -> None:
@@ -349,60 +319,96 @@ def _validate_same_road_lane_predecessors(
 
     if len(predecessors) == 1:
         prev_lane_id = predecessors[0]
-        _compare_outer_border_points(
+
+        if not _equal_outer_border_points(
             road,
-            prev_lane_section,
             prev_lane_id,
-            current_lane_section,
+            prev_outer_points,
+            prev_road_s,
             lane_id,
-            checker_data,
-            rule_uid,
-        )
-        _compare_inner_border_points(
+            current_outer_points,
+            current_road_s,
+        ) or not _equal_inner_border_points(
             road,
-            prev_lane_section,
             prev_lane_id,
-            current_lane_section,
+            prev_outer_points,
+            prev_road_s,
             lane_id,
-            checker_data,
-            rule_uid,
-        )
-    elif len(predecessors) > 1:
+            current_outer_points,
+            current_road_s,
+        ):
+            prev_lane = next(
+                prev_lane
+                for prev_lane in prev_lanes
+                if utils.get_lane_id(prev_lane) == prev_lane_id
+            )
+            _raise_lane_linkage_gap_issue(
+                checker_data,
+                rule_uid,
+                prev_lane,
+                lane,
+            )
+
+    elif len(predecessors) == 2:
         predecessors = sorted(predecessors)
         upper_prev_id = predecessors[0]
         bottom_prev_id = predecessors[-1]
 
-        _compare_outer_border_points(
+        if not _equal_outer_border_points(
             road,
-            prev_lane_section,
             upper_prev_id,
-            current_lane_section,
+            prev_outer_points,
+            prev_road_s,
             lane_id,
-            checker_data,
-            rule_uid,
-        )
-        _compare_inner_border_points(
-            road,
-            prev_lane_section,
-            bottom_prev_id,
-            current_lane_section,
-            lane_id,
-            checker_data,
-            rule_uid,
-        )
+            current_outer_points,
+            current_road_s,
+        ):
+            prev_lane = next(
+                prev_lane
+                for prev_lane in prev_lanes
+                if utils.get_lane_id(prev_lane) == upper_prev_id
+            )
+            _raise_lane_linkage_gap_issue(
+                checker_data,
+                rule_uid,
+                prev_lane,
+                lane,
+            )
 
-        if len(predecessors) > 2:
-            for extra_lane_id in predecessors[1:-1]:
-                _raise_lane_linkage_gap_issue(
-                    checker_data,
-                    rule_uid,
-                    utils.get_lane_from_lane_section(
-                        prev_lane_section.lane_section, extra_lane_id
-                    ),
-                    utils.get_lane_from_lane_section(
-                        current_lane_section.lane_section, lane_id
-                    ),
-                )
+        if not _equal_inner_border_points(
+            road,
+            bottom_prev_id,
+            prev_outer_points,
+            prev_road_s,
+            lane_id,
+            current_outer_points,
+            current_road_s,
+        ):
+            prev_lane = next(
+                prev_lane
+                for prev_lane in prev_lanes
+                if utils.get_lane_id(prev_lane) == bottom_prev_id
+            )
+            _raise_lane_linkage_gap_issue(
+                checker_data,
+                rule_uid,
+                prev_lane,
+                lane,
+            )
+
+    else:
+        for extra_lane_id in predecessors[1:-1]:
+            prev_lane = next(
+                prev_lane
+                for prev_lane in prev_lanes
+                if utils.get_lane_id(prev_lane) == extra_lane_id
+            )
+            _raise_lane_linkage_gap_issue(
+                checker_data,
+                rule_uid,
+                prev_lane,
+                lane,
+            )
 
 
 def _check_road_lane_sections_gaps(
@@ -427,12 +433,44 @@ def _check_road_lane_sections_gaps(
             next_lane_section.lane_section
         )
 
+        current_lane_section_s = utils.get_s_from_lane_section(
+            current_lane_section.lane_section
+        )
+        next_lane_section_s = utils.get_s_from_lane_section(
+            next_lane_section.lane_section
+        )
+
+        lane_offset = utils.get_lane_offset_value_from_road_by_s(
+            road, current_lane_section_s + current_lane_section.length
+        )
+        successor_lane_offset = utils.get_lane_offset_value_from_road_by_s(
+            road, next_lane_section_s
+        )
+
+        current_outer_points = utils.get_outer_border_points_from_lane_group_by_s(
+            current_lanes,
+            lane_offset,
+            current_lane_section_s,
+            current_lane_section_s + current_lane_section.length,
+        )
+        current_outer_points[0] = lane_offset
+        successor_outer_points = utils.get_outer_border_points_from_lane_group_by_s(
+            next_lanes,
+            successor_lane_offset,
+            next_lane_section_s,
+            next_lane_section_s,
+        )
+        successor_outer_points[0] = successor_lane_offset
+
         for lane in current_lanes:
             _validate_same_road_lane_successors(
                 road,
                 lane,
-                current_lane_section,
-                next_lane_section,
+                current_outer_points,
+                current_lane_section_s + current_lane_section.length,
+                successor_outer_points,
+                next_lane_section_s,
+                next_lanes,
                 checker_data,
                 rule_uid,
             )
@@ -441,8 +479,11 @@ def _check_road_lane_sections_gaps(
             _validate_same_road_lane_predecessors(
                 road,
                 lane,
-                current_lane_section,
-                next_lane_section,
+                current_outer_points,
+                current_lane_section_s + current_lane_section.length,
+                successor_outer_points,
+                next_lane_section_s,
+                current_lanes,
                 checker_data,
                 rule_uid,
             )
@@ -463,37 +504,6 @@ def _check_roads_internal_smoothness(
         _check_road_lane_sections_gaps(road, geometries, checker_data, rule_uid)
 
 
-def _compute_inner_point(
-    road: etree._Element,
-    lane_section: models.LaneSectionWithLength,
-    lane_id: int,
-    road_s: float,
-) -> models.Point3D:
-    sign = -1 if lane_id < 0 else 1
-    current_lane_t = _get_cumulative_width(
-        lane_id - 1 * sign,
-        lane_section.lane_section,
-        road_s,
-    ) * (sign) + utils.get_lane_offset_value_from_road_by_s(road, road_s)
-    return utils.get_point_xyz_from_road(road=road, s=road_s, t=current_lane_t, h=0)
-
-
-def _compute_outer_point(
-    road: etree._Element,
-    lane_section: models.LaneSectionWithLength,
-    lane_id: int,
-    road_s: float,
-) -> models.Point3D:
-    sign = -1 if lane_id < 0 else 1
-    current_lane_t = _get_cumulative_width(
-        lane_id,
-        lane_section.lane_section,
-        road_s,
-    ) * (sign) + utils.get_lane_offset_value_from_road_by_s(road, road_s)
-    print(f"lane_id = {lane_id} // (s = {road_s}, t = {current_lane_t}) ")
-    return utils.get_point_xyz_from_road(road=road, s=road_s, t=current_lane_t, h=0)
-
-
 def _check_inter_roads_smoothness(
     checker_data: models.CheckerData, rule_uid: str
 ) -> None:
@@ -502,6 +512,7 @@ def _check_inter_roads_smoothness(
     for road_id, road in road_id_map.items():
         successor = utils.get_road_linkage(road, models.LinkageTag.SUCCESSOR)
         predecessor = utils.get_road_linkage(road, models.LinkageTag.PREDECESSOR)
+
         road_lane_sections = utils.get_sorted_lane_sections_with_length_from_road(road)
         road_length = utils.get_road_length(road)
 
@@ -528,20 +539,46 @@ def _check_inter_roads_smoothness(
             lanes = utils.get_left_and_right_lanes_from_lane_section(
                 last_lane_section.lane_section
             )
+            successor_lanes = utils.get_left_and_right_lanes_from_lane_section(
+                successor_lane_section.lane_section
+            )
+
+            lane_offset = utils.get_lane_offset_value_from_road_by_s(road, road_length)
+            successor_lane_offset = utils.get_lane_offset_value_from_road_by_s(
+                successor_road, successor_s
+            )
+
+            lanes_outer_points = utils.get_outer_border_points_from_lane_group_by_s(
+                lanes,
+                lane_offset,
+                utils.get_s_from_lane_section(last_lane_section.lane_section),
+                road_length,
+            )
+            lanes_outer_points[0] = lane_offset
+            successor_lanes_outer_points = (
+                utils.get_outer_border_points_from_lane_group_by_s(
+                    successor_lanes,
+                    successor_lane_offset,
+                    utils.get_s_from_lane_section(successor_lane_section.lane_section),
+                    successor_s,
+                )
+            )
+            successor_lanes_outer_points[0] = successor_lane_offset
+
             for lane in lanes:
                 successors = utils.get_successor_lane_ids(lane)
                 lane_id = utils.get_lane_id(lane)
 
                 current_c0 = _compute_inner_point(
-                    road,
-                    last_lane_section,
+                    lanes_outer_points,
                     lane_id,
+                    road,
                     road_length,
                 )
                 current_c1 = _compute_outer_point(
-                    road,
-                    last_lane_section,
+                    lanes_outer_points,
                     lane_id,
+                    road,
                     road_length,
                 )
 
@@ -552,15 +589,15 @@ def _check_inter_roads_smoothness(
 
                 for next_lane_id in successors:
                     next_c0 = _compute_inner_point(
-                        successor_road,
-                        successor_lane_section,
+                        successor_lanes_outer_points,
                         next_lane_id,
+                        successor_road,
                         successor_s,
                     )
                     next_c1 = _compute_outer_point(
-                        successor_road,
-                        successor_lane_section,
+                        successor_lanes_outer_points,
                         next_lane_id,
+                        successor_road,
                         successor_s,
                     )
 
