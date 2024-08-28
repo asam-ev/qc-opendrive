@@ -15,8 +15,6 @@ RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.7.0"
 # This parameter needs to be configurable later
 TOLERANCE_THRESHOLD = 0.01  # meters
 
-DEBUG = False
-
 
 def _raise_geometry_gap_issue(
     checker_data: models.CheckerData,
