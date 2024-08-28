@@ -103,7 +103,7 @@ def get_junction_id_map(root: etree._ElementTree) -> Dict[int, etree._ElementTre
 
 def get_left_lanes_from_lane_section(
     lane_section: etree._ElementTree,
-) -> List[etree._Element]:
+) -> List[etree._ElementTree]:
     left_lane = lane_section.find("left")
     if left_lane is not None:
         left_lanes_list = left_lane.findall("lane")
@@ -115,7 +115,7 @@ def get_left_lanes_from_lane_section(
 
 def get_right_lanes_from_lane_section(
     lane_section: etree._ElementTree,
-) -> List[etree._Element]:
+) -> List[etree._ElementTree]:
     right_lane = lane_section.find("right")
     if right_lane is not None:
         right_lanes_list = right_lane.findall("lane")
@@ -127,7 +127,7 @@ def get_right_lanes_from_lane_section(
 
 def get_left_and_right_lanes_from_lane_section(
     lane_section: etree._ElementTree,
-) -> List[etree._Element]:
+) -> List[etree._ElementTree]:
     left_lanes = get_left_lanes_from_lane_section(lane_section)
     right_lanes = get_right_lanes_from_lane_section(lane_section)
 
@@ -1536,3 +1536,220 @@ def get_point_xyz_from_road(
     )
 
     return point_xyz
+
+
+def get_lane_section_from_road_by_s(
+    road: etree._ElementTree, s: float
+) -> Union[None, etree._ElementTree]:
+    length = get_road_length(road)
+
+    if s < 0.0 or s > length:
+        return None
+
+    lane_section_list = get_lane_sections(road)
+
+    if len(lane_section_list) == 0:
+        return None
+
+    lane_section_indexes = [get_s_from_lane_section(l) for l in lane_section_list]
+    lane_section_index = np.searchsorted(lane_section_indexes, s, side="right") - 1
+    lane_section_index = max(lane_section_index, 0)
+
+    return lane_section_list[lane_section_index]
+
+
+def get_lane_offset_from_road_by_s(
+    road: etree._ElementTree, s: float
+) -> Union[None, models.OffsetPoly3]:
+    length = get_road_length(road)
+
+    if s < 0.0 or s > length:
+        return None
+
+    lane_offset_list = get_lane_offsets_from_road(road)
+
+    # Default lane offset is zero.
+    if len(lane_offset_list) == 0:
+        return ZERO_OFFSET_POLY3
+
+    lane_offset_indexes = [l.s_offset for l in lane_offset_list]
+    lane_offset_index = np.searchsorted(lane_offset_indexes, s, side="right") - 1
+
+    if lane_offset_index < 0:
+        # It's possible that s_offset does not start from zero.
+        # In this case, lane offset is zero for s < first s_offset.
+        return ZERO_OFFSET_POLY3
+    else:
+        return lane_offset_list[lane_offset_index]
+
+
+def get_lane_offset_value_from_road_by_s(
+    road: etree._ElementTree, s: float
+) -> Union[None, float]:
+    lane_offset = get_lane_offset_from_road_by_s(road, s)
+
+    if lane_offset is None:
+        return None
+
+    poly3 = poly3_to_polynomial(lane_offset.poly3)
+
+    return poly3(s - lane_offset.s_offset)
+
+
+def evaluate_lane_border(
+    lane: etree._Element, s_start_from_lane_section: float
+) -> Union[None, float]:
+    """
+    s_start_from_lane_section shall be greater than or equal to zero.
+    s_start_from_lane_section = s - s_section
+    """
+
+    lane_id = get_lane_id(lane)
+
+    if lane_id == 0:
+        return 0.0
+
+    lane_border_poly3_list = get_borders_from_lane(lane)
+
+    if len(lane_border_poly3_list) == 0:
+        return None
+
+    count = 0
+    for lane_border_poly in lane_border_poly3_list:
+        if lane_border_poly.s_offset > s_start_from_lane_section:
+            break
+        else:
+            count += 1
+
+    if count == 0:
+        return None
+
+    index = count - 1
+
+    lane_border = lane_border_poly3_list[index]
+
+    poly3 = poly3_to_polynomial(lane_border.poly3)
+
+    return poly3(s_start_from_lane_section - lane_border.s_offset)
+
+
+def get_outer_border_points_from_lane_group_by_s(
+    lane_group: List[etree._ElementTree], lane_offset: float, s_section: float, s: float
+) -> Dict[int, float]:
+    """
+    Returns a dictionary where key is the lane id and value is the border point t value
+    """
+    id_to_width = dict()
+    id_to_border_point_t = dict()
+
+    for lane in lane_group:
+        lane_id = get_lane_id(lane)
+        width = evaluate_lane_width(lane, s - s_section)
+        if width is None:
+            border_point_t = evaluate_lane_border(lane, s - s_section)
+            id_to_border_point_t[lane_id] = border_point_t
+        else:
+            id_to_width[lane_id] = width
+
+    # If both width and border are defined, use width
+    if len(id_to_width) > 0:
+        id_to_border_point_t = dict()
+
+        for lane_id, width in id_to_width.items():
+            border_t = lane_offset
+
+            if lane_id > 0:
+                for i in range(1, lane_id + 1):
+                    width = id_to_width.get(i)
+                    if width is not None:
+                        border_t += id_to_width[i]
+            else:
+                for i in range(-1, lane_id - 1, -1):
+                    width = id_to_width.get(i)
+                    if width is not None:
+                        border_t -= id_to_width[i]
+
+            id_to_border_point_t[lane_id] = border_t
+
+    return id_to_border_point_t
+
+
+def get_t_middle_point_from_lane_by_s(
+    road: etree._ElementTree,
+    lane_section: etree._ElementTree,
+    lane: etree._ElementTree,
+    s: float,
+) -> Union[None, float]:
+    lane_id = get_lane_id(lane)
+
+    if lane_id is None:
+        return None
+
+    lane_offset = get_lane_offset_value_from_road_by_s(road, s)
+
+    if lane_offset is None:
+        return None
+
+    s_section = get_s_from_lane_section(lane_section)
+
+    if s_section is None:
+        return None
+
+    if lane_id == 0:
+        return 0.0
+
+    if lane_id > 0:
+        left_lanes = get_left_lanes_from_lane_section(lane_section)
+        border_points = get_outer_border_points_from_lane_group_by_s(
+            left_lanes, lane_offset, s_section, s
+        )
+
+        t_outer = border_points.get(lane_id)
+        if t_outer is None:
+            return None
+
+        t_inner = None
+        if lane_id > 1:
+            t_inner = border_points.get(lane_id - 1)
+        else:
+            t_inner = lane_offset
+
+        if t_inner is None:
+            return None
+
+        return (t_outer + t_inner) / 2.0
+    else:
+        right_lanes = get_right_lanes_from_lane_section(lane_section)
+        border_points = get_outer_border_points_from_lane_group_by_s(
+            right_lanes, lane_offset, s_section, s
+        )
+
+        t_outer = border_points.get(lane_id)
+        if t_outer is None:
+            return None
+
+        t_inner = None
+        if lane_id < -1:
+            t_inner = border_points.get(lane_id + 1)
+        else:
+            t_inner = lane_offset
+
+        if t_inner is None:
+            return None
+
+        return (t_outer + t_inner) / 2.0
+
+
+def get_middle_point_xyz_at_height_zero_from_lane_by_s(
+    road: etree._ElementTree,
+    lane_section: etree._ElementTree,
+    lane: etree._ElementTree,
+    s: float,
+) -> Union[None, models.Point3D]:
+    t = get_t_middle_point_from_lane_by_s(road, lane_section, lane, s)
+
+    if t is None:
+        return None
+    else:
+        point_xyz = get_point_xyz_from_road(road, s, t, 0.0)
+        return point_xyz

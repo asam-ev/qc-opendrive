@@ -47,49 +47,84 @@ def check_rule(checker_data: models.CheckerData) -> None:
         rule_full_name="road.lane.access.no_mix_of_deny_or_allow",
     )
 
-    lanes = utils.get_lanes(root=checker_data.input_file_xml_root)
+    roads = utils.get_roads(checker_data.input_file_xml_root)
 
-    lane: etree._Element
-    for lane in lanes:
-        access_s_offset_info: List[SOffsetInfo] = []
+    for road in roads:
+        lane_sections_with_length = (
+            utils.get_sorted_lane_sections_with_length_from_road(road)
+        )
 
-        access: etree._Element
-        for access in lane.iter("access"):
-            access_attr = access.attrib
+        for lane_section_with_length in lane_sections_with_length:
+            lane_section = lane_section_with_length.lane_section
+            length = lane_section_with_length.length
+            lanes = utils.get_left_and_right_lanes_from_lane_section(lane_section)
+            s_section = utils.get_s_from_lane_section(lane_section)
 
-            if "rule" in access_attr:
-                s_offset = float(access_attr["sOffset"])
-                rule = access_attr["rule"]
+            for lane in lanes:
+                access_s_offset_info: List[SOffsetInfo] = []
 
-                for s_offset_info in access_s_offset_info:
-                    if (
-                        abs(s_offset_info.s_offset - s_offset) <= 1e-6
-                        and rule != s_offset_info.rule
-                    ):
-                        issue_id = checker_data.result.register_issue(
-                            checker_bundle_name=constants.BUNDLE_NAME,
-                            checker_id=semantic_constants.CHECKER_ID,
-                            description="At a given s-position, either only deny or only allow values shall be given, not mixed.",
-                            level=IssueSeverity.ERROR,
-                            rule_uid=rule_uid,
+                access: etree._Element
+                for access in lane.iter("access"):
+                    access_attr = access.attrib
+
+                    if "rule" in access_attr:
+                        s_offset = float(access_attr["sOffset"])
+                        rule = access_attr["rule"]
+
+                        for s_offset_info in access_s_offset_info:
+                            if (
+                                abs(s_offset_info.s_offset - s_offset) <= 1e-6
+                                and rule != s_offset_info.rule
+                            ):
+                                issue_id = checker_data.result.register_issue(
+                                    checker_bundle_name=constants.BUNDLE_NAME,
+                                    checker_id=semantic_constants.CHECKER_ID,
+                                    description="At a given s-position, either only deny or only allow values shall be given, not mixed.",
+                                    level=IssueSeverity.ERROR,
+                                    rule_uid=rule_uid,
+                                )
+
+                                path = checker_data.input_file_xml_root.getpath(access)
+
+                                previous_rule = s_offset_info.rule
+                                current_rule = access_attr["rule"]
+
+                                checker_data.result.add_xml_location(
+                                    checker_bundle_name=constants.BUNDLE_NAME,
+                                    checker_id=semantic_constants.CHECKER_ID,
+                                    issue_id=issue_id,
+                                    xpath=path,
+                                    description=f"First encounter of {current_rule} having {previous_rule} before.",
+                                )
+
+                                if s_section is None:
+                                    continue
+
+                                s = s_section + s_offset + (length - s_offset) / 2.0
+                                t = utils.get_t_middle_point_from_lane_by_s(
+                                    road, lane_section, lane, s
+                                )
+
+                                if t is None:
+                                    continue
+
+                                inertial_point = utils.get_point_xyz_from_road(
+                                    road, s, t, 0.0
+                                )
+                                if inertial_point is not None:
+                                    checker_data.result.add_inertial_location(
+                                        checker_bundle_name=constants.BUNDLE_NAME,
+                                        checker_id=semantic_constants.CHECKER_ID,
+                                        issue_id=issue_id,
+                                        x=inertial_point.x,
+                                        y=inertial_point.y,
+                                        z=inertial_point.z,
+                                        description="Mixed access point.",
+                                    )
+
+                        access_s_offset_info.append(
+                            SOffsetInfo(
+                                s_offset=float(access_attr["sOffset"]),
+                                rule=access_attr["rule"],
+                            )
                         )
-
-                        path = checker_data.input_file_xml_root.getpath(access)
-
-                        previous_rule = s_offset_info.rule
-                        current_rule = access_attr["rule"]
-
-                        checker_data.result.add_xml_location(
-                            checker_bundle_name=constants.BUNDLE_NAME,
-                            checker_id=semantic_constants.CHECKER_ID,
-                            issue_id=issue_id,
-                            xpath=path,
-                            description=f"First encounter of {current_rule} having {previous_rule} before.",
-                        )
-
-                access_s_offset_info.append(
-                    SOffsetInfo(
-                        s_offset=float(access_attr["sOffset"]),
-                        rule=access_attr["rule"],
-                    )
-                )

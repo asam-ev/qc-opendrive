@@ -102,6 +102,8 @@ def _create_border_pairs(
 def _raise_issue(
     checker_data: models.CheckerData,
     rule_uid: str,
+    lane_section_with_length: models.LaneSectionWithLength,
+    road,
     left_lane: etree._ElementTree,
     right_lane: etree._ElementTree,
 ) -> None:
@@ -128,6 +130,43 @@ def _raise_issue(
         xpath=checker_data.input_file_xml_root.getpath(right_lane),
         description=f"",
     )
+
+    s_section = utils.get_s_from_lane_section(lane_section_with_length.lane_section)
+
+    if s_section is None:
+        return
+
+    s = s_section + lane_section_with_length.length / 2.0
+
+    left_inertial_point = utils.get_middle_point_xyz_at_height_zero_from_lane_by_s(
+        road, lane_section_with_length.lane_section, left_lane, s
+    )
+
+    if left_inertial_point is not None:
+        checker_data.result.add_inertial_location(
+            checker_bundle_name=constants.BUNDLE_NAME,
+            checker_id=geometry_constants.CHECKER_ID,
+            issue_id=issue_id,
+            x=left_inertial_point.x,
+            y=left_inertial_point.y,
+            z=left_inertial_point.z,
+            description="Outer lane border intersects or stays within inner lane border.",
+        )
+
+    right_inertial_point = utils.get_middle_point_xyz_at_height_zero_from_lane_by_s(
+        road, lane_section_with_length.lane_section, right_lane, s
+    )
+
+    if right_inertial_point is not None:
+        checker_data.result.add_inertial_location(
+            checker_bundle_name=constants.BUNDLE_NAME,
+            checker_id=geometry_constants.CHECKER_ID,
+            issue_id=issue_id,
+            x=right_inertial_point.x,
+            y=right_inertial_point.y,
+            z=right_inertial_point.z,
+            description="Outer lane border intersects or stays within inner lane border.",
+        )
 
 
 def _intersect_or_stay_within(border_pair: BorderPair) -> bool:
@@ -193,7 +232,8 @@ def _intersect_or_stay_within(border_pair: BorderPair) -> bool:
 def _check_overlap(
     left_lane: etree._ElementTree,
     right_lane: etree._ElementTree,
-    lane_section_length: float,
+    lane_section_with_length: models.LaneSectionWithLength,
+    road: etree._ElementTree,
     rule_uid: str,
     checker_data: models.CheckerData,
 ) -> None:
@@ -204,19 +244,27 @@ def _check_overlap(
     right_lane_borders = utils.get_borders_from_lane(right_lane)
 
     border_pairs = _create_border_pairs(
-        left_lane_borders, right_lane_borders, lane_section_length
+        left_lane_borders, right_lane_borders, lane_section_with_length.length
     )
 
     for border_pair in border_pairs:
         has_issue = _intersect_or_stay_within(border_pair)
         if has_issue:
-            _raise_issue(checker_data, rule_uid, left_lane, right_lane)
+            _raise_issue(
+                checker_data,
+                rule_uid,
+                lane_section_with_length,
+                road,
+                left_lane,
+                right_lane,
+            )
             return
 
 
 def _check_overlap_among_lane_list(
     lanes: List[etree._ElementTree],
-    lane_section_length: float,
+    lane_section_with_length: models.LaneSectionWithLength,
+    road: etree._ElementTree,
     rule_uid: str,
     checker_data: models.CheckerData,
 ) -> None:
@@ -227,7 +275,8 @@ def _check_overlap_among_lane_list(
             _check_overlap(
                 sorted_lanes[left_lane_index],
                 sorted_lanes[right_lane_index],
-                lane_section_length,
+                lane_section_with_length,
+                road,
                 rule_uid,
                 checker_data,
             )
@@ -243,12 +292,12 @@ def _check_road(
     for lane_section in sorted_lane_sections_with_length:
         left_lanes = utils.get_left_lanes_from_lane_section(lane_section.lane_section)
         _check_overlap_among_lane_list(
-            left_lanes, lane_section.length, rule_uid, checker_data
+            left_lanes, lane_section, road, rule_uid, checker_data
         )
 
         right_lanes = utils.get_right_lanes_from_lane_section(lane_section.lane_section)
         _check_overlap_among_lane_list(
-            right_lanes, lane_section.length, rule_uid, checker_data
+            right_lanes, lane_section, road, rule_uid, checker_data
         )
 
 
