@@ -301,6 +301,11 @@ def _check_appearing_successor_junction(
 
         lane_links = utils.get_lane_links_from_connection(connection)
 
+        connection_contact_point = utils.get_contact_point_from_connection(connection)
+
+        if connection_contact_point is None:
+            continue
+
         for lane_link in lane_links:
             from_lane_id = utils.get_from_attribute_from_lane_link(lane_link)
             to_lane_id = utils.get_to_attribute_from_lane_link(lane_link)
@@ -312,13 +317,26 @@ def _check_appearing_successor_junction(
                 contact_lane_sections.connection, to_lane_id
             )
 
-            connection_lane_start_width = utils.evaluate_lane_width(
-                connection_lane, 0.0
-            )
+            connection_lane_contact_width = None
+            if connection_contact_point == models.ContactPoint.START:
+                connection_lane_contact_width = utils.evaluate_lane_width(
+                    connection_lane, 0.0
+                )
+            elif connection_contact_point == models.ContactPoint.END:
+                connection_road_length = utils.get_road_length(connection_road)
+                s_connection_lane_section = utils.get_s_from_lane_section(
+                    contact_lane_sections.connection
+                )
+                if connection_road_length is None or s_connection_lane_section is None:
+                    continue
+
+                connection_lane_contact_width = utils.evaluate_lane_width(
+                    connection_lane, connection_road_length - s_connection_lane_section
+                )
 
             if (
-                connection_lane_start_width is not None
-                and abs(connection_lane_start_width) < FLOAT_COMPARISON_THRESHOLD
+                connection_lane_contact_width is not None
+                and abs(connection_lane_contact_width) < FLOAT_COMPARISON_THRESHOLD
             ):
                 current_road_lane = utils.get_lane_from_lane_section(
                     contact_lane_sections.incoming, from_lane_id
@@ -371,6 +389,8 @@ def _check_appearing_predecessor_junction(
 
         lane_links = utils.get_lane_links_from_connection(connection)
 
+        connection_contact_point = utils.get_contact_point_from_connection(connection)
+
         for lane_link in lane_links:
             from_lane_id = utils.get_from_attribute_from_lane_link(lane_link)
             to_lane_id = utils.get_to_attribute_from_lane_link(lane_link)
@@ -382,13 +402,26 @@ def _check_appearing_predecessor_junction(
                 contact_lane_sections.connection, to_lane_id
             )
 
-            connection_lane_start_width = utils.evaluate_lane_width(
-                connection_lane, 0.0
-            )
+            connection_lane_contact_width = None
+            if connection_contact_point == models.ContactPoint.START:
+                connection_lane_contact_width = utils.evaluate_lane_width(
+                    connection_lane, 0.0
+                )
+            elif connection_contact_point == models.ContactPoint.END:
+                connection_road_length = utils.get_road_length(connection_road)
+                s_connection_lane_section = utils.get_s_from_lane_section(
+                    contact_lane_sections.connection
+                )
+                if connection_road_length is None or s_connection_lane_section is None:
+                    continue
+
+                connection_lane_contact_width = utils.evaluate_lane_width(
+                    connection_lane, connection_road_length - s_connection_lane_section
+                )
 
             if (
-                connection_lane_start_width is not None
-                and abs(connection_lane_start_width) < FLOAT_COMPARISON_THRESHOLD
+                connection_lane_contact_width is not None
+                and abs(connection_lane_contact_width) < FLOAT_COMPARISON_THRESHOLD
             ):
                 current_road_lane = utils.get_lane_from_lane_section(
                     contact_lane_sections.incoming, from_lane_id
