@@ -42,6 +42,45 @@ def _check_junctions_connection_connect_road_no_incoming_road(
                     description="Connection with connecting road found as incoming road.",
                 )
 
+                successor_junction_id = utils.get_linked_junction_id(
+                    incoming_road, models.LinkageTag.SUCCESSOR
+                )
+                predecessor_junction_id = utils.get_linked_junction_id(
+                    incoming_road, models.LinkageTag.PREDECESSOR
+                )
+
+                junction_id = utils.get_junction_id(junction)
+
+                if junction_id is None:
+                    continue
+
+                inertial_point = None
+                if successor_junction_id == junction_id:
+                    inertial_point = utils.get_end_point_xyz_from_road_reference_line(
+                        incoming_road
+                    )
+                elif predecessor_junction_id == junction_id:
+                    inertial_point = utils.get_start_point_xyz_from_road_reference_line(
+                        incoming_road
+                    )
+                else:
+                    inertial_point = (
+                        utils.get_middle_point_xyz_from_road_reference_line(
+                            incoming_road
+                        )
+                    )
+
+                if inertial_point is not None:
+                    checker_data.result.add_inertial_location(
+                        checker_bundle_name=constants.BUNDLE_NAME,
+                        checker_id=semantic_constants.CHECKER_ID,
+                        issue_id=issue_id,
+                        x=inertial_point.x,
+                        y=inertial_point.y,
+                        z=inertial_point.z,
+                        description="Incoming road which is also a connecting road.",
+                    )
+
 
 def check_rule(checker_data: models.CheckerData) -> None:
     """

@@ -13,7 +13,13 @@ RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.8.0"
 
 
 def _raise_lane_linkage_issue(
-    checker_data: models.CheckerData, rule_uid: str, lane_link: etree._Element
+    checker_data: models.CheckerData,
+    rule_uid: str,
+    lane_link: etree._Element,
+    connecting_road: etree._Element,
+    connecting_lane_section: etree._Element,
+    connecting_lane: etree._Element,
+    connecting_contact_point: models.ContactPoint,
 ):
     # raise one issue if a lane link is found in the opposite direction
     # of the connecting road
@@ -31,6 +37,29 @@ def _raise_lane_linkage_issue(
         xpath=checker_data.input_file_xml_root.getpath(lane_link),
         description=f"Lane link in opposite direction.",
     )
+
+    s = None
+    if connecting_contact_point == models.ContactPoint.START:
+        s = 0
+    elif connecting_contact_point == models.ContactPoint.END:
+        s = utils.get_road_length(connecting_road)
+
+    if s is None:
+        return
+
+    inertial_point = utils.get_middle_point_xyz_at_height_zero_from_lane_by_s(
+        connecting_road, connecting_lane_section, connecting_lane, s
+    )
+    if inertial_point is not None:
+        checker_data.result.add_inertial_location(
+            checker_bundle_name=constants.BUNDLE_NAME,
+            checker_id=semantic_constants.CHECKER_ID,
+            issue_id=issue_id,
+            x=inertial_point.x,
+            y=inertial_point.y,
+            z=inertial_point.z,
+            description="Lane link in opposite direction.",
+        )
 
 
 def _is_rht_lane_direction_valid(
@@ -408,7 +437,15 @@ def _check_connection_lane_link_same_direction(
                     connecting_road_successor,
                     connection_contact_point,
                 ):
-                    _raise_lane_linkage_issue(checker_data, rule_uid, lane_link)
+                    _raise_lane_linkage_issue(
+                        checker_data,
+                        rule_uid,
+                        lane_link,
+                        connecting_road,
+                        contacting_lane_sections.connection,
+                        to_lane,
+                        connection_contact_point,
+                    )
             else:
                 if not _is_lht_to_rht_lane_direction_valid(
                     to_lane_id,
@@ -419,7 +456,15 @@ def _check_connection_lane_link_same_direction(
                     connecting_road_successor,
                     connection_contact_point,
                 ):
-                    _raise_lane_linkage_issue(checker_data, rule_uid, lane_link)
+                    _raise_lane_linkage_issue(
+                        checker_data,
+                        rule_uid,
+                        lane_link,
+                        connecting_road,
+                        contacting_lane_sections.connection,
+                        to_lane,
+                        connection_contact_point,
+                    )
 
         elif connection_traffic_hand == models.TrafficHandRule.LHT:
             if incoming_traffic_hand == models.TrafficHandRule.LHT:
@@ -432,7 +477,15 @@ def _check_connection_lane_link_same_direction(
                     connecting_road_successor,
                     connection_contact_point,
                 ):
-                    _raise_lane_linkage_issue(checker_data, rule_uid, lane_link)
+                    _raise_lane_linkage_issue(
+                        checker_data,
+                        rule_uid,
+                        lane_link,
+                        connecting_road,
+                        contacting_lane_sections.connection,
+                        to_lane,
+                        connection_contact_point,
+                    )
             else:
                 if not _is_rht_to_lht_lane_direction_valid(
                     to_lane_id,
@@ -443,7 +496,15 @@ def _check_connection_lane_link_same_direction(
                     connecting_road_successor,
                     connection_contact_point,
                 ):
-                    _raise_lane_linkage_issue(checker_data, rule_uid, lane_link)
+                    _raise_lane_linkage_issue(
+                        checker_data,
+                        rule_uid,
+                        lane_link,
+                        connecting_road,
+                        contacting_lane_sections.connection,
+                        to_lane,
+                        connection_contact_point,
+                    )
 
 
 def _check_junctions_connection_one_link_to_incoming(
@@ -499,6 +560,55 @@ def _check_junctions_connection_one_link_to_incoming(
                         xpath=checker_data.input_file_xml_root.getpath(connection),
                         description=f"Connection with reused (incoming_road_id, connecting_road_id) = ({incoming_road_id}, {connecting_road_id}) pair.",
                     )
+
+                has_start_contact_point = False
+                has_end_contact_point = False
+                for connection in connections:
+                    contact_point = utils.get_contact_point_from_connection(connection)
+                    if contact_point is None:
+                        continue
+                    if contact_point == models.ContactPoint.START:
+                        has_start_contact_point = True
+                    elif contact_point == models.ContactPoint.END:
+                        has_end_contact_point = True
+
+                if connecting_road_id is None:
+                    continue
+
+                connecting_road = road_id_map.get(connecting_road_id)
+
+                if connecting_road is None:
+                    continue
+
+                if has_start_contact_point:
+                    inertial_point = utils.get_start_point_xyz_from_road_reference_line(
+                        connecting_road
+                    )
+                    if inertial_point is not None:
+                        checker_data.result.add_inertial_location(
+                            checker_bundle_name=constants.BUNDLE_NAME,
+                            checker_id=semantic_constants.CHECKER_ID,
+                            issue_id=issue_id,
+                            x=inertial_point.x,
+                            y=inertial_point.y,
+                            z=inertial_point.z,
+                            description="Multiple connection elements to the same incoming road.",
+                        )
+
+                if has_end_contact_point:
+                    inertial_point = utils.get_end_point_xyz_from_road_reference_line(
+                        connecting_road
+                    )
+                    if inertial_point is not None:
+                        checker_data.result.add_inertial_location(
+                            checker_bundle_name=constants.BUNDLE_NAME,
+                            checker_id=semantic_constants.CHECKER_ID,
+                            issue_id=issue_id,
+                            x=inertial_point.x,
+                            y=inertial_point.y,
+                            z=inertial_point.z,
+                            description="Multiple connection elements to the same incoming road.",
+                        )
 
     return
 

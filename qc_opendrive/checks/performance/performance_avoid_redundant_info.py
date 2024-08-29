@@ -36,6 +36,20 @@ def _check_road_superelevations(
                 description=f"",
             )
 
+            inertial_point = utils.get_point_xyz_from_road_reference_line(
+                road, next_superelevation.s_offset
+            )
+            if inertial_point is not None:
+                checker_data.result.add_inertial_location(
+                    checker_bundle_name=constants.BUNDLE_NAME,
+                    checker_id=performance_constants.CHECKER_ID,
+                    issue_id=issue_id,
+                    x=inertial_point.x,
+                    y=inertial_point.y,
+                    z=inertial_point.z,
+                    description="Redudant superelevation declaration.",
+                )
+
 
 def _check_road_elevations(
     checker_data: models.CheckerData, road: etree._ElementTree, rule_uid: str
@@ -61,6 +75,20 @@ def _check_road_elevations(
                 description=f"",
             )
 
+            inertial_point = utils.get_point_xyz_from_road_reference_line(
+                road, next_elevation.s_offset
+            )
+            if inertial_point is not None:
+                checker_data.result.add_inertial_location(
+                    checker_bundle_name=constants.BUNDLE_NAME,
+                    checker_id=performance_constants.CHECKER_ID,
+                    issue_id=issue_id,
+                    x=inertial_point.x,
+                    y=inertial_point.y,
+                    z=inertial_point.z,
+                    description="Redudant elevation declaration.",
+                )
+
 
 def _check_lane_offsets(
     checker_data: models.CheckerData, road: etree._ElementTree, rule_uid: str
@@ -85,6 +113,24 @@ def _check_lane_offsets(
                 xpath=checker_data.input_file_xml_root.getpath(road),
                 description=f"",
             )
+
+            s = next_lane_offset.s_offset
+            t = utils.poly3_to_polynomial(next_lane_offset.poly3)(0.0)
+
+            if s is None or t is None:
+                continue
+
+            inertial_point = utils.get_point_xyz_from_road(road, s, t, 0.0)
+            if inertial_point is not None:
+                checker_data.result.add_inertial_location(
+                    checker_bundle_name=constants.BUNDLE_NAME,
+                    checker_id=performance_constants.CHECKER_ID,
+                    issue_id=issue_id,
+                    x=inertial_point.x,
+                    y=inertial_point.y,
+                    z=inertial_point.z,
+                    description="Redudant lane offset declaration.",
+                )
 
 
 def _check_road_plan_view(
@@ -122,9 +168,29 @@ def _check_road_plan_view(
                 description=f"",
             )
 
+            s_offset = utils.get_s_from_geometry(next_geometry)
+            if s_offset is not None:
+                inertial_point = utils.get_point_xyz_from_road_reference_line(
+                    road, s_offset
+                )
+                if inertial_point is not None:
+                    checker_data.result.add_inertial_location(
+                        checker_bundle_name=constants.BUNDLE_NAME,
+                        checker_id=performance_constants.CHECKER_ID,
+                        issue_id=issue_id,
+                        x=inertial_point.x,
+                        y=inertial_point.y,
+                        z=inertial_point.z,
+                        description="Redundant line geometry declaration.",
+                    )
+
 
 def _check_lane_widths(
-    checker_data: models.CheckerData, lane: etree._ElementTree, rule_uid: str
+    checker_data: models.CheckerData,
+    road: etree._ElementTree,
+    lane_section: etree._ElementTree,
+    lane: etree._ElementTree,
+    rule_uid: str,
 ) -> None:
     widths = utils.get_lane_width_poly3_list(lane)
     for i in range(len(widths) - 1):
@@ -147,9 +213,35 @@ def _check_lane_widths(
                 description=f"",
             )
 
+            s_section = utils.get_s_from_lane_section(lane_section)
+
+            if s_section is None:
+                continue
+
+            s = s_section + next_width.s_offset
+
+            inertial_point = utils.get_middle_point_xyz_at_height_zero_from_lane_by_s(
+                road, lane_section, lane, s
+            )
+
+            if inertial_point is not None:
+                checker_data.result.add_inertial_location(
+                    checker_bundle_name=constants.BUNDLE_NAME,
+                    checker_id=performance_constants.CHECKER_ID,
+                    issue_id=issue_id,
+                    x=inertial_point.x,
+                    y=inertial_point.y,
+                    z=inertial_point.z,
+                    description="Redudant lane width declaration.",
+                )
+
 
 def _check_lane_borders(
-    checker_data: models.CheckerData, lane: etree._ElementTree, rule_uid: str
+    checker_data: models.CheckerData,
+    road: etree._ElementTree,
+    lane_section: etree._ElementTree,
+    lane: etree._ElementTree,
+    rule_uid: str,
 ) -> None:
     borders = utils.get_borders_from_lane(lane)
     for i in range(len(borders) - 1):
@@ -171,6 +263,28 @@ def _check_lane_borders(
                 xpath=checker_data.input_file_xml_root.getpath(lane),
                 description=f"",
             )
+
+            s_section = utils.get_s_from_lane_section(lane_section)
+
+            if s_section is None:
+                continue
+
+            s = s_section + next_border.s_offset
+
+            inertial_point = utils.get_middle_point_xyz_at_height_zero_from_lane_by_s(
+                road, lane_section, lane, s
+            )
+
+            if inertial_point is not None:
+                checker_data.result.add_inertial_location(
+                    checker_bundle_name=constants.BUNDLE_NAME,
+                    checker_id=performance_constants.CHECKER_ID,
+                    issue_id=issue_id,
+                    x=inertial_point.x,
+                    y=inertial_point.y,
+                    z=inertial_point.z,
+                    description="Redudant lane border declaration.",
+                )
 
 
 def check_rule(checker_data: models.CheckerData) -> None:
@@ -222,5 +336,5 @@ def check_rule(checker_data: models.CheckerData) -> None:
         for lane_section in lane_sections:
             lanes = utils.get_left_and_right_lanes_from_lane_section(lane_section)
             for lane in lanes:
-                _check_lane_widths(checker_data, lane, rule_uid)
-                _check_lane_borders(checker_data, lane, rule_uid)
+                _check_lane_widths(checker_data, road, lane_section, lane, rule_uid)
+                _check_lane_borders(checker_data, road, lane_section, lane, rule_uid)
