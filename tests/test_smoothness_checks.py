@@ -68,6 +68,19 @@ from test_setup import *
             0,
             [],
         ),
+        (
+            "multiple_successor_invalid",
+            1,
+            [
+                "/OpenDRIVE/road/lanes/laneSection[1]/right/lane",
+                "/OpenDRIVE/road/lanes/laneSection[2]/right/lane[2]",
+            ],
+        ),
+        (
+            "multiple_successor_valid",
+            0,
+            [],
+        ),
     ],
 )
 def test_road_lane_access_no_mix_of_deny_or_allow_examples(

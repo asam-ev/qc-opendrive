@@ -858,8 +858,8 @@ def _validate_junction_connection_gaps(
                 _raise_lane_linkage_gap_issue(
                     checker_data,
                     rule_uid,
-                    target_lane,
                     from_lane,
+                    target_lane,
                 )
             elif road_relation == models.LinkageTag.SUCCESSOR:
                 _raise_lane_linkage_gap_issue(
