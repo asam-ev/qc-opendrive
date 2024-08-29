@@ -36,11 +36,13 @@ def _raise_geometry_gap_issue(
     rule_uid: str,
     previous_geometry: etree._Element,
     geometry: etree._Element,
+    distance: float,
+    inertial_point: Union[None, models.Point3D],
 ) -> None:
     issue_id = checker_data.result.register_issue(
         checker_bundle_name=constants.BUNDLE_NAME,
         checker_id=smoothness_constants.CHECKER_ID,
-        description=f"The transition between geometry elements should be defined with no gaps.",
+        description=f"The transition between geometry elements should be defined with no gaps. A gap of {distance} meters has been found.",
         level=IssueSeverity.ERROR,
         rule_uid=rule_uid,
     )
@@ -59,6 +61,17 @@ def _raise_geometry_gap_issue(
         xpath=checker_data.input_file_xml_root.getpath(geometry),
         description=f"Second geometry element",
     )
+
+    if inertial_point is not None:
+        checker_data.result.add_inertial_location(
+            checker_bundle_name=constants.BUNDLE_NAME,
+            checker_id=smoothness_constants.CHECKER_ID,
+            issue_id=issue_id,
+            x=inertial_point.x,
+            y=inertial_point.y,
+            z=inertial_point.z,
+            description=f"Point where the transition between geometry elements has a gap of {distance} meters.",
+        )
 
 
 def _raise_lane_linkage_gap_issue(
@@ -92,6 +105,7 @@ def _raise_lane_linkage_gap_issue(
 
 
 def _check_geometries_gap(
+    road: etree._ElementTree,
     previous_geometry: etree._Element,
     current_geometry: etree._Element,
     checker_data: models.CheckerData,
@@ -105,6 +119,9 @@ def _check_geometries_gap(
 
     previous_s0 = utils.get_s_from_geometry(previous_geometry)
     previous_length = utils.get_length_from_geometry(previous_geometry)
+    if previous_s0 is None or previous_length is None:
+        return
+
     previous_end_point = utils.get_point_xy_from_geometry(
         previous_geometry, previous_s0 + previous_length
     )
@@ -115,12 +132,28 @@ def _check_geometries_gap(
             (x0, y0),
         )
         if gap_size > TOLERANCE_THRESHOLD:
+            inertial_point = None
+
+            current_s = utils.get_s_from_geometry(current_geometry)
+            if current_s is not None:
+                elevation = utils.get_elevation_from_road_by_s(road, current_s)
+
+                if elevation is not None:
+                    z0 = utils.calculate_elevation_value(elevation, current_s)
+                    inertial_point = models.Point3D(x=x0, y=y0, z=z0)
+
             _raise_geometry_gap_issue(
-                checker_data, rule_uid, previous_geometry, current_geometry
+                checker_data,
+                rule_uid,
+                previous_geometry,
+                current_geometry,
+                gap_size,
+                inertial_point,
             )
 
 
 def _check_plan_view_gaps(
+    road: etree._ElementTree,
     geometries: etree._ElementTree,
     checker_data: models.CheckerData,
     rule_uid: str,
@@ -130,6 +163,7 @@ def _check_plan_view_gaps(
     for geometry in geometries:
         if previous_geometry is not None:
             _check_geometries_gap(
+                road=road,
                 previous_geometry=previous_geometry,
                 current_geometry=geometry,
                 checker_data=checker_data,
@@ -535,7 +569,7 @@ def _check_roads_internal_smoothness(
 
         # we can only calculate gaps with 2 or more geometries
         if len(geometries) > 2:
-            _check_plan_view_gaps(geometries, checker_data, rule_uid)
+            _check_plan_view_gaps(road, geometries, checker_data, rule_uid)
 
         _check_road_lane_sections_gaps(road, checker_data, rule_uid)
 
