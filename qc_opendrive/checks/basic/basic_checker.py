@@ -30,8 +30,6 @@ def run_checks(config: Configuration, result: Result) -> bool:
     xml_file_path = config.get_config_param("InputFile")
 
     is_xml = valid_xml_document.check_rule(xml_file_path, result)
-    root = None
-    checker_data = None
 
     basic_rule_list = [
         root_tag_is_opendrive.check_rule,
