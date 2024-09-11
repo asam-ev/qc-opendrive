@@ -1,0 +1,10 @@
+<?xml version="1.0" standalone="yes"?>
+<OpenDRIVE>
+  <header revMajor="1" revMinor="6" name="" version="1.00" date="Thu Apr 20 14:40:28 2017"
+    north="0.0000000000000000e+00" south="0.0000000000000000e+00" east="0.0000000000000000e+00"
+    west="0.0000000000000000e+00">
+  </header>
+  <road name="" length="1.0000000000000000e+04" id="1" junction="-1">
+    <!-- Invalid because road is empty-->
+  </road>
+</OpenDRIVE>

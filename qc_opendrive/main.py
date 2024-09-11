@@ -9,6 +9,8 @@ from qc_opendrive.checks.semantic import semantic_checker
 from qc_opendrive.checks.geometry import geometry_checker
 from qc_opendrive.checks.performance import performance_checker
 from qc_opendrive.checks.smoothness import smoothness_checker
+from qc_opendrive.checks.basic import basic_checker
+from qc_opendrive.checks.schema import schema_checker
 
 logging.basicConfig(format="%(asctime)s - %(message)s", level=logging.INFO)
 
@@ -55,10 +57,21 @@ def main():
             input_param
         )
 
-        semantic_checker.run_checks(config=config, result=result)
-        geometry_checker.run_checks(config=config, result=result)
-        performance_checker.run_checks(config=config, result=result)
-        smoothness_checker.run_checks(config=config, result=result)
+        # 1. Run basic checks
+        valid_document = basic_checker.run_checks(config=config, result=result)
+
+        if valid_document:
+            schema_checker.run_checks(config=config, result=result)
+            semantic_checker.run_checks(config=config, result=result)
+            geometry_checker.run_checks(config=config, result=result)
+            performance_checker.run_checks(config=config, result=result)
+            smoothness_checker.run_checks(config=config, result=result)
+        else:
+            schema_checker.skip_checks(result=result)
+            semantic_checker.skip_checks(result=result)
+            geometry_checker.skip_checks(result=result)
+            performance_checker.skip_checks(result=result)
+            smoothness_checker.skip_checks(result=result)
 
         result.write_to_file(
             config.get_checker_bundle_param(
