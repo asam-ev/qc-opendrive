@@ -33,57 +33,52 @@ def _check_true_level_on_side(
     found_true_level = False
 
     for index, lane in enumerate(side_lanes):
-        lane_attrib = lane.attrib
+        lane_level = utils.get_lane_level_from_lane(lane)
 
-        if "level" in lane_attrib:
-            lane_level = utils.xml_string_to_bool(lane_attrib["level"])
+        if lane_level == True:
+            found_true_level = True
 
-            if lane_level == True:
-                found_true_level = True
+        elif lane_level == False and found_true_level == True:
+            # lane_level is False when previous lane_level was True before
+            issue_id = result.register_issue(
+                checker_bundle_name=constants.BUNDLE_NAME,
+                checker_id=semantic_constants.CHECKER_ID,
+                description="Lane level False encountered on same side after True set.",
+                level=IssueSeverity.ERROR,
+                rule_uid=rule_uid,
+            )
 
-            elif lane_level == False and found_true_level == True:
-                # lane_level is False when previous lane_level was True before
-                issue_id = result.register_issue(
-                    checker_bundle_name=constants.BUNDLE_NAME,
-                    checker_id=semantic_constants.CHECKER_ID,
-                    description="Lane level False encountered on same side after True set.",
-                    level=IssueSeverity.ERROR,
-                    rule_uid=rule_uid,
-                )
+            path = root.getpath(lane)
 
-                path = root.getpath(lane)
+            result.add_xml_location(
+                checker_bundle_name=constants.BUNDLE_NAME,
+                checker_id=semantic_constants.CHECKER_ID,
+                issue_id=issue_id,
+                xpath=path,
+                description=f"Lane id {index} @level=False where previous lane id @level=True.",
+            )
 
-                result.add_xml_location(
+            s_section = utils.get_s_from_lane_section(
+                lane_section_with_length.lane_section
+            )
+            if s_section is None:
+                continue
+
+            s = s_section + lane_section_with_length.length / 2.0
+
+            inertial_point = utils.get_middle_point_xyz_at_height_zero_from_lane_by_s(
+                road, lane_section_with_length.lane_section, lane, s
+            )
+            if inertial_point is not None:
+                result.add_inertial_location(
                     checker_bundle_name=constants.BUNDLE_NAME,
                     checker_id=semantic_constants.CHECKER_ID,
                     issue_id=issue_id,
-                    xpath=path,
-                    description=f"Lane id {index} @level=False where previous lane id @level=True.",
+                    x=inertial_point.x,
+                    y=inertial_point.y,
+                    z=inertial_point.z,
+                    description="Lane level false when previous lane level is True.",
                 )
-
-                s_section = utils.get_s_from_lane_section(
-                    lane_section_with_length.lane_section
-                )
-                if s_section is None:
-                    continue
-
-                s = s_section + lane_section_with_length.length / 2.0
-
-                inertial_point = (
-                    utils.get_middle_point_xyz_at_height_zero_from_lane_by_s(
-                        road, lane_section_with_length.lane_section, lane, s
-                    )
-                )
-                if inertial_point is not None:
-                    result.add_inertial_location(
-                        checker_bundle_name=constants.BUNDLE_NAME,
-                        checker_id=semantic_constants.CHECKER_ID,
-                        issue_id=issue_id,
-                        x=inertial_point.x,
-                        y=inertial_point.y,
-                        z=inertial_point.z,
-                        description="Lane level false when previous lane level is True.",
-                    )
 
 
 def _get_linkage_level_warnings(
@@ -99,10 +94,9 @@ def _get_linkage_level_warnings(
 
         for link in lane.findall("link"):
             for linkage in link.findall(linkage_tag):
-                linkage_id = linkage.get("id")
+                linkage_id = utils.to_int(linkage.get("id"))
                 if linkage_id is None:
                     continue
-                linkage_id = int(linkage_id)
                 linkage_lane = utils.get_lane_from_lane_section(
                     target_lane_section, linkage_id
                 )
@@ -318,10 +312,18 @@ def _check_level_in_lane_section(
             left_lanes_list = utils.get_left_lanes_from_lane_section(lane_section)
             right_lanes_list = utils.get_right_lanes_from_lane_section(lane_section)
 
+            left_lanes_list = [
+                lane for lane in left_lanes_list if utils.get_lane_id(lane) is not None
+            ]
+
+            right_lanes_list = [
+                lane for lane in right_lanes_list if utils.get_lane_id(lane) is not None
+            ]
+
             # sort by lane id to guarantee order while checking level
             # left ids goes monotonic increasing from 1
             sorted_left_lane = sorted(
-                left_lanes_list, key=lambda lane: int(lane.attrib["id"])
+                left_lanes_list, key=lambda lane: int(utils.get_lane_id(lane))
             )
 
             _check_true_level_on_side(
@@ -336,7 +338,7 @@ def _check_level_in_lane_section(
             # sort by lane abs(id) to guarantee order while checking level
             # right ids goes monotonic decreasing from -1
             sorted_right_lane = sorted(
-                right_lanes_list, key=lambda lane: abs(int(lane.attrib["id"]))
+                right_lanes_list, key=lambda lane: abs(utils.get_lane_id(lane))
             )
 
             _check_true_level_on_side(

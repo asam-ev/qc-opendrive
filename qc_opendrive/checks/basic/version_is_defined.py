@@ -3,15 +3,17 @@ from lxml import etree
 from qc_baselib import IssueSeverity, Result
 from qc_opendrive import constants
 from qc_opendrive.checks.basic import basic_constants
+from qc_opendrive.base import utils
 
 
 def is_unsigned_short(value: int) -> bool:
     """Helper function to check if a value is within the xsd:unsignedShort range (0-65535)."""
-    try:
-        num = int(value)
-        return 0 <= num <= 65535
-    except ValueError:
+    num = utils.to_int(value)
+
+    if num is None:
         return False
+    else:
+        return 0 <= num <= 65535
 
 
 def check_rule(tree: etree._ElementTree, result: Result) -> bool:

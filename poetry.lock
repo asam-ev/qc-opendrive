@@ -29,7 +29,7 @@ pydantic-xml = "^2.11.0"
 type = "git"
 url = "https://github.com/asam-ev/qc-baselib-py.git"
 reference = "develop"
-resolved_reference = "a893b7b14c7b6251ba17af619a0022d8ea9c8ea9"
+resolved_reference = "f7ea664805bcce456ebd0ede93c852dd389c1944"
 
 [[package]]
 name = "black"
@@ -630,13 +630,13 @@ lxml = ["lxml (>=4.9.0)"]
 
 [[package]]
 name = "pytest"
-version = "8.3.2"
+version = "8.3.3"
 description = "pytest: simple powerful testing with Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pytest-8.3.2-py3-none-any.whl", hash = "sha256:4ba08f9ae7dcf84ded419494d229b48d0903ea6407b030eaec46df5e6a73bba5"},
-    {file = "pytest-8.3.2.tar.gz", hash = "sha256:c132345d12ce551242c87269de812483f5bcc87cdbb4722e48487ba194f9fdce"},
+    {file = "pytest-8.3.3-py3-none-any.whl", hash = "sha256:a6853c7375b2663155079443d2e45de913a911a11d669df02a50814944db57b2"},
+    {file = "pytest-8.3.3.tar.gz", hash = "sha256:70b98107bd648308a7952b06e6ca9a50bc660be218d53c257cc1fc94fda10181"},
 ]
 
 [package.dependencies]
@@ -738,13 +738,13 @@ files = [
 
 [[package]]
 name = "xmlschema"
-version = "3.3.2"
+version = "3.4.1"
 description = "An XML Schema validator and decoder"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "xmlschema-3.3.2-py3-none-any.whl", hash = "sha256:e9b9663aaa313904b8bf3d7487fc8123920e199662bc09bb32e0d62d9548f1ec"},
-    {file = "xmlschema-3.3.2.tar.gz", hash = "sha256:a2f021f21d0b5ab371e9bcb5a1d5c34b9ba2c74ad3e32854474c4159bf94e158"},
+    {file = "xmlschema-3.4.1-py3-none-any.whl", hash = "sha256:7113a9dca6c48625c4ea819486bce9567f41cff1b6d064f7c32da2e03d443deb"},
+    {file = "xmlschema-3.4.1.tar.gz", hash = "sha256:4f69eca6f2c446b06c74acd958e7d6613487c253d959a3b75078dfcc880b80ff"},
 ]
 
 [package.dependencies]
