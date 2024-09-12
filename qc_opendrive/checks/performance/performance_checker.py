@@ -13,6 +13,28 @@ from qc_opendrive.checks.performance import (
 )
 
 
+def skip_checks(result: Result) -> None:
+
+    if performance_constants.CHECKER_ID not in result.get_checker_ids(
+        constants.BUNDLE_NAME
+    ):
+        result.register_checker(
+            checker_bundle_name=constants.BUNDLE_NAME,
+            checker_id=performance_constants.CHECKER_ID,
+            description="Check if xml properties of input file are properly set",
+            summary="",
+        )
+
+    logging.error(
+        f"Invalid xml input file. Checker {performance_constants.CHECKER_ID} skipped"
+    )
+    result.set_checker_status(
+        checker_bundle_name=constants.BUNDLE_NAME,
+        checker_id=performance_constants.CHECKER_ID,
+        status=StatusType.SKIPPED,
+    )
+
+
 def run_checks(config: Configuration, result: Result) -> None:
     logging.info("Executing performance checks")
 
