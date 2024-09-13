@@ -4,6 +4,7 @@ import pytest
 from typing import List
 
 from qc_baselib import IssueSeverity
+from qc_opendrive.checks import performance
 
 from test_setup import *
 
@@ -113,5 +114,11 @@ def test_performance_avoid_redundant_info(
     target_file_path = os.path.join(base_path, target_file_name)
     create_test_config(target_file_path)
     launch_main(monkeypatch)
-    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
+    check_issues(
+        rule_uid,
+        issue_count,
+        issue_xpath,
+        issue_severity,
+        performance.performance_avoid_redundant_info.CHECKER_ID,
+    )
     cleanup_files()

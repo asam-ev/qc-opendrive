@@ -1,37 +1,39 @@
 import logging
 
-from typing import Dict, List
+from typing import Dict
 from lxml import etree
 
-from qc_baselib import IssueSeverity
+from qc_baselib import IssueSeverity, StatusType
 
 from qc_opendrive import constants
 from qc_opendrive.base import models, utils
-from qc_opendrive.checks.semantic import semantic_constants
+from qc_opendrive import basic_preconditions
 
-RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.4.0"
+CHECKER_ID = "check_asam_xodr_road_lane_link_new_lane_appear"
+CHECKER_DESCRIPTION = "If a new lane appears besides, only the continuing lane shall be connected to the original lane, not the appearing lane."
+CHECKER_PRECONDITIONS = basic_preconditions.CHECKER_PRECONDITIONS
+RULE_UID = "asam.net:xodr:1.4.0:road.lane.link.new_lane_appear"
 
 FLOAT_COMPARISON_THRESHOLD = 1e-6
 
 
 def _raise_issue(
     checker_data: models.CheckerData,
-    rule_uid: str,
     lane: etree._Element,
     successor_width_zero_lane: etree._Element,
     issue_severity: IssueSeverity,
 ) -> None:
     issue_id = checker_data.result.register_issue(
         checker_bundle_name=constants.BUNDLE_NAME,
-        checker_id=semantic_constants.CHECKER_ID,
+        checker_id=CHECKER_ID,
         description=f"If a new lane appears besides, only the continuing lane shall be connected to the original lane, not the appearing lane.",
         level=issue_severity,
-        rule_uid=rule_uid,
+        rule_uid=RULE_UID,
     )
 
     checker_data.result.add_xml_location(
         checker_bundle_name=constants.BUNDLE_NAME,
-        checker_id=semantic_constants.CHECKER_ID,
+        checker_id=CHECKER_ID,
         issue_id=issue_id,
         xpath=checker_data.input_file_xml_root.getpath(lane),
         description="Lane with successors with width zero.",
@@ -39,7 +41,7 @@ def _raise_issue(
 
     checker_data.result.add_xml_location(
         checker_bundle_name=constants.BUNDLE_NAME,
-        checker_id=semantic_constants.CHECKER_ID,
+        checker_id=CHECKER_ID,
         issue_id=issue_id,
         xpath=checker_data.input_file_xml_root.getpath(successor_width_zero_lane),
         description="Successor lane with width zero.",
@@ -48,7 +50,6 @@ def _raise_issue(
 
 def _check_successor_with_width_zero_between_lane_sections(
     checker_data: models.CheckerData,
-    rule_uid: str,
     current_lane_section: etree._ElementTree,
     next_lane_section: etree._ElementTree,
     contact_point: models.ContactPoint,
@@ -88,7 +89,6 @@ def _check_successor_with_width_zero_between_lane_sections(
             ):
                 _raise_issue(
                     checker_data,
-                    rule_uid,
                     lane,
                     successor_lane,
                     IssueSeverity.ERROR,
@@ -97,7 +97,6 @@ def _check_successor_with_width_zero_between_lane_sections(
 
 def _check_predecessor_with_width_zero_between_lane_sections(
     checker_data: models.CheckerData,
-    rule_uid: str,
     current_lane_section: etree._ElementTree,
     next_lane_section: etree._ElementTree,
     contact_point: models.ContactPoint,
@@ -137,7 +136,6 @@ def _check_predecessor_with_width_zero_between_lane_sections(
             ):
                 _raise_issue(
                     checker_data,
-                    rule_uid,
                     lane,
                     predecessor_lane,
                     IssueSeverity.ERROR,
@@ -145,7 +143,7 @@ def _check_predecessor_with_width_zero_between_lane_sections(
 
 
 def _check_appearing_successor_with_width_zero_on_road(
-    checker_data: models.CheckerData, rule_uid: str, road: etree._ElementTree
+    checker_data: models.CheckerData, road: etree._ElementTree
 ) -> None:
     lane_sections = utils.get_sorted_lane_sections_with_length_from_road(road)
 
@@ -158,7 +156,6 @@ def _check_appearing_successor_with_width_zero_on_road(
 
         _check_successor_with_width_zero_between_lane_sections(
             checker_data,
-            rule_uid,
             current_lane_section,
             next_lane_section,
             models.ContactPoint.START,
@@ -168,7 +165,6 @@ def _check_appearing_successor_with_width_zero_on_road(
 
 def _check_appearing_successor_road(
     checker_data: models.CheckerData,
-    rule_uid: str,
     road_id_map: Dict[int, etree._ElementTree],
     current_road_id: int,
     successor_road_id: int,
@@ -205,7 +201,6 @@ def _check_appearing_successor_road(
 
     _check_successor_with_width_zero_between_lane_sections(
         checker_data,
-        rule_uid,
         current_road_last_lane_section,
         successor_road_target_lane_section.lane_section,
         successor_linkage.contact_point,
@@ -215,7 +210,6 @@ def _check_appearing_successor_road(
 
 def _check_appearing_predecessor_road(
     checker_data: models.CheckerData,
-    rule_uid: str,
     road_id_map: Dict[int, etree._ElementTree],
     current_road_id: int,
     predecessor_road_id: int,
@@ -256,7 +250,6 @@ def _check_appearing_predecessor_road(
 
     _check_predecessor_with_width_zero_between_lane_sections(
         checker_data,
-        rule_uid,
         current_road_last_lane_section,
         predecessor_road_target_lane_section.lane_section,
         predecessor_linkage.contact_point,
@@ -266,7 +259,6 @@ def _check_appearing_predecessor_road(
 
 def _check_appearing_successor_junction(
     checker_data: models.CheckerData,
-    rule_uid: str,
     junction_id_map: Dict[int, etree._ElementTree],
     road_id_map: Dict[int, etree._ElementTree],
     road_id: int,
@@ -345,7 +337,6 @@ def _check_appearing_successor_junction(
                     continue
                 _raise_issue(
                     checker_data,
-                    rule_uid,
                     current_road_lane,
                     connection_lane,
                     IssueSeverity.ERROR,
@@ -354,7 +345,6 @@ def _check_appearing_successor_junction(
 
 def _check_appearing_predecessor_junction(
     checker_data: models.CheckerData,
-    rule_uid: str,
     junction_id_map: Dict[int, etree._ElementTree],
     road_id_map: Dict[int, etree._ElementTree],
     road_id: int,
@@ -430,34 +420,31 @@ def _check_appearing_predecessor_junction(
                     continue
                 _raise_issue(
                     checker_data,
-                    rule_uid,
                     current_road_lane,
                     connection_lane,
                     IssueSeverity.ERROR,
                 )
 
 
-def _check_road_lane_link_new_lane_appear(
-    checker_data: models.CheckerData, rule_uid: str
-) -> None:
+def _check_road_lane_link_new_lane_appear(checker_data: models.CheckerData) -> None:
     road_id_map = utils.get_road_id_map(checker_data.input_file_xml_root)
     junction_id_map = utils.get_junction_id_map(checker_data.input_file_xml_root)
 
     for road_id, road in road_id_map.items():
-        _check_appearing_successor_with_width_zero_on_road(checker_data, rule_uid, road)
+        _check_appearing_successor_with_width_zero_on_road(checker_data, road)
 
         successor_road_id = utils.get_successor_road_id(road)
 
         if successor_road_id is not None:
             _check_appearing_successor_road(
-                checker_data, rule_uid, road_id_map, road_id, successor_road_id
+                checker_data, road_id_map, road_id, successor_road_id
             )
 
         predecessor_road_id = utils.get_predecessor_road_id(road)
 
         if predecessor_road_id is not None:
             _check_appearing_predecessor_road(
-                checker_data, rule_uid, road_id_map, road_id, predecessor_road_id
+                checker_data, road_id_map, road_id, predecessor_road_id
             )
 
         successor_junction_id = utils.get_linked_junction_id(
@@ -466,7 +453,6 @@ def _check_road_lane_link_new_lane_appear(
         if successor_junction_id is not None:
             _check_appearing_successor_junction(
                 checker_data,
-                rule_uid,
                 junction_id_map,
                 road_id_map,
                 road_id,
@@ -480,7 +466,6 @@ def _check_road_lane_link_new_lane_appear(
         if predecessor_junction_id is not None:
             _check_appearing_predecessor_junction(
                 checker_data,
-                rule_uid,
                 junction_id_map,
                 road_id_map,
                 road_id,
@@ -507,19 +492,4 @@ def check_rule(checker_data: models.CheckerData) -> None:
     """
     logging.info("Executing road.lane.link.new_lane_appear check")
 
-    rule_uid = checker_data.result.register_rule(
-        checker_bundle_name=constants.BUNDLE_NAME,
-        checker_id=semantic_constants.CHECKER_ID,
-        emanating_entity="asam.net",
-        standard="xodr",
-        definition_setting=RULE_INITIAL_SUPPORTED_SCHEMA_VERSION,
-        rule_full_name="road.lane.link.new_lane_appear",
-    )
-
-    if checker_data.schema_version < RULE_INITIAL_SUPPORTED_SCHEMA_VERSION:
-        logging.info(
-            f"Schema version {checker_data.schema_version} not supported. Skipping rule."
-        )
-        return
-
-    _check_road_lane_link_new_lane_appear(checker_data, rule_uid)
+    _check_road_lane_link_new_lane_appear(checker_data)

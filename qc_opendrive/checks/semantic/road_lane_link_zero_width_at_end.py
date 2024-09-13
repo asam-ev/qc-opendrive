@@ -1,22 +1,24 @@
 import logging
 
-from typing import Dict, List
+from typing import Dict
 from lxml import etree
 
-from qc_baselib import IssueSeverity
+from qc_baselib import IssueSeverity, StatusType
 
 from qc_opendrive import constants
 from qc_opendrive.base import models, utils
-from qc_opendrive.checks.semantic import semantic_constants
+from qc_opendrive import basic_preconditions
 
-RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.7.0"
+CHECKER_ID = "check_asam_xodr_road_lane_link_zero_width_at_end"
+CHECKER_DESCRIPTION = "Lanes that have a width of zero at the end of the lane section shall have no successor element."
+CHECKER_PRECONDITIONS = basic_preconditions.CHECKER_PRECONDITIONS
+RULE_UID = "asam.net:xodr:1.7.0:road.lane.link.zero_width_at_end"
 
 FLOAT_COMPARISON_THRESHOLD = 1e-6
 
 
 def _raise_issue(
     checker_data: models.CheckerData,
-    rule_uid: str,
     road: etree._ElementTree,
     lane_section_with_length: models.LaneSectionWithLength,
     lane: etree._Element,
@@ -24,15 +26,15 @@ def _raise_issue(
 ) -> None:
     issue_id = checker_data.result.register_issue(
         checker_bundle_name=constants.BUNDLE_NAME,
-        checker_id=semantic_constants.CHECKER_ID,
+        checker_id=CHECKER_ID,
         description=f" Lanes that have a width of zero at the end of the lane section shall have no successor element.",
         level=issue_severity,
-        rule_uid=rule_uid,
+        rule_uid=RULE_UID,
     )
 
     checker_data.result.add_xml_location(
         checker_bundle_name=constants.BUNDLE_NAME,
-        checker_id=semantic_constants.CHECKER_ID,
+        checker_id=CHECKER_ID,
         issue_id=issue_id,
         xpath=checker_data.input_file_xml_root.getpath(lane),
         description="Lane with width zero and successors.",
@@ -51,7 +53,7 @@ def _raise_issue(
     if inertial_point is not None:
         checker_data.result.add_inertial_location(
             checker_bundle_name=constants.BUNDLE_NAME,
-            checker_id=semantic_constants.CHECKER_ID,
+            checker_id=CHECKER_ID,
             issue_id=issue_id,
             x=inertial_point.x,
             y=inertial_point.y,
@@ -66,7 +68,6 @@ def _raise_issue_based_on_lane_id(
     road: etree._ElementTree,
     lane_section_with_length: models.LaneSectionWithLength,
     checker_data: models.CheckerData,
-    rule_uid: str,
 ) -> None:
     if lane_id == 0:
         # Because of backward compatibility, this rule does
@@ -76,7 +77,6 @@ def _raise_issue_based_on_lane_id(
         # to "WARNING"
         _raise_issue(
             checker_data,
-            rule_uid,
             road,
             lane_section_with_length,
             lane,
@@ -85,7 +85,6 @@ def _raise_issue_based_on_lane_id(
     else:
         _raise_issue(
             checker_data,
-            rule_uid,
             road,
             lane_section_with_length,
             lane,
@@ -93,9 +92,7 @@ def _raise_issue_based_on_lane_id(
         )
 
 
-def _check_road_lane_link_zero_width_at_end(
-    checker_data: models.CheckerData, rule_uid: str
-) -> None:
+def _check_road_lane_link_zero_width_at_end(checker_data: models.CheckerData) -> None:
     roads = utils.get_roads(checker_data.input_file_xml_root)
 
     for road in roads:
@@ -127,13 +124,11 @@ def _check_road_lane_link_zero_width_at_end(
                             road,
                             lane_section,
                             checker_data,
-                            rule_uid,
                         )
 
 
 def _check_incoming_road_junction_successor_lane_width_zero(
     checker_data: models.CheckerData,
-    rule_uid: str,
     road: etree._Element,
     road_id: int,
     road_id_map: Dict[int, etree._ElementTree],
@@ -196,13 +191,11 @@ def _check_incoming_road_junction_successor_lane_width_zero(
                     road,
                     last_lane_section,
                     checker_data,
-                    rule_uid,
                 )
 
 
 def _check_connecting_road_lane_width_zero_with_successor(
     checker_data: models.CheckerData,
-    rule_uid: str,
     road: etree._Element,
     road_id: int,
     junction_id_map: Dict[int, etree._ElementTree],
@@ -262,12 +255,11 @@ def _check_connecting_road_lane_width_zero_with_successor(
                     road,
                     last_lane_section,
                     checker_data,
-                    rule_uid,
                 )
 
 
 def _check_junction_road_lane_link_zero_width_at_end(
-    checker_data: models.CheckerData, rule_uid: str
+    checker_data: models.CheckerData,
 ) -> None:
     road_id_map = utils.get_road_id_map(checker_data.input_file_xml_root)
     junction_id_map = utils.get_junction_id_map(checker_data.input_file_xml_root)
@@ -275,11 +267,11 @@ def _check_junction_road_lane_link_zero_width_at_end(
     for road_id, road in road_id_map.items():
         if utils.road_belongs_to_junction(road):
             _check_connecting_road_lane_width_zero_with_successor(
-                checker_data, rule_uid, road, road_id, junction_id_map
+                checker_data, road, road_id, junction_id_map
             )
         else:
             _check_incoming_road_junction_successor_lane_width_zero(
-                checker_data, rule_uid, road, road_id, road_id_map, junction_id_map
+                checker_data, road, road_id, road_id_map, junction_id_map
             )
 
 
@@ -305,20 +297,5 @@ def check_rule(checker_data: models.CheckerData) -> None:
     """
     logging.info("Executing road.lane.link.zero_width_at_end check")
 
-    rule_uid = checker_data.result.register_rule(
-        checker_bundle_name=constants.BUNDLE_NAME,
-        checker_id=semantic_constants.CHECKER_ID,
-        emanating_entity="asam.net",
-        standard="xodr",
-        definition_setting=RULE_INITIAL_SUPPORTED_SCHEMA_VERSION,
-        rule_full_name="road.lane.link.zero_width_at_end",
-    )
-
-    if checker_data.schema_version < RULE_INITIAL_SUPPORTED_SCHEMA_VERSION:
-        logging.info(
-            f"Schema version {checker_data.schema_version} not supported. Skipping rule."
-        )
-        return
-
-    _check_road_lane_link_zero_width_at_end(checker_data, rule_uid)
-    _check_junction_road_lane_link_zero_width_at_end(checker_data, rule_uid)
+    _check_road_lane_link_zero_width_at_end(checker_data)
+    _check_junction_road_lane_link_zero_width_at_end(checker_data)

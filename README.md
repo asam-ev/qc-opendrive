@@ -30,8 +30,11 @@ as an application.
 pip install asam-qc-opendrive@git+https://github.com/asam-ev/qc-opendrive@main
 ```
 
-**Note**: To install from different sources, you can replace `@main` with
-your desired target. For example, `develop` branch as `@develop`.
+**Note:** The above command will install `asam-qc-opendrive` from the `main` branch. If you want to install `asam-qc-opendrive` from another branch or tag, replace `@main` with the desired branch or tag. It is also possible to install from a local directory.
+
+```bash
+pip install /home/user/qc-opendrive
+```
 
 #### To use as a library
 
@@ -163,10 +166,29 @@ An example configuration file for using this Checker Bundle within the ASAM Qual
 
     <CheckerBundle application="xodrBundle">
         <Param name="resultFile" value="xodr_bundle_report.xqar" />
-        <Checker checkerId="semantic_xodr" maxLevel="1" minLevel="3" />
-        <Checker checkerId="geometry_xodr" maxLevel="1" minLevel="3" />
-        <Checker checkerId="performance_xodr" maxLevel="1" minLevel="3" />
-        <Checker checkerId="smoothness_xodr" maxLevel="1" minLevel="3" />
+        <Checker checkerId="check_asam_xodr_xml_valid_xml_document" maxLevel="1" minLevel="3" />
+        <Checker checkerId="check_asam_xodr_xml_root_tag_is_opendrive" maxLevel="1" minLevel="3" />
+        <Checker checkerId="check_asam_xodr_xml_fileheader_is_present" maxLevel="1" minLevel="3" />
+        <Checker checkerId="check_asam_xodr_xml_version_is_defined" maxLevel="1" minLevel="3" />
+        <Checker checkerId="check_asam_xodr_xml_valid_schema" maxLevel="1" minLevel="3" />
+        <Checker checkerId="check_asam_xodr_road_lane_level_true_one_side" maxLevel="1" minLevel="3" />
+        <Checker checkerId="check_asam_xodr_road_lane_access_no_mix_of_deny_or_allow" maxLevel="1" minLevel="3" />
+        <Checker checkerId="check_asam_xodr_road_lane_link_lanes_across_lane_sections" maxLevel="1" minLevel="3" />
+        <Checker checkerId="check_asam_xodr_road_linkage_is_junction_needed" maxLevel="1" minLevel="3" />
+        <Checker checkerId="check_asam_xodr_road_lane_link_zero_width_at_start" maxLevel="1" minLevel="3" />
+        <Checker checkerId="check_asam_xodr_road_lane_link_zero_width_at_end" maxLevel="1" minLevel="3" />
+        <Checker checkerId="check_asam_xodr_road_lane_link_new_lane_appear" maxLevel="1" minLevel="3" />
+        <Checker checkerId="check_asam_xodr_junctions_connection_connect_road_no_incoming_road" maxLevel="1" minLevel="3" />
+        <Checker checkerId="check_asam_xodr_junctions_connection_one_connection_element" maxLevel="1" minLevel="3" />
+        <Checker checkerId="check_asam_xodr_junctions_connection_one_link_to_incoming" maxLevel="1" minLevel="3" />
+        <Checker checkerId="check_asam_xodr_junctions_connection_start_along_linkage" maxLevel="1" minLevel="3" />
+        <Checker checkerId="check_asam_xodr_junctions_connection_end_opposite_linkage" maxLevel="1" minLevel="3" />
+        <Checker checkerId="check_asam_xodr_road_geometry_parampoly3_length_match" maxLevel="1" minLevel="3" />
+        <Checker checkerId="check_asam_xodr_road_lane_border_overlap_with_inner_lanes" maxLevel="1" minLevel="3" />
+        <Checker checkerId="check_asam_xodr_road_geometry_parampoly3_arclength_range" maxLevel="1" minLevel="3" />
+        <Checker checkerId="check_asam_xodr_road_geometry_parampoly3_normalized_range" maxLevel="1" minLevel="3" />
+        <Checker checkerId="check_asam_xodr_performance_avoid_redundant_info" maxLevel="1" minLevel="3" />
+        <Checker checkerId="check_asam_xodr_lane_smoothness_contact_point_no_horizontal_gaps" maxLevel="1" minLevel="3" />
     </CheckerBundle>
 
     <ReportModule application="TextReport">

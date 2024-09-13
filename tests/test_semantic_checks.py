@@ -1,10 +1,10 @@
 import os
-import sys
 import pytest
 
 from typing import List
 
 from qc_baselib import IssueSeverity
+from qc_opendrive.checks import semantic
 
 from test_setup import *
 
@@ -23,7 +23,6 @@ from test_setup import *
         ("17_valid", 0, []),
         ("18_invalid", 1, ["/OpenDRIVE/road/lanes/laneSection/left/lane[1]/access[2]"]),
         ("18_valid", 0, []),
-        ("17_invalid_older_schema_version", 0, []),
     ],
 )
 def test_road_lane_access_no_mix_of_deny_or_allow_examples(
@@ -40,7 +39,37 @@ def test_road_lane_access_no_mix_of_deny_or_allow_examples(
     target_file_path = os.path.join(base_path, target_file_name)
     create_test_config(target_file_path)
     launch_main(monkeypatch)
-    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
+    check_issues(
+        rule_uid,
+        issue_count,
+        issue_xpath,
+        issue_severity,
+        semantic.road_lane_access_no_mix_of_deny_or_allow.CHECKER_ID,
+    )
+    cleanup_files()
+
+
+@pytest.mark.parametrize(
+    "target_file",
+    [
+        ("17_invalid_older_schema_version"),
+    ],
+)
+def test_road_lane_access_no_mix_of_deny_or_allow_older_schema(
+    target_file: str,
+    monkeypatch,
+) -> None:
+    base_path = "tests/data/road_lane_access_no_mix_of_deny_or_allow/"
+    target_file_name = f"road_lane_access_no_mix_of_deny_or_allow_{target_file}.xodr"
+    rule_uid = "asam.net:xodr:1.7.0:road.lane.access.no_mix_of_deny_or_allow"
+
+    target_file_path = os.path.join(base_path, target_file_name)
+    create_test_config(target_file_path)
+    launch_main(monkeypatch)
+    check_skipped(
+        rule_uid,
+        semantic.road_lane_access_no_mix_of_deny_or_allow.CHECKER_ID,
+    )
     cleanup_files()
 
 
@@ -74,7 +103,13 @@ def test_road_lane_access_no_mix_of_deny_or_allow_close_match(
     target_file_path = os.path.join(base_path, target_file_name)
     create_test_config(target_file_path)
     launch_main(monkeypatch)
-    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
+    check_issues(
+        rule_uid,
+        issue_count,
+        issue_xpath,
+        issue_severity,
+        semantic.road_lane_access_no_mix_of_deny_or_allow.CHECKER_ID,
+    )
     cleanup_files()
 
 
@@ -90,7 +125,6 @@ def test_road_lane_access_no_mix_of_deny_or_allow_close_match(
                 "/OpenDRIVE/road/lanes/laneSection/right/lane[3]",
             ],
         ),
-        ("invalid_older_schema_version", 0, []),
     ],
 )
 def test_road_lane_true_level_one_side(
@@ -107,7 +141,37 @@ def test_road_lane_true_level_one_side(
     target_file_path = os.path.join(base_path, target_file_name)
     create_test_config(target_file_path)
     launch_main(monkeypatch)
-    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
+    check_issues(
+        rule_uid,
+        issue_count,
+        issue_xpath,
+        issue_severity,
+        semantic.road_lane_level_true_one_side.CHECKER_ID,
+    )
+    cleanup_files()
+
+
+@pytest.mark.parametrize(
+    "target_file",
+    [
+        ("invalid_older_schema_version"),
+    ],
+)
+def test_road_lane_true_level_one_side_older_schema(
+    target_file: str,
+    monkeypatch,
+) -> None:
+    base_path = "tests/data/road_lane_level_true_one_side/"
+    target_file_name = f"road_lane_level_true_one_side_{target_file}.xodr"
+    rule_uid = "asam.net:xodr:1.7.0:road.lane.level_true_one_side"
+
+    target_file_path = os.path.join(base_path, target_file_name)
+    create_test_config(target_file_path)
+    launch_main(monkeypatch)
+    check_skipped(
+        rule_uid,
+        semantic.road_lane_level_true_one_side.CHECKER_ID,
+    )
     cleanup_files()
 
 
@@ -154,7 +218,13 @@ def test_road_lane_true_level_one_side_lane_section(
     target_file_path = os.path.join(base_path, target_file_name)
     create_test_config(target_file_path)
     launch_main(monkeypatch)
-    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
+    check_issues(
+        rule_uid,
+        issue_count,
+        issue_xpath,
+        issue_severity,
+        semantic.road_lane_level_true_one_side.CHECKER_ID,
+    )
     cleanup_files()
 
 
@@ -188,7 +258,13 @@ def test_road_lane_true_level_one_side_road(
     target_file_path = os.path.join(base_path, target_file_name)
     create_test_config(target_file_path)
     launch_main(monkeypatch)
-    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
+    check_issues(
+        rule_uid,
+        issue_count,
+        issue_xpath,
+        issue_severity,
+        semantic.road_lane_level_true_one_side.CHECKER_ID,
+    )
     cleanup_files()
 
 
@@ -220,7 +296,13 @@ def test_road_lane_true_level_one_side_junction(
     target_file_path = os.path.join(base_path, target_file_name)
     create_test_config(target_file_path)
     launch_main(monkeypatch)
-    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
+    check_issues(
+        rule_uid,
+        issue_count,
+        issue_xpath,
+        issue_severity,
+        semantic.road_lane_level_true_one_side.CHECKER_ID,
+    )
     cleanup_files()
 
 
@@ -278,7 +360,13 @@ def test_road_lane_link_lanes_across_lane_sections(
     target_file_path = os.path.join(base_path, target_file_name)
     create_test_config(target_file_path)
     launch_main(monkeypatch)
-    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
+    check_issues(
+        rule_uid,
+        issue_count,
+        issue_xpath,
+        issue_severity,
+        semantic.road_lane_link_lanes_across_lane_sections.CHECKER_ID,
+    )
     cleanup_files()
 
 
@@ -310,7 +398,13 @@ def test_road_linkage_is_junction_needed(
     target_file_path = os.path.join(base_path, target_file_name)
     create_test_config(target_file_path)
     launch_main(monkeypatch)
-    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
+    check_issues(
+        rule_uid,
+        issue_count,
+        issue_xpath,
+        issue_severity,
+        semantic.road_linkage_is_junction_needed.CHECKER_ID,
+    )
     cleanup_files()
 
 
@@ -344,7 +438,13 @@ def test_junctions_connection_road_no_incoming_road(
     target_file_path = os.path.join(base_path, target_file_name)
     create_test_config(target_file_path)
     launch_main(monkeypatch)
-    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
+    check_issues(
+        rule_uid,
+        issue_count,
+        issue_xpath,
+        issue_severity,
+        semantic.junctions_connection_connect_road_no_incoming_road.CHECKER_ID,
+    )
     cleanup_files()
 
 
@@ -376,7 +476,13 @@ def test_junctions_connection_one_connection_element(
     target_file_path = os.path.join(base_path, target_file_name)
     create_test_config(target_file_path)
     launch_main(monkeypatch)
-    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
+    check_issues(
+        rule_uid,
+        issue_count,
+        issue_xpath,
+        issue_severity,
+        semantic.junctions_connection_one_connection_element.CHECKER_ID,
+    )
     cleanup_files()
 
 
@@ -423,7 +529,13 @@ def test_junctions_connection_one_link_to_incoming(
     target_file_path = os.path.join(base_path, target_file_name)
     create_test_config(target_file_path)
     launch_main(monkeypatch)
-    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
+    check_issues(
+        rule_uid,
+        issue_count,
+        issue_xpath,
+        issue_severity,
+        semantic.junctions_connection_one_link_to_incoming.CHECKER_ID,
+    )
     cleanup_files()
 
 
@@ -454,7 +566,13 @@ def test_junctions_connection_one_link_to_incoming_bidirectional(
     target_file_path = os.path.join(base_path, target_file_name)
     create_test_config(target_file_path)
     launch_main(monkeypatch)
-    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
+    check_issues(
+        rule_uid,
+        issue_count,
+        issue_xpath,
+        issue_severity,
+        semantic.junctions_connection_one_link_to_incoming.CHECKER_ID,
+    )
     cleanup_files()
 
 
@@ -478,7 +596,13 @@ def test_junctions_connection_one_link_to_incoming_direct(
     target_file_path = os.path.join(base_path, target_file_name)
     create_test_config(target_file_path)
     launch_main(monkeypatch)
-    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
+    check_issues(
+        rule_uid,
+        issue_count,
+        issue_xpath,
+        issue_severity,
+        semantic.junctions_connection_one_link_to_incoming.CHECKER_ID,
+    )
     cleanup_files()
 
 
@@ -509,7 +633,13 @@ def test_road_lane_link_zero_width_at_start(
     target_file_path = os.path.join(base_path, target_file_name)
     create_test_config(target_file_path)
     launch_main(monkeypatch)
-    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
+    check_issues(
+        rule_uid,
+        issue_count,
+        issue_xpath,
+        issue_severity,
+        semantic.road_lane_link_zero_width_at_start.CHECKER_ID,
+    )
     cleanup_files()
 
 
@@ -540,7 +670,13 @@ def test_road_lane_link_zero_width_at_start_junction(
     target_file_path = os.path.join(base_path, target_file_name)
     create_test_config(target_file_path)
     launch_main(monkeypatch)
-    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
+    check_issues(
+        rule_uid,
+        issue_count,
+        issue_xpath,
+        issue_severity,
+        semantic.road_lane_link_zero_width_at_start.CHECKER_ID,
+    )
     cleanup_files()
 
 
@@ -573,7 +709,13 @@ def test_road_lane_link_zero_width_at_start_inside_junction(
     target_file_path = os.path.join(base_path, target_file_name)
     create_test_config(target_file_path)
     launch_main(monkeypatch)
-    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
+    check_issues(
+        rule_uid,
+        issue_count,
+        issue_xpath,
+        issue_severity,
+        semantic.road_lane_link_zero_width_at_start.CHECKER_ID,
+    )
     cleanup_files()
 
 
@@ -604,7 +746,13 @@ def test_road_lane_link_zero_width_at_end(
     target_file_path = os.path.join(base_path, target_file_name)
     create_test_config(target_file_path)
     launch_main(monkeypatch)
-    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
+    check_issues(
+        rule_uid,
+        issue_count,
+        issue_xpath,
+        issue_severity,
+        semantic.road_lane_link_zero_width_at_end.CHECKER_ID,
+    )
     cleanup_files()
 
 
@@ -635,7 +783,13 @@ def test_road_lane_link_zero_width_at_end_junction(
     target_file_path = os.path.join(base_path, target_file_name)
     create_test_config(target_file_path)
     launch_main(monkeypatch)
-    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
+    check_issues(
+        rule_uid,
+        issue_count,
+        issue_xpath,
+        issue_severity,
+        semantic.road_lane_link_zero_width_at_end.CHECKER_ID,
+    )
     cleanup_files()
 
 
@@ -668,7 +822,13 @@ def test_road_lane_link_zero_width_at_end_inside_junction(
     target_file_path = os.path.join(base_path, target_file_name)
     create_test_config(target_file_path)
     launch_main(monkeypatch)
-    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
+    check_issues(
+        rule_uid,
+        issue_count,
+        issue_xpath,
+        issue_severity,
+        semantic.road_lane_link_zero_width_at_end.CHECKER_ID,
+    )
     cleanup_files()
 
 
@@ -708,7 +868,13 @@ def test_road_lane_link_new_lane_appear(
     target_file_path = os.path.join(base_path, target_file_name)
     create_test_config(target_file_path)
     launch_main(monkeypatch)
-    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
+    check_issues(
+        rule_uid,
+        issue_count,
+        issue_xpath,
+        issue_severity,
+        semantic.road_lane_link_new_lane_appear.CHECKER_ID,
+    )
     cleanup_files()
 
 
@@ -740,7 +906,13 @@ def test_road_lane_link_new_lane_appear_junction(
     target_file_path = os.path.join(base_path, target_file_name)
     create_test_config(target_file_path)
     launch_main(monkeypatch)
-    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
+    check_issues(
+        rule_uid,
+        issue_count,
+        issue_xpath,
+        issue_severity,
+        semantic.road_lane_link_new_lane_appear.CHECKER_ID,
+    )
     cleanup_files()
 
 
@@ -785,7 +957,13 @@ def test_road_lane_link_new_lane_appear_inside_junction(
     target_file_path = os.path.join(base_path, target_file_name)
     create_test_config(target_file_path)
     launch_main(monkeypatch)
-    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
+    check_issues(
+        rule_uid,
+        issue_count,
+        issue_xpath,
+        issue_severity,
+        semantic.road_lane_link_new_lane_appear.CHECKER_ID,
+    )
     cleanup_files()
 
 
@@ -820,7 +998,13 @@ def test_road_lane_link_new_lane_appear_end_contact_point(
     target_file_path = os.path.join(base_path, target_file_name)
     create_test_config(target_file_path)
     launch_main(monkeypatch)
-    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
+    check_issues(
+        rule_uid,
+        issue_count,
+        issue_xpath,
+        issue_severity,
+        semantic.road_lane_link_new_lane_appear.CHECKER_ID,
+    )
     cleanup_files()
 
 
@@ -851,7 +1035,13 @@ def test_junction_connection_start_along_linkage(
     target_file_path = os.path.join(base_path, target_file_name)
     create_test_config(target_file_path)
     launch_main(monkeypatch)
-    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
+    check_issues(
+        rule_uid,
+        issue_count,
+        issue_xpath,
+        issue_severity,
+        semantic.junctions_connection_start_along_linkage.CHECKER_ID,
+    )
     cleanup_files()
 
 
@@ -882,5 +1072,11 @@ def test_junction_connection_end_opposite_linkage(
     target_file_path = os.path.join(base_path, target_file_name)
     create_test_config(target_file_path)
     launch_main(monkeypatch)
-    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
+    check_issues(
+        rule_uid,
+        issue_count,
+        issue_xpath,
+        issue_severity,
+        semantic.junctions_connection_end_opposite_linkage.CHECKER_ID,
+    )
     cleanup_files()

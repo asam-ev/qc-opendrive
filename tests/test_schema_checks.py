@@ -1,9 +1,8 @@
 import os
 import pytest
 from test_setup import *
-from qc_opendrive import constants
-from qc_opendrive.checks.schema import schema_constants
 from qc_baselib import Result, IssueSeverity, StatusType
+from qc_opendrive.checks.schema import valid_schema
 
 
 def test_valid_schema_positive17(
@@ -125,14 +124,9 @@ def test_unsupported_schema_version(
     result = Result()
     result.load_from_file(REPORT_FILE_PATH)
 
-    schema_result = result.get_checker_result(
-        checker_bundle_name=constants.BUNDLE_NAME,
-        checker_id=schema_constants.CHECKER_ID,
-    )
-
     schema_issues = result.get_issues_by_rule_uid(
         "asam.net:xodr:1.0.0:xml.valid_schema"
     )
     assert len(schema_issues) == 0
-    assert schema_result.status == StatusType.SKIPPED
+    assert result.get_checker_status(valid_schema.CHECKER_ID) == StatusType.SKIPPED
     cleanup_files()

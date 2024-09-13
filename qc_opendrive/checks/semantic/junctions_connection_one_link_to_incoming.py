@@ -3,18 +3,20 @@ import logging
 from typing import Dict, List
 from lxml import etree
 
-from qc_baselib import IssueSeverity
+from qc_baselib import IssueSeverity, StatusType
 
 from qc_opendrive import constants
 from qc_opendrive.base import models, utils
-from qc_opendrive.checks.semantic import semantic_constants
+from qc_opendrive import basic_preconditions
 
-RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.8.0"
+CHECKER_ID = "check_asam_xodr_junctions_connection_one_link_to_incoming"
+CHECKER_DESCRIPTION = "Each connecting road shall be associated with at most one <connection> element per incoming road. A connecting road shall only have the <laneLink> element for that direction."
+CHECKER_PRECONDITIONS = basic_preconditions.CHECKER_PRECONDITIONS
+RULE_UID = "asam.net:xodr:1.8.0:junctions.connection.one_link_to_incoming"
 
 
 def _raise_lane_linkage_issue(
     checker_data: models.CheckerData,
-    rule_uid: str,
     lane_link: etree._Element,
     connecting_road: etree._Element,
     connecting_lane_section: etree._Element,
@@ -25,14 +27,14 @@ def _raise_lane_linkage_issue(
     # of the connecting road
     issue_id = checker_data.result.register_issue(
         checker_bundle_name=constants.BUNDLE_NAME,
-        checker_id=semantic_constants.CHECKER_ID,
+        checker_id=CHECKER_ID,
         description=f"A connecting road shall only have the <laneLink> element for that direction.",
         level=IssueSeverity.ERROR,
-        rule_uid=rule_uid,
+        rule_uid=RULE_UID,
     )
     checker_data.result.add_xml_location(
         checker_bundle_name=constants.BUNDLE_NAME,
-        checker_id=semantic_constants.CHECKER_ID,
+        checker_id=CHECKER_ID,
         issue_id=issue_id,
         xpath=checker_data.input_file_xml_root.getpath(lane_link),
         description=f"Lane link in opposite direction.",
@@ -53,7 +55,7 @@ def _raise_lane_linkage_issue(
     if inertial_point is not None:
         checker_data.result.add_inertial_location(
             checker_bundle_name=constants.BUNDLE_NAME,
-            checker_id=semantic_constants.CHECKER_ID,
+            checker_id=CHECKER_ID,
             issue_id=issue_id,
             x=inertial_point.x,
             y=inertial_point.y,
@@ -364,7 +366,6 @@ def _check_connection_lane_link_same_direction(
     checker_data: models.CheckerData,
     road_id_map: Dict[int, etree._ElementTree],
     connection: etree._Element,
-    rule_uid: str,
 ) -> None:
     connection_contact_point = utils.get_contact_point_from_connection(connection)
 
@@ -439,7 +440,6 @@ def _check_connection_lane_link_same_direction(
                 ):
                     _raise_lane_linkage_issue(
                         checker_data,
-                        rule_uid,
                         lane_link,
                         connecting_road,
                         contacting_lane_sections.connection,
@@ -458,7 +458,6 @@ def _check_connection_lane_link_same_direction(
                 ):
                     _raise_lane_linkage_issue(
                         checker_data,
-                        rule_uid,
                         lane_link,
                         connecting_road,
                         contacting_lane_sections.connection,
@@ -479,7 +478,6 @@ def _check_connection_lane_link_same_direction(
                 ):
                     _raise_lane_linkage_issue(
                         checker_data,
-                        rule_uid,
                         lane_link,
                         connecting_road,
                         contacting_lane_sections.connection,
@@ -498,7 +496,6 @@ def _check_connection_lane_link_same_direction(
                 ):
                     _raise_lane_linkage_issue(
                         checker_data,
-                        rule_uid,
                         lane_link,
                         connecting_road,
                         contacting_lane_sections.connection,
@@ -508,7 +505,7 @@ def _check_connection_lane_link_same_direction(
 
 
 def _check_junctions_connection_one_link_to_incoming(
-    checker_data: models.CheckerData, rule_uid: str
+    checker_data: models.CheckerData,
 ) -> None:
     junctions = utils.get_junctions(checker_data.input_file_xml_root)
     road_id_map = utils.get_road_id_map(checker_data.input_file_xml_root)
@@ -537,7 +534,7 @@ def _check_junctions_connection_one_link_to_incoming(
             )
 
             _check_connection_lane_link_same_direction(
-                checker_data, road_id_map, connection, rule_uid
+                checker_data, road_id_map, connection
             )
 
     for incoming_road_id, connecting_road_map in connection_road_link_map.items():
@@ -547,15 +544,15 @@ def _check_junctions_connection_one_link_to_incoming(
                 # appears in more than one connection.
                 issue_id = checker_data.result.register_issue(
                     checker_bundle_name=constants.BUNDLE_NAME,
-                    checker_id=semantic_constants.CHECKER_ID,
+                    checker_id=CHECKER_ID,
                     description=f"Connecting road {connecting_road_id} shall be represented by at most one <connection> element per incoming road id.",
                     level=IssueSeverity.ERROR,
-                    rule_uid=rule_uid,
+                    rule_uid=RULE_UID,
                 )
                 for connection in connections:
                     checker_data.result.add_xml_location(
                         checker_bundle_name=constants.BUNDLE_NAME,
-                        checker_id=semantic_constants.CHECKER_ID,
+                        checker_id=CHECKER_ID,
                         issue_id=issue_id,
                         xpath=checker_data.input_file_xml_root.getpath(connection),
                         description=f"Connection with reused (incoming_road_id, connecting_road_id) = ({incoming_road_id}, {connecting_road_id}) pair.",
@@ -587,7 +584,7 @@ def _check_junctions_connection_one_link_to_incoming(
                     if inertial_point is not None:
                         checker_data.result.add_inertial_location(
                             checker_bundle_name=constants.BUNDLE_NAME,
-                            checker_id=semantic_constants.CHECKER_ID,
+                            checker_id=CHECKER_ID,
                             issue_id=issue_id,
                             x=inertial_point.x,
                             y=inertial_point.y,
@@ -602,7 +599,7 @@ def _check_junctions_connection_one_link_to_incoming(
                     if inertial_point is not None:
                         checker_data.result.add_inertial_location(
                             checker_bundle_name=constants.BUNDLE_NAME,
-                            checker_id=semantic_constants.CHECKER_ID,
+                            checker_id=CHECKER_ID,
                             issue_id=issue_id,
                             x=inertial_point.x,
                             y=inertial_point.y,
@@ -633,19 +630,4 @@ def check_rule(checker_data: models.CheckerData) -> None:
     """
     logging.info("Executing junctions.connection.one_link_to_incoming check")
 
-    rule_uid = checker_data.result.register_rule(
-        checker_bundle_name=constants.BUNDLE_NAME,
-        checker_id=semantic_constants.CHECKER_ID,
-        emanating_entity="asam.net",
-        standard="xodr",
-        definition_setting=RULE_INITIAL_SUPPORTED_SCHEMA_VERSION,
-        rule_full_name="junctions.connection.one_link_to_incoming",
-    )
-
-    if checker_data.schema_version < RULE_INITIAL_SUPPORTED_SCHEMA_VERSION:
-        logging.info(
-            f"Schema version {checker_data.schema_version} not supported. Skipping rule."
-        )
-        return
-
-    _check_junctions_connection_one_link_to_incoming(checker_data, rule_uid)
+    _check_junctions_connection_one_link_to_incoming(checker_data)
