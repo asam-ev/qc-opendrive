@@ -14,6 +14,20 @@ ZERO_OFFSET_POLY3 = models.OffsetPoly3(
 )
 
 
+def to_int(s):
+    try:
+        return int(s)
+    except (ValueError, TypeError):
+        return None
+
+
+def to_float(s):
+    try:
+        return float(s)
+    except (ValueError, TypeError):
+        return None
+
+
 def get_root_without_default_namespace(path: str) -> etree._ElementTree:
     with open(path, "rb") as raw_file:
         xml_string = raw_file.read().decode()
@@ -77,9 +91,9 @@ def get_road_id_map(root: etree._ElementTree) -> Dict[int, etree._ElementTree]:
     road_id_map = dict()
 
     for road in root.iter("road"):
-        road_id = road.get("id")
+        road_id = to_int(road.get("id"))
         if road_id is not None:
-            road_id_map[int(road_id)] = road
+            road_id_map[road_id] = road
 
     return road_id_map
 
@@ -94,9 +108,9 @@ def get_junction_id_map(root: etree._ElementTree) -> Dict[int, etree._ElementTre
     junction_id_map = dict()
 
     for junction in root.iter("junction"):
-        junction_id = junction.get("id")
+        junction_id = to_int(junction.get("id"))
         if junction_id is not None:
-            junction_id_map[int(junction_id)] = junction
+            junction_id_map[junction_id] = junction
 
     return junction_id_map
 
@@ -157,13 +171,13 @@ def get_road_linkage(
     if linkage is None:
         return None
     elif linkage.get("elementType") == "road":
-        road_id = linkage.get("elementId")
+        road_id = to_int(linkage.get("elementId"))
         contact_point = linkage.get("contactPoint")
         if road_id is None or contact_point is None:
             return None
         else:
             return models.RoadLinkage(
-                id=int(road_id), contact_point=models.ContactPoint(contact_point)
+                id=road_id, contact_point=models.ContactPoint(contact_point)
             )
     else:
         return None
@@ -181,11 +195,8 @@ def get_linked_junction_id(
     if linkage is None:
         return None
     elif linkage.get("elementType") == "junction":
-        junction_id = linkage.get("elementId")
-        if junction_id is None:
-            return None
-        else:
-            return int(junction_id)
+        junction_id = to_int(linkage.get("elementId"))
+        return junction_id
     else:
         return None
 
@@ -213,9 +224,9 @@ def get_predecessor_lane_ids(lane: etree._ElementTree) -> List[int]:
     for link in links:
         linkages = link.findall("predecessor")
         for linkage in linkages:
-            predecessor_id = linkage.get("id")
+            predecessor_id = to_int(linkage.get("id"))
             if predecessor_id is not None:
-                predecessors.append(int(predecessor_id))
+                predecessors.append(predecessor_id)
 
     return predecessors
 
@@ -227,9 +238,9 @@ def get_successor_lane_ids(lane: etree._ElementTree) -> List[int]:
     for link in links:
         linkages = link.findall("successor")
         for linkage in linkages:
-            successor_id = linkage.get("id")
+            successor_id = to_int(linkage.get("id"))
             if successor_id is not None:
-                successors.append(int(successor_id))
+                successors.append(successor_id)
 
     return successors
 
@@ -242,8 +253,8 @@ def get_lane_link_element(
         for link in links:
             linkages = link.findall("predecessor")
             for linkage in linkages:
-                predecessor_id = linkage.get("id")
-                if predecessor_id is not None and link_id == int(predecessor_id):
+                predecessor_id = to_int(linkage.get("id"))
+                if predecessor_id is not None and link_id == predecessor_id:
                     return linkage
 
         return None
@@ -251,8 +262,8 @@ def get_lane_link_element(
         for link in links:
             linkages = link.findall("successor")
             for linkage in linkages:
-                successor_id = linkage.get("id")
-                if successor_id is not None and link_id == int(successor_id):
+                successor_id = to_int(linkage.get("id"))
+                if successor_id is not None and link_id == successor_id:
                     return linkage
 
         return None
@@ -266,8 +277,8 @@ def get_lane_from_lane_section(
     lanes = get_left_and_right_lanes_from_lane_section(lane_section)
 
     for lane in lanes:
-        current_id = lane.get("id")
-        if current_id is not None and int(current_id) == lane_id:
+        current_id = get_lane_id(lane)
+        if current_id is not None and current_id == lane_id:
             return lane
 
     return None
@@ -298,19 +309,11 @@ def get_connections_from_junction(
 
 
 def get_lane_id(lane: etree._ElementTree) -> Union[None, int]:
-    lane_id = lane.get("id")
-    if lane_id is None:
-        return None
-    else:
-        return int(lane_id)
+    return to_int(lane.get("id"))
 
 
 def get_road_junction_id(road: etree._ElementTree) -> Union[None, int]:
-    junction_id = road.get("junction")
-    if junction_id is None:
-        return None
-    else:
-        return int(junction_id)
+    return to_int(road.get("junction"))
 
 
 def get_road_link_element(
@@ -321,8 +324,8 @@ def get_road_link_element(
         for link in links:
             linkages = link.findall("predecessor")
             for linkage in linkages:
-                predecessor_id = linkage.get("elementId")
-                if predecessor_id is not None and link_id == int(predecessor_id):
+                predecessor_id = to_int(linkage.get("elementId"))
+                if predecessor_id is not None and link_id == predecessor_id:
                     return linkage
 
         return None
@@ -330,8 +333,8 @@ def get_road_link_element(
         for link in links:
             linkages = link.findall("successor")
             for linkage in linkages:
-                successor_id = linkage.get("elementId")
-                if successor_id is not None and link_id == int(successor_id):
+                successor_id = to_int(linkage.get("elementId"))
+                if successor_id is not None and link_id == successor_id:
                     return linkage
 
         return None
@@ -350,21 +353,13 @@ def road_belongs_to_junction(road: etree._Element) -> bool:
 def get_incoming_road_id_from_connection(
     connection: etree._Element,
 ) -> Union[None, int]:
-    incoming_road_id = connection.get("incomingRoad")
-    if incoming_road_id is None:
-        return None
-    else:
-        return int(incoming_road_id)
+    return to_int(connection.get("incomingRoad"))
 
 
 def get_connecting_road_id_from_connection(
     connection: etree._Element,
 ) -> Union[None, int]:
-    connecting_road_id = connection.get("connectingRoad")
-    if connecting_road_id is None:
-        return None
-    else:
-        return int(connecting_road_id)
+    return to_int(connection.get("connectingRoad"))
 
 
 def get_contact_point_from_connection(
@@ -378,27 +373,34 @@ def get_contact_point_from_connection(
 
 
 def get_from_attribute_from_lane_link(lane_link: etree._Element) -> Union[int, None]:
-    from_attribute = lane_link.get("from")
-    if from_attribute is None:
-        return None
-    else:
-        return int(from_attribute)
+    return to_int(lane_link.get("from"))
 
 
 def get_to_attribute_from_lane_link(lane_link: etree._Element) -> Union[int, None]:
-    to_attribute = lane_link.get("to")
-    if to_attribute is None:
-        return None
-    else:
-        return int(to_attribute)
+    return to_int(lane_link.get("to"))
 
 
 def get_length_from_geometry(geometry: etree._ElementTree) -> Union[None, float]:
-    length = geometry.get("length")
-    if length is None:
-        return None
+    return to_float(geometry.get("length"))
+
+
+def is_valid_param_poly3(param_poly3: models.ParamPoly3) -> bool:
+    if any(
+        value is None
+        for value in [
+            param_poly3.u.a,
+            param_poly3.u.b,
+            param_poly3.u.c,
+            param_poly3.u.d,
+            param_poly3.v.a,
+            param_poly3.v.b,
+            param_poly3.v.c,
+            param_poly3.v.d,
+        ]
+    ):
+        return False
     else:
-        return float(length)
+        return True
 
 
 def get_normalized_param_poly3_from_geometry(
@@ -415,21 +417,26 @@ def get_normalized_param_poly3_from_geometry(
     if param_poly3.get("pRange") != models.ParamPoly3Range.NORMALIZED:
         return None
 
-    return models.ParamPoly3(
+    parsed_result = models.ParamPoly3(
         u=models.Poly3(
-            a=float(param_poly3.get("aU")),
-            b=float(param_poly3.get("bU")),
-            c=float(param_poly3.get("cU")),
-            d=float(param_poly3.get("dU")),
+            a=to_float(param_poly3.get("aU")),
+            b=to_float(param_poly3.get("bU")),
+            c=to_float(param_poly3.get("cU")),
+            d=to_float(param_poly3.get("dU")),
         ),
         v=models.Poly3(
-            a=float(param_poly3.get("aV")),
-            b=float(param_poly3.get("bV")),
-            c=float(param_poly3.get("cV")),
-            d=float(param_poly3.get("dV")),
+            a=to_float(param_poly3.get("aV")),
+            b=to_float(param_poly3.get("bV")),
+            c=to_float(param_poly3.get("cV")),
+            d=to_float(param_poly3.get("dV")),
         ),
         range=models.ParamPoly3Range.NORMALIZED,
     )
+
+    if is_valid_param_poly3(parsed_result):
+        return parsed_result
+    else:
+        return None
 
 
 def poly3_to_polynomial(poly3: models.Poly3) -> np.polynomial.Polynomial:
@@ -450,21 +457,26 @@ def get_arclen_param_poly3_from_geometry(
     if param_poly3.get("pRange") != models.ParamPoly3Range.ARC_LENGTH:
         return None
 
-    return models.ParamPoly3(
+    parsed_result = models.ParamPoly3(
         u=models.Poly3(
-            a=float(param_poly3.get("aU")),
-            b=float(param_poly3.get("bU")),
-            c=float(param_poly3.get("cU")),
-            d=float(param_poly3.get("dU")),
+            a=to_float(param_poly3.get("aU")),
+            b=to_float(param_poly3.get("bU")),
+            c=to_float(param_poly3.get("cU")),
+            d=to_float(param_poly3.get("dU")),
         ),
         v=models.Poly3(
-            a=float(param_poly3.get("aV")),
-            b=float(param_poly3.get("bV")),
-            c=float(param_poly3.get("cV")),
-            d=float(param_poly3.get("dV")),
+            a=to_float(param_poly3.get("aV")),
+            b=to_float(param_poly3.get("bV")),
+            c=to_float(param_poly3.get("cV")),
+            d=to_float(param_poly3.get("dV")),
         ),
         range=models.ParamPoly3Range.ARC_LENGTH,
     )
+
+    if is_valid_param_poly3(parsed_result):
+        return parsed_result
+    else:
+        return None
 
 
 def arc_length_integrand(
@@ -578,18 +590,39 @@ def get_connecting_lane_ids(
         return []
 
 
+def is_valid_offset_poly3(offset_poly3: models.OffsetPoly3) -> bool:
+    if any(
+        value is None
+        for value in [
+            offset_poly3.poly3.a,
+            offset_poly3.poly3.b,
+            offset_poly3.poly3.c,
+            offset_poly3.poly3.d,
+            offset_poly3.s_offset,
+        ]
+    ):
+        return False
+    else:
+        return True
+
+
 def get_poly3_from_width(
     width: etree._ElementTree,
 ) -> models.OffsetPoly3:
-    return models.OffsetPoly3(
+    offset_poly3 = models.OffsetPoly3(
         poly3=models.Poly3(
-            a=float(width.get("a")),
-            b=float(width.get("b")),
-            c=float(width.get("c")),
-            d=float(width.get("d")),
+            a=to_float(width.get("a")),
+            b=to_float(width.get("b")),
+            c=to_float(width.get("c")),
+            d=to_float(width.get("d")),
         ),
-        s_offset=float(width.get("sOffset")),
+        s_offset=to_float(width.get("sOffset")),
     )
+
+    if is_valid_offset_poly3(offset_poly3):
+        return offset_poly3
+    else:
+        return None
 
 
 def get_lane_width_poly3_list(lane: etree._Element) -> List[models.OffsetPoly3]:
@@ -742,37 +775,29 @@ def get_traffic_hand_rule_from_road(road: etree._Element) -> models.TrafficHandR
 
 
 def get_road_length(road: etree._ElementTree) -> Union[None, float]:
-    length = road.get("length")
-    if length is None:
-        return None
-    else:
-        return float(length)
+    return to_float(road.get("length"))
 
 
 def get_s_from_lane_section(
     lane_section: etree._ElementTree,
 ) -> Union[None, float]:
-    s_coordinate = lane_section.get("s")
-    if s_coordinate is None:
-        return None
-    else:
-        return float(s_coordinate)
+    return to_float(lane_section.get("s"))
 
 
 def get_borders_from_lane(lane: etree._ElementTree) -> List[models.OffsetPoly3]:
     border_list = []
     for border in lane.iter("border"):
-        border_list.append(
-            models.OffsetPoly3(
-                models.Poly3(
-                    a=float(border.get("a")),
-                    b=float(border.get("b")),
-                    c=float(border.get("c")),
-                    d=float(border.get("d")),
-                ),
-                s_offset=float(border.get("sOffset")),
-            )
+        offset_poly3 = models.OffsetPoly3(
+            models.Poly3(
+                a=to_float(border.get("a")),
+                b=to_float(border.get("b")),
+                c=to_float(border.get("c")),
+                d=to_float(border.get("d")),
+            ),
+            s_offset=to_float(border.get("sOffset")),
         )
+        if is_valid_offset_poly3(offset_poly3):
+            border_list.append(offset_poly3)
 
     return border_list
 
@@ -835,17 +860,18 @@ def get_road_elevations(road: etree._ElementTree) -> List[models.OffsetPoly3]:
 
     elevation_list = []
     for elevation in elevation_profile.iter("elevation"):
-        elevation_list.append(
-            models.OffsetPoly3(
-                models.Poly3(
-                    a=float(elevation.get("a")),
-                    b=float(elevation.get("b")),
-                    c=float(elevation.get("c")),
-                    d=float(elevation.get("d")),
-                ),
-                s_offset=float(elevation.get("s")),
-            )
+        offset_poly3 = models.OffsetPoly3(
+            models.Poly3(
+                a=to_float(elevation.get("a")),
+                b=to_float(elevation.get("b")),
+                c=to_float(elevation.get("c")),
+                d=to_float(elevation.get("d")),
+            ),
+            s_offset=to_float(elevation.get("s")),
         )
+
+        if is_valid_offset_poly3(offset_poly3):
+            elevation_list.append(offset_poly3)
 
     return elevation_list
 
@@ -858,17 +884,18 @@ def get_road_superelevations(road: etree._ElementTree) -> List[models.OffsetPoly
 
     superelevation_list = []
     for superelevation in lateral_profile.iter("superelevation"):
-        superelevation_list.append(
-            models.OffsetPoly3(
-                models.Poly3(
-                    a=float(superelevation.get("a")),
-                    b=float(superelevation.get("b")),
-                    c=float(superelevation.get("c")),
-                    d=float(superelevation.get("d")),
-                ),
-                s_offset=float(superelevation.get("s")),
-            )
+        offset_poly3 = models.OffsetPoly3(
+            models.Poly3(
+                a=to_float(superelevation.get("a")),
+                b=to_float(superelevation.get("b")),
+                c=to_float(superelevation.get("c")),
+                d=to_float(superelevation.get("d")),
+            ),
+            s_offset=to_float(superelevation.get("s")),
         )
+
+        if is_valid_offset_poly3(offset_poly3):
+            superelevation_list.append(offset_poly3)
 
     return superelevation_list
 
@@ -881,17 +908,18 @@ def get_lane_offsets_from_road(road: etree._ElementTree) -> List[models.OffsetPo
 
     lane_offset_list = []
     for lane_offset in lanes.iter("laneOffset"):
-        lane_offset_list.append(
-            models.OffsetPoly3(
-                models.Poly3(
-                    a=float(lane_offset.get("a")),
-                    b=float(lane_offset.get("b")),
-                    c=float(lane_offset.get("c")),
-                    d=float(lane_offset.get("d")),
-                ),
-                s_offset=float(lane_offset.get("s")),
-            )
+        offset_poly3 = models.OffsetPoly3(
+            models.Poly3(
+                a=to_float(lane_offset.get("a")),
+                b=to_float(lane_offset.get("b")),
+                c=to_float(lane_offset.get("c")),
+                d=to_float(lane_offset.get("d")),
+            ),
+            s_offset=to_float(lane_offset.get("s")),
         )
+
+        if is_valid_offset_poly3(offset_poly3):
+            lane_offset_list.append(offset_poly3)
 
     return lane_offset_list
 
@@ -977,36 +1005,19 @@ def get_lane_direction(lane: etree._Element) -> Union[models.LaneDirection, None
 
 
 def get_heading_from_geometry(geometry: etree._ElementTree) -> Union[None, float]:
-    heading = geometry.get("hdg")
-
-    if heading is None:
-        return None
-
-    return float(heading)
+    return to_float(geometry.get("hdg"))
 
 
 def get_s_from_geometry(geometry: etree._ElementTree) -> Union[None, float]:
-    s = geometry.get("s")
-    if s is None:
-        return None
-    else:
-        return float(s)
+    return to_float(geometry.get("s"))
 
 
 def get_x_from_geometry(geometry: etree._ElementTree) -> Union[None, float]:
-    x = geometry.get("x")
-    if x is None:
-        return None
-    else:
-        return float(x)
+    return to_float(geometry.get("x"))
 
 
 def get_y_from_geometry(geometry: etree._ElementTree) -> Union[None, float]:
-    y = geometry.get("y")
-    if y is None:
-        return None
-    else:
-        return float(y)
+    return to_float(geometry.get("y"))
 
 
 def get_geometry_from_road_by_s(
@@ -1051,11 +1062,7 @@ def calculate_line_point(
 
 
 def get_curvature_from_arc(arc: etree._Element) -> Union[None, float]:
-    curvature = arc.get("curvature")
-    if curvature is None:
-        return None
-    else:
-        return float(curvature)
+    return to_float(arc.get("curvature"))
 
 
 def calculate_arc_point(
@@ -1078,19 +1085,11 @@ def calculate_arc_point(
 
 
 def get_curv_start_from_spiral(spiral: etree._Element) -> Union[None, float]:
-    curvStart = spiral.get("curvStart")
-    if curvStart is None:
-        return None
-    else:
-        return float(curvStart)
+    return to_float(spiral.get("curvStart"))
 
 
 def get_curv_end_from_spiral(spiral: etree._Element) -> Union[None, float]:
-    curvEnd = spiral.get("curvEnd")
-    if curvEnd is None:
-        return None
-    else:
-        return float(curvEnd)
+    return to_float(spiral.get("curvEnd"))
 
 
 def calculate_spiral_point(
@@ -1308,20 +1307,11 @@ def get_middle_point_xyz_from_road_reference_line(
 
 
 def get_junction_id(junction: etree._ElementTree) -> Union[None, int]:
-    id = junction.get("id")
-    if id is None:
-        return None
-    else:
-        return int(id)
+    return to_int(junction.get("id"))
 
 
 def get_heading_from_geometry(geometry: etree._ElementTree) -> Union[None, float]:
-    heading = geometry.get("hdg")
-
-    if heading is None:
-        return None
-
-    return float(heading)
+    return to_float(geometry.get("hdg"))
 
 
 def calculate_arc_point_heading(
@@ -1757,3 +1747,7 @@ def get_middle_point_xyz_at_height_zero_from_lane_by_s(
     else:
         point_xyz = get_point_xyz_from_road(road, s, t, 0.0)
         return point_xyz
+
+
+def get_s_offset_from_access(access: etree._ElementTree) -> Union[None, float]:
+    return to_float(access.get("sOffset"))

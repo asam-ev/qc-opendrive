@@ -65,9 +65,12 @@ def _is_schema_compliant(
     """
 
     split_result = schema_version.split(".")
-    major = int(split_result[0])
-    minor = int(split_result[1])
+    major = utils.to_int(split_result[0])
+    minor = utils.to_int(split_result[1])
     errors = []
+
+    if major is None or minor is None:
+        return False, errors
 
     # use LXML for XSD 1.0 with better error level -> OpenDRIVE 1.7 and lower
     if major <= 1 and minor <= 7:

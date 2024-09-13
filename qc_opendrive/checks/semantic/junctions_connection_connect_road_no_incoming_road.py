@@ -23,7 +23,12 @@ def _check_junctions_connection_connect_road_no_incoming_road(
 
         for connection in connections:
             incoming_road_id = utils.get_incoming_road_id_from_connection(connection)
-            incoming_road = road_id_map[incoming_road_id]
+            if incoming_road_id is None:
+                continue
+
+            incoming_road = road_id_map.get(incoming_road_id)
+            if incoming_road is None:
+                continue
 
             if utils.road_belongs_to_junction(incoming_road):
                 issue_id = checker_data.result.register_issue(
