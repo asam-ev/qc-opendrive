@@ -117,7 +117,7 @@ def _raise_lane_linkage_gap_issue(
             x=inertial_point.x,
             y=inertial_point.y,
             z=inertial_point.z,
-            description="Lane reference point",
+            description="Next lane middle reference point",
         )
 
 
