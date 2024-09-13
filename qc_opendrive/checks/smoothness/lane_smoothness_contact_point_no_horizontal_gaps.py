@@ -79,9 +79,7 @@ def _raise_lane_linkage_gap_issue(
     rule_uid: str,
     previous_lane: etree._Element,
     current_lane: etree._Element,
-    current_road: etree._ElementTree,
-    current_road_s: float,
-    current_road_t: float,
+    inertial_point: Union[None, models.Point3D],
 ) -> None:
     issue_id = checker_data.result.register_issue(
         checker_bundle_name=constants.BUNDLE_NAME,
@@ -106,9 +104,6 @@ def _raise_lane_linkage_gap_issue(
         description=f"Next lane element",
     )
 
-    inertial_point = utils.get_point_xyz_from_road(
-        road=current_road, s=current_road_s, t=current_road_t, h=0
-    )
     if inertial_point is not None:
         checker_data.result.add_inertial_location(
             checker_bundle_name=constants.BUNDLE_NAME,
@@ -215,6 +210,26 @@ def _compute_outer_point(
     return utils.get_point_xyz_from_road(road=road, s=road_s, t=current_lane_t, h=0)
 
 
+def _compute_middle_point(
+    lanes_outer_points: Dict[int, float],
+    lane_id: int,
+    road: etree._Element,
+    road_s: float,
+) -> Union[None, models.Point3D]:
+    outer_point = _compute_outer_point(lanes_outer_points, lane_id, road, road_s)
+
+    inner_point = _compute_inner_point(lanes_outer_points, lane_id, road, road_s)
+
+    if inner_point is not None and outer_point is not None:
+        return models.Point3D(
+            x=(inner_point.x + outer_point.x) / 2,
+            y=(inner_point.y + outer_point.y) / 2,
+            z=(inner_point.z + outer_point.z) / 2,
+        )
+    else:
+        return None
+
+
 def _equal_outer_border_points(
     road: etree._Element,
     lane_id: int,
@@ -309,18 +324,18 @@ def _validate_same_road_lane_successors(
                 if utils.get_lane_id(next_lane) == next_lane_id
             ]
             if len(next_lane) == 1:
-                current_road_t = (
-                    current_outer_points.get(lane_id)
-                    + current_outer_points.get(next_lane_id)
-                ) / 2
+                inertial_point = _compute_middle_point(
+                    successor_outer_points,
+                    next_lane_id,
+                    road,
+                    successor_road_s,
+                )
                 _raise_lane_linkage_gap_issue(
                     checker_data,
                     rule_uid,
                     lane,
                     next_lane[0],
-                    current_road=road,
-                    current_road_s=successor_road_s,
-                    current_road_t=current_road_t,
+                    inertial_point,
                 )
 
     elif len(successors) == 2:
@@ -344,18 +359,18 @@ def _validate_same_road_lane_successors(
                 if utils.get_lane_id(next_lane) == bottom_successor_id
             ]
             if len(next_lane) == 1:
-                current_road_t = (
-                    current_outer_points.get(lane_id)
-                    + current_outer_points.get(bottom_successor_id)
-                ) / 2
+                inertial_point = _compute_middle_point(
+                    successor_outer_points,
+                    bottom_successor_id,
+                    road,
+                    successor_road_s,
+                )
                 _raise_lane_linkage_gap_issue(
                     checker_data,
                     rule_uid,
                     lane,
                     next_lane[0],
-                    current_road=road,
-                    current_road_s=successor_road_s,
-                    current_road_t=current_road_t,
+                    inertial_point,
                 )
 
         if not _equal_inner_border_points(
@@ -373,18 +388,18 @@ def _validate_same_road_lane_successors(
                 if utils.get_lane_id(next_lane) == upper_successor_id
             ]
             if len(next_lane) == 1:
-                current_road_t = (
-                    current_outer_points.get(lane_id)
-                    + current_outer_points.get(upper_successor_id)
-                ) / 2
+                inertial_point = _compute_middle_point(
+                    successor_outer_points,
+                    upper_successor_id,
+                    road,
+                    successor_road_s,
+                )
                 _raise_lane_linkage_gap_issue(
                     checker_data,
                     rule_uid,
                     lane,
                     next_lane[0],
-                    current_road=road,
-                    current_road_s=successor_road_s,
-                    current_road_t=current_road_t,
+                    inertial_point,
                 )
 
     else:
@@ -395,18 +410,18 @@ def _validate_same_road_lane_successors(
                 if utils.get_lane_id(next_lane) == extra_lane_id
             ]
             if len(next_lane) == 1:
-                current_road_t = (
-                    current_outer_points.get(lane_id)
-                    + current_outer_points.get(extra_lane_id)
-                ) / 2
+                inertial_point = _compute_middle_point(
+                    successor_outer_points,
+                    extra_lane_id,
+                    road,
+                    successor_road_s,
+                )
                 _raise_lane_linkage_gap_issue(
                     checker_data,
                     rule_uid,
                     lane,
                     next_lane[0],
-                    current_road=road,
-                    current_road_s=successor_road_s,
-                    current_road_t=current_road_t,
+                    inertial_point,
                 )
 
 
@@ -450,18 +465,18 @@ def _validate_same_road_lane_predecessors(
                 if utils.get_lane_id(prev_lane) == prev_lane_id
             ]
             if len(prev_lane) == 1:
-                current_road_t = (
-                    current_outer_points.get(lane_id)
-                    + current_outer_points.get(prev_lane_id)
-                ) / 2
+                inertial_point = _compute_middle_point(
+                    current_outer_points,
+                    lane_id,
+                    road,
+                    current_road_s,
+                )
                 _raise_lane_linkage_gap_issue(
                     checker_data,
                     rule_uid,
                     prev_lane[0],
                     lane,
-                    current_road=road,
-                    current_road_s=current_road_s,
-                    current_road_t=current_road_t,
+                    inertial_point,
                 )
 
     elif len(predecessors) == 2:
@@ -485,18 +500,17 @@ def _validate_same_road_lane_predecessors(
                 if utils.get_lane_id(prev_lane) == upper_prev_id
             ]
             if len(prev_lane) == 1:
-                current_road_t = (
-                    current_outer_points.get(lane_id)
-                    + current_outer_points.get(upper_prev_id)
-                ) / 2
+                inertial_point = _compute_middle_point(
+                    current_outer_points,
+                    lane_id,
+                    road,
+                    current_road_s,
+                )
                 _raise_lane_linkage_gap_issue(
                     checker_data,
                     rule_uid,
                     prev_lane[0],
-                    lane,
-                    current_road=road,
-                    current_road_s=current_road_s,
-                    current_road_t=current_road_t,
+                    inertial_point,
                 )
 
         if not _equal_inner_border_points(
@@ -514,18 +528,18 @@ def _validate_same_road_lane_predecessors(
                 if utils.get_lane_id(prev_lane) == bottom_prev_id
             ]
             if len(prev_lane) == 1:
-                current_road_t = (
-                    current_outer_points.get(lane_id)
-                    + current_outer_points.get(bottom_prev_id)
-                ) / 2
+                inertial_point = _compute_middle_point(
+                    current_outer_points,
+                    lane_id,
+                    road,
+                    current_road_s,
+                )
                 _raise_lane_linkage_gap_issue(
                     checker_data,
                     rule_uid,
                     prev_lane[0],
                     lane,
-                    current_road=road,
-                    current_road_s=current_road_s,
-                    current_road_t=current_road_t,
+                    inertial_point,
                 )
 
     else:
@@ -536,18 +550,18 @@ def _validate_same_road_lane_predecessors(
                 if utils.get_lane_id(prev_lane) == extra_lane_id
             ]
             if len(prev_lane) == 1:
-                current_road_t = (
-                    current_outer_points.get(lane_id)
-                    + current_outer_points.get(extra_lane_id)
-                ) / 2
+                inertial_point = _compute_middle_point(
+                    current_outer_points,
+                    lane_id,
+                    road,
+                    current_road_s,
+                )
                 _raise_lane_linkage_gap_issue(
                     checker_data,
                     rule_uid,
                     prev_lane[0],
                     lane,
-                    current_road=road,
-                    current_road_s=current_road_s,
-                    current_road_t=current_road_t,
+                    inertial_point,
                 )
 
 
@@ -792,31 +806,35 @@ def _validate_inter_road_smoothness(
                     for target_lane in target_lanes
                     if utils.get_lane_id(target_lane) == conn_lane_id
                 )
-                sign = -1 if conn_lane_id < 0 else 1
-                target_road_t = (
-                    target_lanes_outer_points.get(conn_lane_id)
-                    + target_lanes_outer_points.get(conn_lane_id - 1 * sign)
-                ) / 2
+
                 if road_relation == models.LinkageTag.PREDECESSOR:
+                    inertial_point = _compute_middle_point(
+                        lanes_outer_points,
+                        lane_id,
+                        road,
+                        road_s,
+                    )
                     _raise_lane_linkage_gap_issue(
                         checker_data,
                         rule_uid,
                         target_lane,
                         lane,
-                        current_road=target_road,
-                        current_road_s=target_s,
-                        current_road_t=target_road_t,
+                        inertial_point,
                     )
 
                 elif road_relation == models.LinkageTag.SUCCESSOR:
+                    inertial_point = _compute_middle_point(
+                        target_lanes_outer_points,
+                        conn_lane_id,
+                        target_road,
+                        target_s,
+                    )
                     _raise_lane_linkage_gap_issue(
                         checker_data,
                         rule_uid,
                         lane,
                         target_lane,
-                        current_road=target_road,
-                        current_road_s=target_s,
-                        current_road_t=target_road_t,
+                        inertial_point,
                     )
 
 
@@ -973,30 +991,34 @@ def _validate_junction_connection_gaps(
                 for target_lane in target_lanes
                 if utils.get_lane_id(target_lane) == to_id
             )
-            sign = -1 if to_id < 0 else 1
-            target_road_t = (
-                target_lanes_outer_points.get(to_id)
-                + target_lanes_outer_points.get(to_id - 1 * sign)
-            ) / 2
+
             if road_relation == models.LinkageTag.PREDECESSOR:
+                inertial_point = _compute_middle_point(
+                    lanes_outer_points,
+                    from_id,
+                    incoming_road,
+                    incoming_road_s,
+                )
                 _raise_lane_linkage_gap_issue(
                     checker_data,
                     rule_uid,
                     from_lane,
                     target_lane,
-                    current_road=target_road,
-                    current_road_s=target_s,
-                    current_road_t=target_road_t,
+                    inertial_point,
                 )
             elif road_relation == models.LinkageTag.SUCCESSOR:
+                inertial_point = _compute_middle_point(
+                    target_lanes_outer_points,
+                    to_id,
+                    target_road,
+                    target_s,
+                )
                 _raise_lane_linkage_gap_issue(
                     checker_data,
                     rule_uid,
                     from_lane,
                     target_lane,
-                    current_road=target_road,
-                    current_road_s=target_s,
-                    current_road_t=target_road_t,
+                    inertial_point,
                 )
 
 
