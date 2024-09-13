@@ -65,66 +65,68 @@ def check_rule(checker_data: models.CheckerData) -> None:
 
                 access: etree._Element
                 for access in lane.iter("access"):
-                    access_attr = access.attrib
+                    rule = access.get("rule")
+                    if rule is None:
+                        continue
 
-                    if "rule" in access_attr:
-                        s_offset = float(access_attr["sOffset"])
-                        rule = access_attr["rule"]
+                    s_offset = utils.get_s_offset_from_access(access)
+                    if s_offset is None:
+                        continue
 
-                        for s_offset_info in access_s_offset_info:
-                            if (
-                                abs(s_offset_info.s_offset - s_offset) <= 1e-6
-                                and rule != s_offset_info.rule
-                            ):
-                                issue_id = checker_data.result.register_issue(
-                                    checker_bundle_name=constants.BUNDLE_NAME,
-                                    checker_id=semantic_constants.CHECKER_ID,
-                                    description="At a given s-position, either only deny or only allow values shall be given, not mixed.",
-                                    level=IssueSeverity.ERROR,
-                                    rule_uid=rule_uid,
-                                )
+                    for s_offset_info in access_s_offset_info:
+                        if (
+                            abs(s_offset_info.s_offset - s_offset) <= 1e-6
+                            and rule != s_offset_info.rule
+                        ):
+                            issue_id = checker_data.result.register_issue(
+                                checker_bundle_name=constants.BUNDLE_NAME,
+                                checker_id=semantic_constants.CHECKER_ID,
+                                description="At a given s-position, either only deny or only allow values shall be given, not mixed.",
+                                level=IssueSeverity.ERROR,
+                                rule_uid=rule_uid,
+                            )
 
-                                path = checker_data.input_file_xml_root.getpath(access)
+                            path = checker_data.input_file_xml_root.getpath(access)
 
-                                previous_rule = s_offset_info.rule
-                                current_rule = access_attr["rule"]
+                            previous_rule = s_offset_info.rule
+                            current_rule = rule
 
-                                checker_data.result.add_xml_location(
+                            checker_data.result.add_xml_location(
+                                checker_bundle_name=constants.BUNDLE_NAME,
+                                checker_id=semantic_constants.CHECKER_ID,
+                                issue_id=issue_id,
+                                xpath=path,
+                                description=f"First encounter of {current_rule} having {previous_rule} before.",
+                            )
+
+                            if s_section is None:
+                                continue
+
+                            s = s_section + s_offset + (length - s_offset) / 2.0
+                            t = utils.get_t_middle_point_from_lane_by_s(
+                                road, lane_section, lane, s
+                            )
+
+                            if t is None:
+                                continue
+
+                            inertial_point = utils.get_point_xyz_from_road(
+                                road, s, t, 0.0
+                            )
+                            if inertial_point is not None:
+                                checker_data.result.add_inertial_location(
                                     checker_bundle_name=constants.BUNDLE_NAME,
                                     checker_id=semantic_constants.CHECKER_ID,
                                     issue_id=issue_id,
-                                    xpath=path,
-                                    description=f"First encounter of {current_rule} having {previous_rule} before.",
+                                    x=inertial_point.x,
+                                    y=inertial_point.y,
+                                    z=inertial_point.z,
+                                    description="Mixed access point.",
                                 )
 
-                                if s_section is None:
-                                    continue
-
-                                s = s_section + s_offset + (length - s_offset) / 2.0
-                                t = utils.get_t_middle_point_from_lane_by_s(
-                                    road, lane_section, lane, s
-                                )
-
-                                if t is None:
-                                    continue
-
-                                inertial_point = utils.get_point_xyz_from_road(
-                                    road, s, t, 0.0
-                                )
-                                if inertial_point is not None:
-                                    checker_data.result.add_inertial_location(
-                                        checker_bundle_name=constants.BUNDLE_NAME,
-                                        checker_id=semantic_constants.CHECKER_ID,
-                                        issue_id=issue_id,
-                                        x=inertial_point.x,
-                                        y=inertial_point.y,
-                                        z=inertial_point.z,
-                                        description="Mixed access point.",
-                                    )
-
-                        access_s_offset_info.append(
-                            SOffsetInfo(
-                                s_offset=float(access_attr["sOffset"]),
-                                rule=access_attr["rule"],
-                            )
+                    access_s_offset_info.append(
+                        SOffsetInfo(
+                            s_offset=s_offset,
+                            rule=rule,
                         )
+                    )
