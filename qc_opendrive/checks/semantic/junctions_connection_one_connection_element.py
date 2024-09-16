@@ -3,17 +3,20 @@ import logging
 from typing import Dict, List
 from lxml import etree
 
-from qc_baselib import IssueSeverity
+from qc_baselib import IssueSeverity, StatusType
 
 from qc_opendrive import constants
 from qc_opendrive.base import models, utils
-from qc_opendrive.checks.semantic import semantic_constants
+from qc_opendrive import basic_preconditions
 
-RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.7.0"
+CHECKER_ID = "check_asam_xodr_junctions_connection_one_connection_element"
+CHECKER_DESCRIPTION = "Each connecting road shall be represented by exactly one element. A connecting road may contain as many lanes as required."
+CHECKER_PRECONDITIONS = basic_preconditions.CHECKER_PRECONDITIONS
+RULE_UID = "asam.net:xodr:1.7.0:junctions.connection.one_connection_element"
 
 
 def _check_junctions_connection_one_connection_element(
-    checker_data: models.CheckerData, rule_uid: str
+    checker_data: models.CheckerData,
 ) -> None:
     junctions = utils.get_junctions(checker_data.input_file_xml_root)
 
@@ -43,16 +46,16 @@ def _check_junctions_connection_one_connection_element(
             # we raise 1 issue with all repeated locations for each repeated id
             issue_id = checker_data.result.register_issue(
                 checker_bundle_name=constants.BUNDLE_NAME,
-                checker_id=semantic_constants.CHECKER_ID,
+                checker_id=CHECKER_ID,
                 description=f"Connecting road {connecting_road_id} shall be represented by only one <connection> element.",
                 level=IssueSeverity.ERROR,
-                rule_uid=rule_uid,
+                rule_uid=RULE_UID,
             )
 
             for connection in connections:
                 checker_data.result.add_xml_location(
                     checker_bundle_name=constants.BUNDLE_NAME,
-                    checker_id=semantic_constants.CHECKER_ID,
+                    checker_id=CHECKER_ID,
                     issue_id=issue_id,
                     xpath=checker_data.input_file_xml_root.getpath(connection),
                     description="Connection with reused connecting road id.",
@@ -67,7 +70,7 @@ def _check_junctions_connection_one_connection_element(
                 if inertial_point is not None:
                     checker_data.result.add_inertial_location(
                         checker_bundle_name=constants.BUNDLE_NAME,
-                        checker_id=semantic_constants.CHECKER_ID,
+                        checker_id=CHECKER_ID,
                         issue_id=issue_id,
                         x=inertial_point.x,
                         y=inertial_point.y,
@@ -97,19 +100,4 @@ def check_rule(checker_data: models.CheckerData) -> None:
     """
     logging.info("Executing junctions.connection.one_connection_element check")
 
-    rule_uid = checker_data.result.register_rule(
-        checker_bundle_name=constants.BUNDLE_NAME,
-        checker_id=semantic_constants.CHECKER_ID,
-        emanating_entity="asam.net",
-        standard="xodr",
-        definition_setting=RULE_INITIAL_SUPPORTED_SCHEMA_VERSION,
-        rule_full_name="junctions.connection.one_connection_element",
-    )
-
-    if checker_data.schema_version != RULE_INITIAL_SUPPORTED_SCHEMA_VERSION:
-        logging.info(
-            f"Schema version {checker_data.schema_version} not supported. Skipping rule."
-        )
-        return
-
-    _check_junctions_connection_one_connection_element(checker_data, rule_uid)
+    _check_junctions_connection_one_connection_element(checker_data)

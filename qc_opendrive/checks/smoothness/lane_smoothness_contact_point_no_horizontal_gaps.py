@@ -4,14 +4,18 @@ from typing import Union, List, Dict
 from lxml import etree
 from scipy.spatial import distance
 
-from qc_baselib import IssueSeverity
+from qc_baselib import IssueSeverity, StatusType
 
 from qc_opendrive import constants
 from qc_opendrive.base import utils, models
-from qc_opendrive.checks.smoothness import smoothness_constants
+from qc_opendrive import basic_preconditions
 
 
-RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.7.0"
+CHECKER_ID = "check_asam_xodr_lane_smoothness_contact_point_no_horizontal_gaps"
+CHECKER_DESCRIPTION = "Two connected drivable lanes shall have no horizontal gaps."
+CHECKER_PRECONDITIONS = basic_preconditions.CHECKER_PRECONDITIONS
+RULE_UID = "asam.net:xodr:1.7.0:lane_smoothness.contact_point_no_horizontal_gaps"
+
 # This parameter needs to be configurable later
 TOLERANCE_THRESHOLD = 0.01  # meters
 
@@ -33,7 +37,6 @@ DRIVABLE_LANE_TYPES = {
 
 def _raise_geometry_gap_issue(
     checker_data: models.CheckerData,
-    rule_uid: str,
     previous_geometry: etree._Element,
     geometry: etree._Element,
     distance: float,
@@ -41,22 +44,22 @@ def _raise_geometry_gap_issue(
 ) -> None:
     issue_id = checker_data.result.register_issue(
         checker_bundle_name=constants.BUNDLE_NAME,
-        checker_id=smoothness_constants.CHECKER_ID,
+        checker_id=CHECKER_ID,
         description=f"The transition between geometry elements should be defined with no gaps. A gap of {distance} meters has been found.",
         level=IssueSeverity.ERROR,
-        rule_uid=rule_uid,
+        rule_uid=RULE_UID,
     )
 
     checker_data.result.add_xml_location(
         checker_bundle_name=constants.BUNDLE_NAME,
-        checker_id=smoothness_constants.CHECKER_ID,
+        checker_id=CHECKER_ID,
         issue_id=issue_id,
         xpath=checker_data.input_file_xml_root.getpath(previous_geometry),
         description=f"First geometry element",
     )
     checker_data.result.add_xml_location(
         checker_bundle_name=constants.BUNDLE_NAME,
-        checker_id=smoothness_constants.CHECKER_ID,
+        checker_id=CHECKER_ID,
         issue_id=issue_id,
         xpath=checker_data.input_file_xml_root.getpath(geometry),
         description=f"Second geometry element",
@@ -65,7 +68,7 @@ def _raise_geometry_gap_issue(
     if inertial_point is not None:
         checker_data.result.add_inertial_location(
             checker_bundle_name=constants.BUNDLE_NAME,
-            checker_id=smoothness_constants.CHECKER_ID,
+            checker_id=CHECKER_ID,
             issue_id=issue_id,
             x=inertial_point.x,
             y=inertial_point.y,
@@ -76,29 +79,28 @@ def _raise_geometry_gap_issue(
 
 def _raise_lane_linkage_gap_issue(
     checker_data: models.CheckerData,
-    rule_uid: str,
     previous_lane: etree._Element,
     current_lane: etree._Element,
     inertial_point: Union[None, models.Point3D],
 ) -> None:
     issue_id = checker_data.result.register_issue(
         checker_bundle_name=constants.BUNDLE_NAME,
-        checker_id=smoothness_constants.CHECKER_ID,
+        checker_id=CHECKER_ID,
         description=f"The transition between lane elements should be defined with no gaps.",
         level=IssueSeverity.ERROR,
-        rule_uid=rule_uid,
+        rule_uid=RULE_UID,
     )
 
     checker_data.result.add_xml_location(
         checker_bundle_name=constants.BUNDLE_NAME,
-        checker_id=smoothness_constants.CHECKER_ID,
+        checker_id=CHECKER_ID,
         issue_id=issue_id,
         xpath=checker_data.input_file_xml_root.getpath(previous_lane),
         description=f"First lane element",
     )
     checker_data.result.add_xml_location(
         checker_bundle_name=constants.BUNDLE_NAME,
-        checker_id=smoothness_constants.CHECKER_ID,
+        checker_id=CHECKER_ID,
         issue_id=issue_id,
         xpath=checker_data.input_file_xml_root.getpath(current_lane),
         description=f"Next lane element",
@@ -107,7 +109,7 @@ def _raise_lane_linkage_gap_issue(
     if inertial_point is not None:
         checker_data.result.add_inertial_location(
             checker_bundle_name=constants.BUNDLE_NAME,
-            checker_id=smoothness_constants.CHECKER_ID,
+            checker_id=CHECKER_ID,
             issue_id=issue_id,
             x=inertial_point.x,
             y=inertial_point.y,
@@ -121,7 +123,6 @@ def _check_geometries_gap(
     previous_geometry: etree._Element,
     current_geometry: etree._Element,
     checker_data: models.CheckerData,
-    rule_uid: str,
 ) -> None:
     x0 = utils.get_x_from_geometry(current_geometry)
     y0 = utils.get_y_from_geometry(current_geometry)
@@ -156,7 +157,6 @@ def _check_geometries_gap(
 
             _raise_geometry_gap_issue(
                 checker_data,
-                rule_uid,
                 previous_geometry,
                 current_geometry,
                 gap_size,
@@ -168,7 +168,6 @@ def _check_plan_view_gaps(
     road: etree._ElementTree,
     geometries: etree._ElementTree,
     checker_data: models.CheckerData,
-    rule_uid: str,
 ) -> None:
     # we are assuming geometries is a sorted list on s position
     previous_geometry: Union[etree._Element, None] = None
@@ -179,7 +178,6 @@ def _check_plan_view_gaps(
                 previous_geometry=previous_geometry,
                 current_geometry=geometry,
                 checker_data=checker_data,
-                rule_uid=rule_uid,
             )
 
         previous_geometry = geometry
@@ -293,7 +291,6 @@ def _validate_same_road_lane_successors(
     successor_road_s: float,
     successor_lanes: List[etree._Element],
     checker_data: models.CheckerData,
-    rule_uid: str,
 ) -> None:
     successors = utils.get_successor_lane_ids(lane)
     lane_id = utils.get_lane_id(lane)
@@ -332,7 +329,6 @@ def _validate_same_road_lane_successors(
                 )
                 _raise_lane_linkage_gap_issue(
                     checker_data,
-                    rule_uid,
                     lane,
                     next_lane[0],
                     inertial_point,
@@ -367,7 +363,6 @@ def _validate_same_road_lane_successors(
                 )
                 _raise_lane_linkage_gap_issue(
                     checker_data,
-                    rule_uid,
                     lane,
                     next_lane[0],
                     inertial_point,
@@ -396,7 +391,6 @@ def _validate_same_road_lane_successors(
                 )
                 _raise_lane_linkage_gap_issue(
                     checker_data,
-                    rule_uid,
                     lane,
                     next_lane[0],
                     inertial_point,
@@ -418,7 +412,6 @@ def _validate_same_road_lane_successors(
                 )
                 _raise_lane_linkage_gap_issue(
                     checker_data,
-                    rule_uid,
                     lane,
                     next_lane[0],
                     inertial_point,
@@ -434,7 +427,6 @@ def _validate_same_road_lane_predecessors(
     current_road_s: float,
     prev_lanes: List[etree._Element],
     checker_data: models.CheckerData,
-    rule_uid: str,
 ) -> None:
     lane_id = utils.get_lane_id(lane)
     predecessors = utils.get_predecessor_lane_ids(lane)
@@ -473,7 +465,6 @@ def _validate_same_road_lane_predecessors(
                 )
                 _raise_lane_linkage_gap_issue(
                     checker_data,
-                    rule_uid,
                     prev_lane[0],
                     lane,
                     inertial_point,
@@ -508,7 +499,6 @@ def _validate_same_road_lane_predecessors(
                 )
                 _raise_lane_linkage_gap_issue(
                     checker_data,
-                    rule_uid,
                     prev_lane[0],
                     inertial_point,
                 )
@@ -536,7 +526,6 @@ def _validate_same_road_lane_predecessors(
                 )
                 _raise_lane_linkage_gap_issue(
                     checker_data,
-                    rule_uid,
                     prev_lane[0],
                     lane,
                     inertial_point,
@@ -558,7 +547,6 @@ def _validate_same_road_lane_predecessors(
                 )
                 _raise_lane_linkage_gap_issue(
                     checker_data,
-                    rule_uid,
                     prev_lane[0],
                     lane,
                     inertial_point,
@@ -568,7 +556,6 @@ def _validate_same_road_lane_predecessors(
 def _check_road_lane_sections_gaps(
     road: etree._ElementTree,
     checker_data: models.CheckerData,
-    rule_uid: str,
 ) -> None:
     lane_sections = utils.get_sorted_lane_sections_with_length_from_road(road)
 
@@ -627,7 +614,6 @@ def _check_road_lane_sections_gaps(
                 next_lane_section_s,
                 next_lanes,
                 checker_data,
-                rule_uid,
             )
 
         for lane in next_lanes:
@@ -642,13 +628,10 @@ def _check_road_lane_sections_gaps(
                 next_lane_section_s,
                 current_lanes,
                 checker_data,
-                rule_uid,
             )
 
 
-def _check_roads_internal_smoothness(
-    checker_data: models.CheckerData, rule_uid: str
-) -> None:
+def _check_roads_internal_smoothness(checker_data: models.CheckerData) -> None:
     road_id_map = utils.get_road_id_map(checker_data.input_file_xml_root)
 
     for road in road_id_map.values():
@@ -656,9 +639,9 @@ def _check_roads_internal_smoothness(
 
         # we can only calculate gaps with 2 or more geometries
         if len(geometries) > 2:
-            _check_plan_view_gaps(road, geometries, checker_data, rule_uid)
+            _check_plan_view_gaps(road, geometries, checker_data)
 
-        _check_road_lane_sections_gaps(road, checker_data, rule_uid)
+        _check_road_lane_sections_gaps(road, checker_data)
 
 
 def _validate_inter_road_smoothness(
@@ -669,7 +652,6 @@ def _validate_inter_road_smoothness(
     road_s: float,
     road_id_map: Dict[int, etree._ElementTree],
     checker_data: models.CheckerData,
-    rule_uid: str,
 ):
     lane_section = road_lane_section
 
@@ -816,7 +798,6 @@ def _validate_inter_road_smoothness(
                     )
                     _raise_lane_linkage_gap_issue(
                         checker_data,
-                        rule_uid,
                         target_lane,
                         lane,
                         inertial_point,
@@ -831,7 +812,6 @@ def _validate_inter_road_smoothness(
                     )
                     _raise_lane_linkage_gap_issue(
                         checker_data,
-                        rule_uid,
                         lane,
                         target_lane,
                         inertial_point,
@@ -846,7 +826,6 @@ def _validate_junction_connection_gaps(
     road_relation: models.ContactPoint,
     road_id_map: Dict[int, etree._ElementTree],
     checker_data: models.CheckerData,
-    rule_uid: str,
 ):
     connection_contact_point = utils.get_contact_point_from_connection(connection)
     connection_road_id = utils.get_connecting_road_id_from_connection(connection)
@@ -1001,7 +980,6 @@ def _validate_junction_connection_gaps(
                 )
                 _raise_lane_linkage_gap_issue(
                     checker_data,
-                    rule_uid,
                     from_lane,
                     target_lane,
                     inertial_point,
@@ -1015,16 +993,13 @@ def _validate_junction_connection_gaps(
                 )
                 _raise_lane_linkage_gap_issue(
                     checker_data,
-                    rule_uid,
                     from_lane,
                     target_lane,
                     inertial_point,
                 )
 
 
-def _check_inter_roads_smoothness(
-    checker_data: models.CheckerData, rule_uid: str
-) -> None:
+def _check_inter_roads_smoothness(checker_data: models.CheckerData) -> None:
     road_id_map = utils.get_road_id_map(checker_data.input_file_xml_root)
     junction_id_map = utils.get_junction_id_map(checker_data.input_file_xml_root)
 
@@ -1044,7 +1019,6 @@ def _check_inter_roads_smoothness(
                 road_s=road_length,
                 road_id_map=road_id_map,
                 checker_data=checker_data,
-                rule_uid=rule_uid,
             )
 
         if predecessor is not None:
@@ -1056,7 +1030,6 @@ def _check_inter_roads_smoothness(
                 road_s=0.0,
                 road_id_map=road_id_map,
                 checker_data=checker_data,
-                rule_uid=rule_uid,
             )
 
         successor_junction_id = utils.get_linked_junction_id(
@@ -1086,7 +1059,6 @@ def _check_inter_roads_smoothness(
                     road_relation=models.LinkageTag.SUCCESSOR,
                     road_id_map=road_id_map,
                     checker_data=checker_data,
-                    rule_uid=rule_uid,
                 )
 
         if predecessor_junction_id is not None:
@@ -1109,7 +1081,6 @@ def _check_inter_roads_smoothness(
                     road_relation=models.LinkageTag.PREDECESSOR,
                     road_id_map=road_id_map,
                     checker_data=checker_data,
-                    rule_uid=rule_uid,
                 )
 
 
@@ -1137,20 +1108,5 @@ def check_rule(checker_data: models.CheckerData) -> None:
     """
     logging.info("Executing lane_smoothness.contact_point_no_horizontal_gaps check.")
 
-    rule_uid = checker_data.result.register_rule(
-        checker_bundle_name=constants.BUNDLE_NAME,
-        checker_id=smoothness_constants.CHECKER_ID,
-        emanating_entity="asam.net",
-        standard="xodr",
-        definition_setting=RULE_INITIAL_SUPPORTED_SCHEMA_VERSION,
-        rule_full_name="lane_smoothness.contact_point_no_horizontal_gaps",
-    )
-
-    if checker_data.schema_version < RULE_INITIAL_SUPPORTED_SCHEMA_VERSION:
-        logging.info(
-            f"Schema version {checker_data.schema_version} not supported. Skipping rule."
-        )
-        return
-
-    _check_roads_internal_smoothness(checker_data=checker_data, rule_uid=rule_uid)
-    _check_inter_roads_smoothness(checker_data=checker_data, rule_uid=rule_uid)
+    _check_roads_internal_smoothness(checker_data=checker_data)
+    _check_inter_roads_smoothness(checker_data=checker_data)

@@ -4,18 +4,20 @@ from typing import Dict
 
 from lxml import etree
 
-from qc_baselib import IssueSeverity
+from qc_baselib import IssueSeverity, StatusType
 
 from qc_opendrive import constants
 from qc_opendrive.base import models, utils
-from qc_opendrive.checks.semantic import semantic_constants
+from qc_opendrive import basic_preconditions
 
-RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.4.0"
+CHECKER_ID = "check_asam_xodr_road_lane_link_lanes_across_lane_sections"
+CHECKER_DESCRIPTION = "Lanes that continues across the lane sections shall be connected in both directions."
+CHECKER_PRECONDITIONS = basic_preconditions.CHECKER_PRECONDITIONS
+RULE_UID = "asam.net:xodr:1.4.0:road.lane.link.lanes_across_lane_sections"
 
 
 def _check_two_lane_sections_one_direction(
     checker_data: models.CheckerData,
-    rule_uid: str,
     first_lane_section: models.ContactingLaneSection,
     second_lane_section: models.ContactingLaneSection,
 ) -> None:
@@ -44,15 +46,15 @@ def _check_two_lane_sections_one_direction(
             if current_lane_id not in connecting_lane_ids_of_second_lane:
                 issue_id = checker_data.result.register_issue(
                     checker_bundle_name=constants.BUNDLE_NAME,
-                    checker_id=semantic_constants.CHECKER_ID,
+                    checker_id=CHECKER_ID,
                     description="Missing lane link.",
                     level=IssueSeverity.ERROR,
-                    rule_uid=rule_uid,
+                    rule_uid=RULE_UID,
                 )
 
                 checker_data.result.add_xml_location(
                     checker_bundle_name=constants.BUNDLE_NAME,
-                    checker_id=semantic_constants.CHECKER_ID,
+                    checker_id=CHECKER_ID,
                     issue_id=issue_id,
                     xpath=checker_data.input_file_xml_root.getpath(connecting_lane),
                     description="",
@@ -61,20 +63,19 @@ def _check_two_lane_sections_one_direction(
 
 def _check_two_lane_sections(
     checker_data: models.CheckerData,
-    rule_uid: str,
     first_lane_section: models.ContactingLaneSection,
     second_lane_section: models.ContactingLaneSection,
 ) -> None:
     _check_two_lane_sections_one_direction(
-        checker_data, rule_uid, first_lane_section, second_lane_section
+        checker_data, first_lane_section, second_lane_section
     )
     _check_two_lane_sections_one_direction(
-        checker_data, rule_uid, second_lane_section, first_lane_section
+        checker_data, second_lane_section, first_lane_section
     )
 
 
 def _check_middle_lane_sections(
-    checker_data: models.CheckerData, road: etree._ElementTree, rule_uid: str
+    checker_data: models.CheckerData, road: etree._ElementTree
 ) -> None:
     lane_sections = utils.get_lane_sections(road)
 
@@ -86,7 +87,6 @@ def _check_middle_lane_sections(
         previous_lane_section = lane_sections[i - 1]
         _check_two_lane_sections(
             checker_data,
-            rule_uid,
             models.ContactingLaneSection(
                 lane_section=previous_lane_section,
                 linkage_tag=models.LinkageTag.SUCCESSOR,
@@ -102,7 +102,6 @@ def _check_first_lane_section(
     checker_data: models.CheckerData,
     road: etree._ElementTree,
     road_id_map: Dict[int, etree._ElementTree],
-    rule_uid: str,
 ) -> None:
     first_lane_section = utils.get_first_lane_section(road)
     if first_lane_section is None:
@@ -124,7 +123,6 @@ def _check_first_lane_section(
 
     _check_two_lane_sections(
         checker_data,
-        rule_uid,
         first_contacting_lane_section,
         other_contacting_lane_section,
     )
@@ -134,7 +132,6 @@ def _check_last_lane_section(
     checker_data: models.CheckerData,
     road: etree._ElementTree,
     road_id_map: Dict[int, etree._ElementTree],
-    rule_uid: str,
 ) -> None:
     last_lane_section = utils.get_last_lane_section(road)
     if last_lane_section is None:
@@ -157,7 +154,6 @@ def _check_last_lane_section(
 
     _check_two_lane_sections(
         checker_data,
-        rule_uid,
         last_contacting_lane_section,
         other_contacting_lane_section,
     )
@@ -178,32 +174,17 @@ def check_rule(checker_data: models.CheckerData) -> None:
     """
     logging.info("Executing road.lane.link.lanes_across_lane_sections check.")
 
-    rule_uid = checker_data.result.register_rule(
-        checker_bundle_name=constants.BUNDLE_NAME,
-        checker_id=semantic_constants.CHECKER_ID,
-        emanating_entity="asam.net",
-        standard="xodr",
-        definition_setting=RULE_INITIAL_SUPPORTED_SCHEMA_VERSION,
-        rule_full_name="road.lane.link.lanes_across_lane_sections",
-    )
-
-    if checker_data.schema_version < RULE_INITIAL_SUPPORTED_SCHEMA_VERSION:
-        logging.info(
-            f"Schema version {checker_data.schema_version} not supported. Skipping rule."
-        )
-        return
-
     road_id_map = utils.get_road_id_map(checker_data.input_file_xml_root)
 
     for road in utils.get_roads(checker_data.input_file_xml_root):
         # For all roads, no matter whether they belong to a junction or not, middle lane sections
         # shall always be connected
-        _check_middle_lane_sections(checker_data, road, rule_uid)
+        _check_middle_lane_sections(checker_data, road)
 
         # For all roads not belonging to a junction, the first and the last lane sections shall be checked.
         # For roads belonging to a junction, ignore this rule for the first and the last lane section
         # due to the following statement from the standard:
         #     "The <link> element shall be omitted if the lane starts or ends in a junction or has no link."
         if not utils.road_belongs_to_junction(road):
-            _check_first_lane_section(checker_data, road, road_id_map, rule_uid)
-            _check_last_lane_section(checker_data, road, road_id_map, rule_uid)
+            _check_first_lane_section(checker_data, road, road_id_map)
+            _check_last_lane_section(checker_data, road, road_id_map)
