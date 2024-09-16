@@ -5,12 +5,16 @@ from typing import List
 import numpy as np
 from lxml import etree
 
-from qc_baselib import IssueSeverity
+from qc_baselib import IssueSeverity, StatusType
 from qc_opendrive import constants
 from qc_opendrive.base import models, utils
-from qc_opendrive.checks.geometry import geometry_constants
+from qc_opendrive import basic_preconditions
 
-RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.4.0"
+CHECKER_ID = "check_asam_xodr_road_lane_border_overlap_with_inner_lanes"
+CHECKER_DESCRIPTION = "Lane borders shall not intersect inner lanes."
+CHECKER_PRECONDITIONS = basic_preconditions.CHECKER_PRECONDITIONS
+RULE_UID = "asam.net:xodr:1.4.0:road.lane.border.overlap_with_inner_lanes"
+
 TOLERANCE_THRESHOLD = 1e-6
 
 
@@ -101,7 +105,6 @@ def _create_border_pairs(
 
 def _raise_issue(
     checker_data: models.CheckerData,
-    rule_uid: str,
     lane_section_with_length: models.LaneSectionWithLength,
     road,
     left_lane: etree._ElementTree,
@@ -109,15 +112,15 @@ def _raise_issue(
 ) -> None:
     issue_id = checker_data.result.register_issue(
         checker_bundle_name=constants.BUNDLE_NAME,
-        checker_id=geometry_constants.CHECKER_ID,
+        checker_id=CHECKER_ID,
         description=f"Outer lane border intersects or stays within inner lane border.",
         level=IssueSeverity.ERROR,
-        rule_uid=rule_uid,
+        rule_uid=RULE_UID,
     )
 
     checker_data.result.add_xml_location(
         checker_bundle_name=constants.BUNDLE_NAME,
-        checker_id=geometry_constants.CHECKER_ID,
+        checker_id=CHECKER_ID,
         issue_id=issue_id,
         xpath=checker_data.input_file_xml_root.getpath(left_lane),
         description=f"",
@@ -125,7 +128,7 @@ def _raise_issue(
 
     checker_data.result.add_xml_location(
         checker_bundle_name=constants.BUNDLE_NAME,
-        checker_id=geometry_constants.CHECKER_ID,
+        checker_id=CHECKER_ID,
         issue_id=issue_id,
         xpath=checker_data.input_file_xml_root.getpath(right_lane),
         description=f"",
@@ -145,7 +148,7 @@ def _raise_issue(
     if left_inertial_point is not None:
         checker_data.result.add_inertial_location(
             checker_bundle_name=constants.BUNDLE_NAME,
-            checker_id=geometry_constants.CHECKER_ID,
+            checker_id=CHECKER_ID,
             issue_id=issue_id,
             x=left_inertial_point.x,
             y=left_inertial_point.y,
@@ -160,7 +163,7 @@ def _raise_issue(
     if right_inertial_point is not None:
         checker_data.result.add_inertial_location(
             checker_bundle_name=constants.BUNDLE_NAME,
-            checker_id=geometry_constants.CHECKER_ID,
+            checker_id=CHECKER_ID,
             issue_id=issue_id,
             x=right_inertial_point.x,
             y=right_inertial_point.y,
@@ -234,7 +237,6 @@ def _check_overlap(
     right_lane: etree._ElementTree,
     lane_section_with_length: models.LaneSectionWithLength,
     road: etree._ElementTree,
-    rule_uid: str,
     checker_data: models.CheckerData,
 ) -> None:
     """
@@ -252,7 +254,6 @@ def _check_overlap(
         if has_issue:
             _raise_issue(
                 checker_data,
-                rule_uid,
                 lane_section_with_length,
                 road,
                 left_lane,
@@ -265,7 +266,6 @@ def _check_overlap_among_lane_list(
     lanes: List[etree._ElementTree],
     lane_section_with_length: models.LaneSectionWithLength,
     road: etree._ElementTree,
-    rule_uid: str,
     checker_data: models.CheckerData,
 ) -> None:
     lanes = [lane for lane in lanes if utils.get_lane_id(lane) is not None]
@@ -277,28 +277,21 @@ def _check_overlap_among_lane_list(
                 sorted_lanes[right_lane_index],
                 lane_section_with_length,
                 road,
-                rule_uid,
                 checker_data,
             )
 
 
-def _check_road(
-    road: etree._ElementTree, rule_uid: str, checker_data: models.CheckerData
-) -> None:
+def _check_road(road: etree._ElementTree, checker_data: models.CheckerData) -> None:
     sorted_lane_sections_with_length = (
         utils.get_sorted_lane_sections_with_length_from_road(road)
     )
 
     for lane_section in sorted_lane_sections_with_length:
         left_lanes = utils.get_left_lanes_from_lane_section(lane_section.lane_section)
-        _check_overlap_among_lane_list(
-            left_lanes, lane_section, road, rule_uid, checker_data
-        )
+        _check_overlap_among_lane_list(left_lanes, lane_section, road, checker_data)
 
         right_lanes = utils.get_right_lanes_from_lane_section(lane_section.lane_section)
-        _check_overlap_among_lane_list(
-            right_lanes, lane_section, road, rule_uid, checker_data
-        )
+        _check_overlap_among_lane_list(right_lanes, lane_section, road, checker_data)
 
 
 def check_rule(checker_data: models.CheckerData) -> None:
@@ -316,22 +309,7 @@ def check_rule(checker_data: models.CheckerData) -> None:
     """
     logging.info("Executing road.lane.border.overlap_with_inner_lanes check.")
 
-    rule_uid = checker_data.result.register_rule(
-        checker_bundle_name=constants.BUNDLE_NAME,
-        checker_id=geometry_constants.CHECKER_ID,
-        emanating_entity="asam.net",
-        standard="xodr",
-        definition_setting=RULE_INITIAL_SUPPORTED_SCHEMA_VERSION,
-        rule_full_name="road.lane.border.overlap_with_inner_lanes",
-    )
-
-    if checker_data.schema_version < RULE_INITIAL_SUPPORTED_SCHEMA_VERSION:
-        logging.info(
-            f"Schema version {checker_data.schema_version} not supported. Skipping rule."
-        )
-        return
-
     road_list = utils.get_roads(checker_data.input_file_xml_root)
 
     for road in road_list:
-        _check_road(road, rule_uid, checker_data)
+        _check_road(road, checker_data)

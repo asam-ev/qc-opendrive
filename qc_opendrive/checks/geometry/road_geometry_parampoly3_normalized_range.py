@@ -3,51 +3,21 @@ import logging
 import numpy as np
 from scipy.integrate import quad
 
-from qc_baselib import IssueSeverity
+from qc_baselib import IssueSeverity, StatusType
 
 from qc_opendrive import constants
 from qc_opendrive.base import models, utils
-from qc_opendrive.checks.geometry import geometry_constants
+from qc_opendrive import basic_preconditions
 
-RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.7.0"
+CHECKER_ID = "check_asam_xodr_road_geometry_parampoly3_normalized_range"
+CHECKER_DESCRIPTION = "If @prange='normalized', p shall be chosen in [0, 1]."
+CHECKER_PRECONDITIONS = basic_preconditions.CHECKER_PRECONDITIONS
+RULE_UID = "asam.net:xodr:1.7.0:road.geometry.parampoly3.normalized_range"
+
 TOLERANCE_THRESHOLD = 0.001
 
 
-def check_rule(checker_data: models.CheckerData) -> None:
-    """
-    Rule ID: asam.net:xodr:1.7.0:road.geometry.parampoly3.normalized_range
-
-    Description: If @prange="normalized", p shall be chosen in [0, 1].
-
-    Severity: ERROR
-
-    Version range: [1.7.0, )
-
-    Remark:
-        This check currently relies on the accuracy of the scipy.integrate.quad method.
-        The estimated absolute error of the numerical integration is included in
-        the issue description message.
-
-    More info at
-        - https://github.com/asam-ev/qc-opendrive/issues/39
-    """
-    logging.info("Executing road.geometry.parampoly3.normalized_range check.")
-
-    rule_uid = checker_data.result.register_rule(
-        checker_bundle_name=constants.BUNDLE_NAME,
-        checker_id=geometry_constants.CHECKER_ID,
-        emanating_entity="asam.net",
-        standard="xodr",
-        definition_setting=RULE_INITIAL_SUPPORTED_SCHEMA_VERSION,
-        rule_full_name="road.geometry.parampoly3.normalized_range",
-    )
-
-    if checker_data.schema_version < RULE_INITIAL_SUPPORTED_SCHEMA_VERSION:
-        logging.info(
-            f"Schema version {checker_data.schema_version} not supported. Skipping rule."
-        )
-        return
-
+def _check_all_roads(checker_data: models.CheckerData) -> None:
     roads = utils.get_roads(checker_data.input_file_xml_root)
 
     for road in roads:
@@ -75,15 +45,15 @@ def check_rule(checker_data: models.CheckerData) -> None:
             if np.abs(integral_length - length) > TOLERANCE_THRESHOLD:
                 issue_id = checker_data.result.register_issue(
                     checker_bundle_name=constants.BUNDLE_NAME,
-                    checker_id=geometry_constants.CHECKER_ID,
+                    checker_id=CHECKER_ID,
                     description=f"Length does not match the actual curve length. The estimated absolute error from numerical integration is {estimated_error}",
                     level=IssueSeverity.ERROR,
-                    rule_uid=rule_uid,
+                    rule_uid=RULE_UID,
                 )
 
                 checker_data.result.add_xml_location(
                     checker_bundle_name=constants.BUNDLE_NAME,
-                    checker_id=geometry_constants.CHECKER_ID,
+                    checker_id=CHECKER_ID,
                     issue_id=issue_id,
                     xpath=checker_data.input_file_xml_root.getpath(geometry),
                     description=f"",
@@ -102,10 +72,33 @@ def check_rule(checker_data: models.CheckerData) -> None:
                 if inertial_point is not None:
                     checker_data.result.add_inertial_location(
                         checker_bundle_name=constants.BUNDLE_NAME,
-                        checker_id=geometry_constants.CHECKER_ID,
+                        checker_id=CHECKER_ID,
                         issue_id=issue_id,
                         x=inertial_point.x,
                         y=inertial_point.y,
                         z=inertial_point.z,
                         description=f"Length does not match the actual curve length. The estimated absolute error from numerical integration is {estimated_error}",
                     )
+
+
+def check_rule(checker_data: models.CheckerData) -> None:
+    """
+    Rule ID: asam.net:xodr:1.7.0:road.geometry.parampoly3.normalized_range
+
+    Description: If @prange="normalized", p shall be chosen in [0, 1].
+
+    Severity: ERROR
+
+    Version range: [1.7.0, )
+
+    Remark:
+        This check currently relies on the accuracy of the scipy.integrate.quad method.
+        The estimated absolute error of the numerical integration is included in
+        the issue description message.
+
+    More info at
+        - https://github.com/asam-ev/qc-opendrive/issues/39
+    """
+    logging.info("Executing road.geometry.parampoly3.normalized_range check.")
+
+    _check_all_roads(checker_data)

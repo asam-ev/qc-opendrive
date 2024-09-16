@@ -1,10 +1,10 @@
 import os
-import sys
 import pytest
 
 from typing import List
 
 from qc_baselib import IssueSeverity
+from qc_opendrive.checks import smoothness
 
 from test_setup import *
 
@@ -97,5 +97,11 @@ def test_road_lane_access_no_mix_of_deny_or_allow_examples(
     target_file_path = os.path.join(base_path, target_file_name)
     create_test_config(target_file_path)
     launch_main(monkeypatch)
-    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
+    check_issues(
+        rule_uid,
+        issue_count,
+        issue_xpath,
+        issue_severity,
+        smoothness.lane_smoothness_contact_point_no_horizontal_gaps.CHECKER_ID,
+    )
     cleanup_files()

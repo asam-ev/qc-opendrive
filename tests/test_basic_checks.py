@@ -1,9 +1,8 @@
 import os
 import pytest
 from test_setup import *
-from qc_opendrive import constants
-from qc_opendrive.checks.basic import basic_constants
-from qc_baselib import Result, IssueSeverity
+from qc_baselib import Result, IssueSeverity, StatusType
+from qc_opendrive.checks import basic
 
 
 def test_valid_xml_document_positive(
@@ -19,6 +18,11 @@ def test_valid_xml_document_positive(
 
     result = Result()
     result.load_from_file(REPORT_FILE_PATH)
+
+    assert (
+        result.get_checker_status(basic.valid_xml_document.CHECKER_ID)
+        == StatusType.COMPLETED
+    )
 
     assert (
         len(result.get_issues_by_rule_uid("asam.net:xodr:1.0.0:xml.valid_xml_document"))
@@ -42,6 +46,11 @@ def test_valid_xml_document_negative(
     result = Result()
     result.load_from_file(REPORT_FILE_PATH)
 
+    assert (
+        result.get_checker_status(basic.valid_xml_document.CHECKER_ID)
+        == StatusType.COMPLETED
+    )
+
     xml_doc_issues = result.get_issues_by_rule_uid(
         "asam.net:xodr:1.0.0:xml.valid_xml_document"
     )
@@ -63,6 +72,11 @@ def test_root_tag_is_opendrive_positive(
 
     result = Result()
     result.load_from_file(REPORT_FILE_PATH)
+
+    assert (
+        result.get_checker_status(basic.root_tag_is_opendrive.CHECKER_ID)
+        == StatusType.COMPLETED
+    )
 
     assert (
         len(
@@ -90,6 +104,11 @@ def test_root_tag_is_opendrive_negative(
     result = Result()
     result.load_from_file(REPORT_FILE_PATH)
 
+    assert (
+        result.get_checker_status(basic.root_tag_is_opendrive.CHECKER_ID)
+        == StatusType.COMPLETED
+    )
+
     xml_doc_issues = result.get_issues_by_rule_uid(
         "asam.net:xodr:1.0.0:xml.root_tag_is_opendrive"
     )
@@ -111,6 +130,11 @@ def test_fileheader_is_present_positive(
 
     result = Result()
     result.load_from_file(REPORT_FILE_PATH)
+
+    assert (
+        result.get_checker_status(basic.fileheader_is_present.CHECKER_ID)
+        == StatusType.COMPLETED
+    )
 
     assert (
         len(
@@ -138,6 +162,11 @@ def test_fileheader_is_present_negative(
     result = Result()
     result.load_from_file(REPORT_FILE_PATH)
 
+    assert (
+        result.get_checker_status(basic.fileheader_is_present.CHECKER_ID)
+        == StatusType.COMPLETED
+    )
+
     xml_doc_issues = result.get_issues_by_rule_uid(
         "asam.net:xodr:1.0.0:xml.fileheader_is_present"
     )
@@ -161,6 +190,11 @@ def test_version_is_defined__positive(
     result.load_from_file(REPORT_FILE_PATH)
 
     assert (
+        result.get_checker_status(basic.version_is_defined.CHECKER_ID)
+        == StatusType.COMPLETED
+    )
+
+    assert (
         len(result.get_issues_by_rule_uid("asam.net:xodr:1.0.0:xml.version_is_defined"))
         == 0
     )
@@ -181,6 +215,11 @@ def test_version_is_defined_negative_attr(
 
     result = Result()
     result.load_from_file(REPORT_FILE_PATH)
+
+    assert (
+        result.get_checker_status(basic.version_is_defined.CHECKER_ID)
+        == StatusType.COMPLETED
+    )
 
     xml_doc_issues = result.get_issues_by_rule_uid(
         "asam.net:xodr:1.0.0:xml.version_is_defined"
@@ -203,6 +242,11 @@ def test_version_is_defined_negative_type(
 
     result = Result()
     result.load_from_file(REPORT_FILE_PATH)
+
+    assert (
+        result.get_checker_status(basic.version_is_defined.CHECKER_ID)
+        == StatusType.COMPLETED
+    )
 
     xml_doc_issues = result.get_issues_by_rule_uid(
         "asam.net:xodr:1.0.0:xml.version_is_defined"

@@ -5,12 +5,20 @@ from typing import List
 
 from lxml import etree
 
-from qc_baselib import Configuration, Result, IssueSeverity
+from qc_baselib import IssueSeverity, StatusType
 
 from qc_opendrive import constants
 from qc_opendrive.base import models, utils
 
-from qc_opendrive.checks.semantic import semantic_constants
+from qc_opendrive import basic_preconditions
+
+
+CHECKER_ID = "check_asam_xodr_road_lane_access_no_mix_of_deny_or_allow"
+CHECKER_DESCRIPTION = (
+    "Check if there is mixed content on access rules for the same sOffset on lanes."
+)
+CHECKER_PRECONDITIONS = basic_preconditions.CHECKER_PRECONDITIONS
+RULE_UID = "asam.net:xodr:1.7.0:road.lane.access.no_mix_of_deny_or_allow"
 
 
 @dataclass
@@ -19,34 +27,7 @@ class SOffsetInfo:
     rule: str
 
 
-RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.7.0"
-
-
-def check_rule(checker_data: models.CheckerData) -> None:
-    """
-    Implements a rule to check if there is mixed content on access rules for
-    the same sOffset on lanes.
-
-    More info at
-        - https://github.com/asam-ev/qc-opendrive/issues/1
-    """
-    logging.info("Executing road.lane.access.no_mix_of_deny_or_allow check")
-
-    if checker_data.schema_version < RULE_INITIAL_SUPPORTED_SCHEMA_VERSION:
-        logging.info(
-            f"Schema version {checker_data.schema_version} not supported. Skipping rule."
-        )
-        return
-
-    rule_uid = checker_data.result.register_rule(
-        checker_bundle_name=constants.BUNDLE_NAME,
-        checker_id=semantic_constants.CHECKER_ID,
-        emanating_entity="asam.net",
-        standard="xodr",
-        definition_setting=RULE_INITIAL_SUPPORTED_SCHEMA_VERSION,
-        rule_full_name="road.lane.access.no_mix_of_deny_or_allow",
-    )
-
+def _check_all_roads(checker_data: models.CheckerData) -> None:
     roads = utils.get_roads(checker_data.input_file_xml_root)
 
     for road in roads:
@@ -80,10 +61,10 @@ def check_rule(checker_data: models.CheckerData) -> None:
                         ):
                             issue_id = checker_data.result.register_issue(
                                 checker_bundle_name=constants.BUNDLE_NAME,
-                                checker_id=semantic_constants.CHECKER_ID,
+                                checker_id=CHECKER_ID,
                                 description="At a given s-position, either only deny or only allow values shall be given, not mixed.",
                                 level=IssueSeverity.ERROR,
-                                rule_uid=rule_uid,
+                                rule_uid=RULE_UID,
                             )
 
                             path = checker_data.input_file_xml_root.getpath(access)
@@ -93,7 +74,7 @@ def check_rule(checker_data: models.CheckerData) -> None:
 
                             checker_data.result.add_xml_location(
                                 checker_bundle_name=constants.BUNDLE_NAME,
-                                checker_id=semantic_constants.CHECKER_ID,
+                                checker_id=CHECKER_ID,
                                 issue_id=issue_id,
                                 xpath=path,
                                 description=f"First encounter of {current_rule} having {previous_rule} before.",
@@ -116,7 +97,7 @@ def check_rule(checker_data: models.CheckerData) -> None:
                             if inertial_point is not None:
                                 checker_data.result.add_inertial_location(
                                     checker_bundle_name=constants.BUNDLE_NAME,
-                                    checker_id=semantic_constants.CHECKER_ID,
+                                    checker_id=CHECKER_ID,
                                     issue_id=issue_id,
                                     x=inertial_point.x,
                                     y=inertial_point.y,
@@ -130,3 +111,16 @@ def check_rule(checker_data: models.CheckerData) -> None:
                             rule=rule,
                         )
                     )
+
+
+def check_rule(checker_data: models.CheckerData) -> None:
+    """
+    Implements a rule to check if there is mixed content on access rules for
+    the same sOffset on lanes.
+
+    More info at
+        - https://github.com/asam-ev/qc-opendrive/issues/1
+    """
+    logging.info("Executing road.lane.access.no_mix_of_deny_or_allow check")
+
+    _check_all_roads(checker_data)

@@ -1,37 +1,39 @@
 import logging
 
-from typing import Dict, Set, List
+from typing import Dict, List
 from lxml import etree
 from typing import Union
 
-from qc_baselib import IssueSeverity
+from qc_baselib import IssueSeverity, StatusType
 
 from qc_opendrive import constants
 from qc_opendrive.base import models, utils
-from qc_opendrive.checks.semantic import semantic_constants
+from qc_opendrive import basic_preconditions
 
-RULE_INITIAL_SUPPORTED_SCHEMA_VERSION = "1.4.0"
+CHECKER_ID = "check_asam_xodr_road_linkage_is_junction_needed"
+CHECKER_DESCRIPTION = "Two roads shall only be linked directly, if the linkage is clear. If the relationship to successor or predecessor is ambiguous, junctions shall be used."
+CHECKER_PRECONDITIONS = basic_preconditions.CHECKER_PRECONDITIONS
+RULE_UID = "asam.net:xodr:1.4.0:road.linkage.is_junction_needed"
 
 
 def _raise_road_linkage_is_junction_needed_issue(
     checker_data: models.CheckerData,
-    rule_uid: str,
     road_linkage_elements: List[etree._Element],
     linkage_tag: models.LinkageTag,
     problematic_road: Union[None, etree._ElementTree],
 ) -> None:
     issue_id = checker_data.result.register_issue(
         checker_bundle_name=constants.BUNDLE_NAME,
-        checker_id=semantic_constants.CHECKER_ID,
+        checker_id=CHECKER_ID,
         description=f"Road cannot have ambiguous {linkage_tag.value}, a junction is needed.",
         level=IssueSeverity.ERROR,
-        rule_uid=rule_uid,
+        rule_uid=RULE_UID,
     )
 
     for element in road_linkage_elements:
         checker_data.result.add_xml_location(
             checker_bundle_name=constants.BUNDLE_NAME,
-            checker_id=semantic_constants.CHECKER_ID,
+            checker_id=CHECKER_ID,
             issue_id=issue_id,
             xpath=checker_data.input_file_xml_root.getpath(element),
             description="",
@@ -51,7 +53,7 @@ def _raise_road_linkage_is_junction_needed_issue(
         if inertial_point is not None:
             checker_data.result.add_inertial_location(
                 checker_bundle_name=constants.BUNDLE_NAME,
-                checker_id=semantic_constants.CHECKER_ID,
+                checker_id=CHECKER_ID,
                 issue_id=issue_id,
                 x=inertial_point.x,
                 y=inertial_point.y,
@@ -74,9 +76,7 @@ def _get_road_linkage_from_contact_point_id(
     )
 
 
-def _check_road_linkage_is_junction_needed(
-    checker_data: models.CheckerData, rule_uid: str
-) -> None:
+def _check_road_linkage_is_junction_needed(checker_data: models.CheckerData) -> None:
     road_id_map = utils.get_road_id_map(checker_data.input_file_xml_root)
 
     if len(road_id_map) < 2:
@@ -140,7 +140,7 @@ def _check_road_linkage_is_junction_needed(
             problematic_road = road_id_map.get(road_linkage.id)
 
             _raise_road_linkage_is_junction_needed_issue(
-                checker_data, rule_uid, elements, linkage_tag, problematic_road
+                checker_data, elements, linkage_tag, problematic_road
             )
 
 
@@ -164,19 +164,4 @@ def check_rule(checker_data: models.CheckerData) -> None:
     """
     logging.info("Executing road.linkage.is_junction_needed check")
 
-    rule_uid = checker_data.result.register_rule(
-        checker_bundle_name=constants.BUNDLE_NAME,
-        checker_id=semantic_constants.CHECKER_ID,
-        emanating_entity="asam.net",
-        standard="xodr",
-        definition_setting=RULE_INITIAL_SUPPORTED_SCHEMA_VERSION,
-        rule_full_name="road.linkage.is_junction_needed",
-    )
-
-    if checker_data.schema_version < RULE_INITIAL_SUPPORTED_SCHEMA_VERSION:
-        logging.info(
-            f"Schema version {checker_data.schema_version} not supported. Skipping rule."
-        )
-        return
-
-    _check_road_linkage_is_junction_needed(checker_data, rule_uid)
+    _check_road_linkage_is_junction_needed(checker_data)

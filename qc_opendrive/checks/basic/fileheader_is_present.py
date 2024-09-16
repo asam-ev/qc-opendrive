@@ -1,11 +1,19 @@
 import logging
-from lxml import etree
-from qc_baselib import IssueSeverity, Result
+from qc_baselib import IssueSeverity, StatusType
 from qc_opendrive import constants
-from qc_opendrive.checks.basic import basic_constants
+from qc_opendrive.checks.basic import valid_xml_document, root_tag_is_opendrive
+from qc_opendrive.base import models
+
+CHECKER_ID = "check_asam_xodr_xml_fileheader_is_present"
+CHECKER_DESCRIPTION = "Below the root element a tag with FileHeader must be defined."
+CHECKER_PRECONDITIONS = {
+    valid_xml_document.CHECKER_ID,
+    root_tag_is_opendrive.CHECKER_ID,
+}
+RULE_UID = "asam.net:xodr:1.0.0:xml.fileheader_is_present"
 
 
-def check_rule(tree: etree._ElementTree, result: Result) -> bool:
+def check_rule(checker_data: models.CheckerData) -> None:
     """
     Below the root element a tag with FileHeader must be defined
 
@@ -14,16 +22,7 @@ def check_rule(tree: etree._ElementTree, result: Result) -> bool:
     """
     logging.info("Executing fileheader_is_present check")
 
-    rule_uid = result.register_rule(
-        checker_bundle_name=constants.BUNDLE_NAME,
-        checker_id=basic_constants.CHECKER_ID,
-        emanating_entity="asam.net",
-        standard="xodr",
-        definition_setting="1.0.0",
-        rule_full_name="xml.fileheader_is_present",
-    )
-
-    root = tree.getroot()
+    root = checker_data.input_file_xml_root.getroot()
 
     is_valid = False
     # Check if root contains a tag 'header'
@@ -37,22 +36,18 @@ def check_rule(tree: etree._ElementTree, result: Result) -> bool:
 
     if not is_valid:
 
-        issue_id = result.register_issue(
+        issue_id = checker_data.result.register_issue(
             checker_bundle_name=constants.BUNDLE_NAME,
-            checker_id=basic_constants.CHECKER_ID,
+            checker_id=CHECKER_ID,
             description="Issue flagging when no header is found under root element",
             level=IssueSeverity.ERROR,
-            rule_uid=rule_uid,
+            rule_uid=RULE_UID,
         )
 
-        result.add_xml_location(
+        checker_data.result.add_xml_location(
             checker_bundle_name=constants.BUNDLE_NAME,
-            checker_id=basic_constants.CHECKER_ID,
+            checker_id=CHECKER_ID,
             issue_id=issue_id,
-            xpath=tree.getpath(root),
+            xpath=checker_data.input_file_xml_root.getpath(root),
             description=f"No child element header",
         )
-
-        return False
-
-    return True

@@ -1,18 +1,33 @@
 import importlib.resources
-import os, logging
+import logging
 
-from dataclasses import dataclass
 from typing import List, Tuple
 
-from qc_baselib import Configuration, Result, IssueSeverity
+from qc_baselib import IssueSeverity, StatusType
 
 from qc_opendrive import constants
 from qc_opendrive.schema import schema_files
 from qc_opendrive.base import models, utils
 
-from qc_opendrive.checks.schema import schema_constants
 import xmlschema
 from lxml import etree
+
+from qc_opendrive.checks.basic import (
+    valid_xml_document,
+    root_tag_is_opendrive,
+    fileheader_is_present,
+    version_is_defined,
+)
+
+CHECKER_ID = "check_asam_xodr_xml_valid_schema"
+CHECKER_DESCRIPTION = "Input xml file must be valid according to the schema."
+CHECKER_PRECONDITIONS = {
+    valid_xml_document.CHECKER_ID,
+    root_tag_is_opendrive.CHECKER_ID,
+    fileheader_is_present.CHECKER_ID,
+    version_is_defined.CHECKER_ID,
+}
+RULE_UID = "asam.net:xodr:1.0.0:xml.valid_schema"
 
 
 def find_xpath_from_position(xml_tree, target_line, target_column):
@@ -76,7 +91,7 @@ def _is_schema_compliant(
     if major <= 1 and minor <= 7:
         schema = etree.XMLSchema(etree.parse(schema_file))
         xml_tree = etree.parse(xml_file)
-        result = schema.validate(xml_tree)
+        schema.validate(xml_tree)
         for error in schema.error_log:
             errors.append(
                 (
@@ -113,22 +128,18 @@ def check_rule(checker_data: models.CheckerData) -> None:
     logging.info("Executing valid_schema check")
 
     schema_version = checker_data.schema_version
-    if schema_version is None:
-        logging.info(f"- Version not found in the file. Skipping check")
+
+    xsd_file = schema_files.SCHEMA_FILES.get(schema_version)
+
+    if xsd_file is None:
+        checker_data.result.set_checker_status(
+            checker_bundle_name=constants.BUNDLE_NAME,
+            checker_id=CHECKER_ID,
+            status=StatusType.SKIPPED,
+        )
+
         return
 
-    rule_uid = checker_data.result.register_rule(
-        checker_bundle_name=constants.BUNDLE_NAME,
-        checker_id=schema_constants.CHECKER_ID,
-        emanating_entity="asam.net",
-        standard="xodr",
-        definition_setting="1.0.0",
-        rule_full_name="xml.valid_schema",
-    )
-
-    schema_files_dict = schema_files.SCHEMA_FILES
-
-    xsd_file = schema_files_dict[schema_version]
     xsd_file_path = str(
         importlib.resources.files("qc_opendrive.schema").joinpath(xsd_file)
     )
@@ -141,14 +152,14 @@ def check_rule(checker_data: models.CheckerData) -> None:
         for error in errors:
             issue_id = checker_data.result.register_issue(
                 checker_bundle_name=constants.BUNDLE_NAME,
-                checker_id=schema_constants.CHECKER_ID,
+                checker_id=CHECKER_ID,
                 description="Issue flagging when input file does not follow its version schema",
                 level=IssueSeverity.ERROR,
-                rule_uid=rule_uid,
+                rule_uid=RULE_UID,
             )
             checker_data.result.add_xml_location(
                 checker_bundle_name=constants.BUNDLE_NAME,
-                checker_id=schema_constants.CHECKER_ID,
+                checker_id=CHECKER_ID,
                 issue_id=issue_id,
                 xpath=error[0],
                 description=error[1],

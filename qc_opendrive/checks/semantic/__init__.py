@@ -1,5 +1,3 @@
-from . import semantic_constants as semantic_constants
-from . import semantic_checker as semantic_checker
 from . import (
     road_lane_access_no_mix_of_deny_or_allow as road_lane_access_no_mix_of_deny_or_allow,
 )
@@ -24,4 +22,7 @@ from . import (
 )
 from . import (
     junctions_connection_end_opposite_linkage as junctions_connection_end_opposite_linkage,
+)
+from . import (
+    junctions_connection_connect_road_no_incoming_road as junctions_connection_connect_road_no_incoming_road,
 )
