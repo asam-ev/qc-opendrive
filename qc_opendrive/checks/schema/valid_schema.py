@@ -127,12 +127,11 @@ def check_rule(checker_data: models.CheckerData) -> None:
             rule_uid=RULE_UID,
         )
 
-        if error.line is not None and error.column is not None:
-            checker_data.result.add_file_location(
-                checker_bundle_name=constants.BUNDLE_NAME,
-                checker_id=CHECKER_ID,
-                issue_id=issue_id,
-                row=error.line,
-                column=error.column,
-                description=error.message,
-            )
+        checker_data.result.add_file_location(
+            checker_bundle_name=constants.BUNDLE_NAME,
+            checker_id=CHECKER_ID,
+            issue_id=issue_id,
+            row=error.line,
+            column=error.column,
+            description=error.message,
+        )
