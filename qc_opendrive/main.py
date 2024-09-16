@@ -107,7 +107,7 @@ def execute_checker(
         )
 
 
-def run_checks(config: models.Configuration, result: models.Result) -> None:
+def run_checks(config: Configuration, result: Result) -> None:
     checker_data = models.CheckerData(
         xml_file_path=config.get_config_param("InputFile"),
         input_file_xml_root=None,
