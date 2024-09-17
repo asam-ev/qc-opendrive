@@ -109,6 +109,12 @@ def check_rule(checker_data: models.CheckerData) -> None:
             status=StatusType.SKIPPED,
         )
 
+        checker_data.result.add_checker_summary(
+            constants.BUNDLE_NAME,
+            CHECKER_ID,
+            f"Cannot find the schema file for ASAM OpenDrive version {schema_version}.",
+        )
+
         return
 
     xsd_file_path = str(
