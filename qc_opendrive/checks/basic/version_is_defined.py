@@ -52,6 +52,12 @@ def check_rule(checker_data: models.CheckerData) -> bool:
             status=StatusType.SKIPPED,
         )
 
+        checker_data.result.add_checker_summary(
+            constants.BUNDLE_NAME,
+            CHECKER_ID,
+            f"The xml file does not contains the 'header' tag.",
+        )
+
         return True
 
     # Check if 'header' has the attributes 'revMajor' and 'revMinor'
