@@ -66,6 +66,12 @@ def execute_checker(
             status=StatusType.SKIPPED,
         )
 
+        checker_data.result.add_checker_summary(
+            constants.BUNDLE_NAME,
+            checker.CHECKER_ID,
+            "Preconditions are not satisfied. Skip the check.",
+        )
+
         return
 
     # Checker definition setting. If not satisfied then set status as SKIPPED and return
@@ -80,6 +86,12 @@ def execute_checker(
                 checker_bundle_name=constants.BUNDLE_NAME,
                 checker_id=checker.CHECKER_ID,
                 status=StatusType.SKIPPED,
+            )
+
+            checker_data.result.add_checker_summary(
+                constants.BUNDLE_NAME,
+                checker.CHECKER_ID,
+                f"Version {schema_version} is lower than definition setting {definition_setting}. Skip the check.",
             )
 
             return
@@ -98,12 +110,16 @@ def execute_checker(
                 checker_id=checker.CHECKER_ID,
                 status=StatusType.COMPLETED,
             )
-    except Exception:
+    except Exception as e:
         # If any exception occurs during the check, set the status as ERROR
         checker_data.result.set_checker_status(
             checker_bundle_name=constants.BUNDLE_NAME,
             checker_id=checker.CHECKER_ID,
             status=StatusType.ERROR,
+        )
+
+        checker_data.result.add_checker_summary(
+            constants.BUNDLE_NAME, checker.CHECKER_ID, f"Error: {str(e)}."
         )
 
 
@@ -213,7 +229,8 @@ def main():
     result.write_to_file(
         config.get_checker_bundle_param(
             checker_bundle_name=constants.BUNDLE_NAME, param_name="resultFile"
-        )
+        ),
+        generate_summary=True,
     )
 
     if args.generate_markdown:
