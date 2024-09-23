@@ -20,8 +20,9 @@ FLOAT_COMPARISON_THRESHOLD = 1e-6
 def _raise_issue(
     checker_data: models.CheckerData,
     lane: etree._Element,
-    successor_width_zero_lane: etree._Element,
+    width_zero_lane: etree._Element,
     issue_severity: IssueSeverity,
+    linkage_tag: models.LinkageTag,
 ) -> None:
     issue_id = checker_data.result.register_issue(
         checker_bundle_name=constants.BUNDLE_NAME,
@@ -36,15 +37,15 @@ def _raise_issue(
         checker_id=CHECKER_ID,
         issue_id=issue_id,
         xpath=checker_data.input_file_xml_root.getpath(lane),
-        description="Lane with successors with width zero.",
+        description=f"Lane with {linkage_tag.value} with width zero.",
     )
 
     checker_data.result.add_xml_location(
         checker_bundle_name=constants.BUNDLE_NAME,
         checker_id=CHECKER_ID,
         issue_id=issue_id,
-        xpath=checker_data.input_file_xml_root.getpath(successor_width_zero_lane),
-        description="Successor lane with width zero.",
+        xpath=checker_data.input_file_xml_root.getpath(width_zero_lane),
+        description=f"{linkage_tag.value.capitalize()} lane with width zero.",
     )
 
 
@@ -92,6 +93,7 @@ def _check_successor_with_width_zero_between_lane_sections(
                     lane,
                     successor_lane,
                     IssueSeverity.ERROR,
+                    models.LinkageTag.SUCCESSOR,
                 )
 
 
@@ -139,6 +141,7 @@ def _check_predecessor_with_width_zero_between_lane_sections(
                     lane,
                     predecessor_lane,
                     IssueSeverity.ERROR,
+                    models.LinkageTag.PREDECESSOR,
                 )
 
 
@@ -340,6 +343,7 @@ def _check_appearing_successor_junction(
                     current_road_lane,
                     connection_lane,
                     IssueSeverity.ERROR,
+                    models.LinkageTag.SUCCESSOR,
                 )
 
 
@@ -423,6 +427,7 @@ def _check_appearing_predecessor_junction(
                     current_road_lane,
                     connection_lane,
                     IssueSeverity.ERROR,
+                    models.LinkageTag.PREDECESSOR,
                 )
 
 
