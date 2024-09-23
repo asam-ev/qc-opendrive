@@ -43,17 +43,10 @@ def execute_checker(
     )
 
     # Register rule uid
-    splitted_rule_uid = checker.RULE_UID.split(":")
-    if len(splitted_rule_uid) != 4:
-        raise RuntimeError(f"Invalid rule uid: {checker.RULE_UID}")
-
-    checker_data.result.register_rule(
+    checker_data.result.register_rule_by_uid(
         checker_bundle_name=constants.BUNDLE_NAME,
         checker_id=checker.CHECKER_ID,
-        emanating_entity=splitted_rule_uid[0],
-        standard=splitted_rule_uid[1],
-        definition_setting=splitted_rule_uid[2],
-        rule_full_name=splitted_rule_uid[3],
+        rule_uid=checker.RULE_UID,
     )
 
     # Check preconditions. If not satisfied then set status as SKIPPED and return
@@ -77,6 +70,11 @@ def execute_checker(
     # Checker definition setting. If not satisfied then set status as SKIPPED and return
     if required_definition_setting:
         schema_version = checker_data.schema_version
+
+        splitted_rule_uid = checker.RULE_UID.split(":")
+        if len(splitted_rule_uid) != 4:
+            raise RuntimeError(f"Invalid rule uid: {checker.RULE_UID}")
+
         definition_setting = splitted_rule_uid[2]
         if (
             schema_version is None
@@ -222,11 +220,9 @@ def main():
     )
     result.set_result_version(version=constants.BUNDLE_VERSION)
 
-    input_file_path = config.get_config_param("InputFile")
-    input_param = ParamType(name="InputFile", value=input_file_path)
-    result.get_checker_bundle_result(constants.BUNDLE_NAME).params.append(input_param)
-
     run_checks(config, result)
+
+    result.copy_param_from_config(config)
 
     result.write_to_file(
         config.get_checker_bundle_param(
