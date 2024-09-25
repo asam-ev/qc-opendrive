@@ -18,7 +18,7 @@ numpy = "^1.26.0"
 scipy = "^1.14.0"
 pyclothoids = "^0.1.5"
 transforms3d = "^0.4.2"
-xmlschema = "^3.3.2"
+xmlschema = "^3.3.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.2"
