@@ -1,20 +1,34 @@
 import logging
-from lxml import etree
-from qc_baselib import IssueSeverity, Result
+from qc_baselib import IssueSeverity, StatusType
 from qc_opendrive import constants
-from qc_opendrive.checks.basic import basic_constants
+from qc_opendrive.checks.basic import (
+    valid_xml_document,
+    root_tag_is_opendrive,
+    fileheader_is_present,
+)
+from qc_opendrive.base import utils, models
+
+CHECKER_ID = "check_asam_xodr_xml_version_is_defined"
+CHECKER_DESCRIPTION = "The FileHeader tag must have the attributes revMajor and revMinor and of type unsignedShort."
+CHECKER_PRECONDITIONS = {
+    valid_xml_document.CHECKER_ID,
+    root_tag_is_opendrive.CHECKER_ID,
+    fileheader_is_present.CHECKER_ID,
+}
+RULE_UID = "asam.net:xodr:1.0.0:xml.version_is_defined"
 
 
 def is_unsigned_short(value: int) -> bool:
     """Helper function to check if a value is within the xsd:unsignedShort range (0-65535)."""
-    try:
-        num = int(value)
-        return 0 <= num <= 65535
-    except ValueError:
+    num = utils.to_int(value)
+
+    if num is None:
         return False
+    else:
+        return 0 <= num <= 65535
 
 
-def check_rule(tree: etree._ElementTree, result: Result) -> bool:
+def check_rule(checker_data: models.CheckerData) -> bool:
     """
     The header tag must have the attributes revMajor and revMinor and of type unsignedShort.
 
@@ -23,16 +37,7 @@ def check_rule(tree: etree._ElementTree, result: Result) -> bool:
     """
     logging.info("Executing version_is_defined check")
 
-    rule_uid = result.register_rule(
-        checker_bundle_name=constants.BUNDLE_NAME,
-        checker_id=basic_constants.CHECKER_ID,
-        emanating_entity="asam.net",
-        standard="xodr",
-        definition_setting="1.0.0",
-        rule_full_name="xml.version_is_defined",
-    )
-
-    root = tree.getroot()
+    root = checker_data.input_file_xml_root.getroot()
 
     is_valid = True
     # Check if root contains a tag 'header'
@@ -40,6 +45,19 @@ def check_rule(tree: etree._ElementTree, result: Result) -> bool:
 
     if file_header_tag is None:
         logging.error("- No header found, cannot check version. Skipping...")
+
+        checker_data.result.set_checker_status(
+            checker_bundle_name=constants.BUNDLE_NAME,
+            checker_id=CHECKER_ID,
+            status=StatusType.SKIPPED,
+        )
+
+        checker_data.result.add_checker_summary(
+            constants.BUNDLE_NAME,
+            CHECKER_ID,
+            f"The xml file does not contains the 'header' tag.",
+        )
+
         return True
 
     # Check if 'header' has the attributes 'revMajor' and 'revMinor'
@@ -63,23 +81,18 @@ def check_rule(tree: etree._ElementTree, result: Result) -> bool:
 
     if not is_valid:
 
-        issue_id = result.register_issue(
+        issue_id = checker_data.result.register_issue(
             checker_bundle_name=constants.BUNDLE_NAME,
-            checker_id=basic_constants.CHECKER_ID,
+            checker_id=CHECKER_ID,
             description="Issue flagging when revMajor revMinor attribute of header are missing or invalid",
             level=IssueSeverity.ERROR,
-            rule_uid=rule_uid,
+            rule_uid=RULE_UID,
         )
 
-        result.add_xml_location(
+        checker_data.result.add_xml_location(
             checker_bundle_name=constants.BUNDLE_NAME,
-            checker_id=basic_constants.CHECKER_ID,
+            checker_id=CHECKER_ID,
             issue_id=issue_id,
-            xpath=tree.getpath(file_header_tag),
-            description=f"header tag has invalid or missing version info",
+            xpath=checker_data.input_file_xml_root.getpath(file_header_tag),
+            description=f"Header tag has invalid or missing version info",
         )
-
-        return False
-    else:
-        logging.info(f"- header version correctly defined: {rev_major}.{rev_minor}")
-    return True

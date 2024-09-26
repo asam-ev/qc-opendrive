@@ -5,6 +5,19 @@
     west="0.0000000000000000e+00">
   </header>
   <road name="" length="1.5250000000000000e+02" id="1" junction="-1" rule="RHT">
+    <link>
+    </link>
+    <type s="0.0000000000000000e+00" country="DE" type="town" />
+    <planView>
+      <geometry s="0.0000000000000000e+00" x="-5.2650689905591861e+01" y="3.1227305737109661e+00"
+        hdg="3.9525485867501885e-03" length="3.6746837512979852e+01">
+        <line />
+      </geometry>
+    </planView>
+    <elevationProfile>
+    </elevationProfile>
+    <lateralProfile>
+    </lateralProfile>
     <lanes>
       <laneSection s="0.0000000000000000e+00">
         <left>

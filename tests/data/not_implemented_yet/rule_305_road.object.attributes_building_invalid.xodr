@@ -1,0 +1,351 @@
+<?xml version="1.0" standalone="yes"?>
+<OpenDRIVE>
+  <header revMajor="1" revMinor="8" name="" version="1.00" date="Thu Jan 26 11:16:17 2023" north="0.0000000000000000e+00" south="0.0000000000000000e+00" east="0.0000000000000000e+00" west="0.0000000000000000e+00">
+    </header>
+  <road name="" length="3.0000000000000006e+02" id="1" junction="-1" rule="RHT">
+    <link>
+        </link>
+    <planView>
+      <geometry s="0.0000000000000000e+00" x="-4.0014524328249813e+01" y="-1.9462599854756718e+01" hdg="5.4555351106673966e-01" length="1.0000000000000000e+02">
+        <line/>
+      </geometry>
+      <geometry s="1.0000000000000000e+02" x="4.5469496636779759e+01" y="3.2426533493665907e+01" hdg="5.4555351106673977e-01" length="3.9685188699805941e+01">
+        <spiral curvStart="0.0000000000000000e+00" curvEnd="1.0000000976746569e-02"/>
+      </geometry>
+      <geometry s="1.3968518869980593e+02" x="7.7902474451730967e+01" y="5.5175434842684886e+01" hdg="7.4397947394695541e-01" length="1.6031481130019412e+02">
+        <arc curvature="1.0000000976746569e-02"/>
+      </geometry>
+    </planView>
+    <elevationProfile>
+      <elevation s="0.0000000000000000e+00" a="0.0000000000000000e+00" b="0.0000000000000000e+00" c="0.0000000000000000e+00" d="0.0000000000000000e+00"/>
+    </elevationProfile>
+    <lateralProfile>
+        </lateralProfile>
+    <lanes>
+      <laneSection s="0.0000000000000000e+00">
+        <left>
+          <lane id="3" type="border" level="false">
+            <link>
+              <successor id="3"/>
+            </link>
+            <width sOffset="0.0000000000000000e+00" a="6.0000000000000000e+00" b="0.0000000000000000e+00" c="0.0000000000000000e+00" d="0.0000000000000000e+00"/>
+          </lane>
+          <lane id="2" type="border" level="false">
+            <link>
+              <successor id="2"/>
+            </link>
+            <width sOffset="0.0000000000000000e+00" a="1.6799999999999999e+00" b="0.0000000000000000e+00" c="0.0000000000000000e+00" d="0.0000000000000000e+00"/>
+          </lane>
+          <lane id="1" type="driving" level="false">
+            <link>
+              <successor id="1"/>
+            </link>
+            <width sOffset="0.0000000000000000e+00" a="3.5699999999999998e+00" b="0.0000000000000000e+00" c="0.0000000000000000e+00" d="0.0000000000000000e+00"/>
+            <roadMark sOffset="0.0000000000000000e+00" type="solid" weight="standard" color="standard" width="1.2000000000000000e-01" laneChange="none" height="1.9999999552965164e-02">
+              <type name="solid" width="1.2000000000000000e-01">
+                <line length="0.0000000000000000e+00" space="0.0000000000000000e+00" tOffset="0.0000000000000000e+00" sOffset="0.0000000000000000e+00" rule="no passing" width="1.2000000000000000e-01"/>
+              </type>
+            </roadMark>
+          </lane>
+        </left>
+        <center>
+          <lane id="0">
+            <link>
+                        </link>
+            <roadMark sOffset="0.0000000000000000e+00" type="broken" weight="standard" color="standard" width="1.2000000000000000e-01" laneChange="both" height="1.9999999552965164e-02">
+              <type name="broken" width="1.2000000000000000e-01">
+                <line length="4.0000000000000000e+00" space="8.0000000000000000e+00" tOffset="0.0000000000000000e+00" sOffset="0.0000000000000000e+00" rule="caution" width="1.2000000000000000e-01"/>
+              </type>
+            </roadMark>
+          </lane>
+        </center>
+        <right>
+          <lane id="-1" type="driving" level="false">
+            <link>
+              <successor id="-1"/>
+            </link>
+            <width sOffset="0.0000000000000000e+00" a="3.5699999999999998e+00" b="0.0000000000000000e+00" c="0.0000000000000000e+00" d="0.0000000000000000e+00"/>
+            <roadMark sOffset="0.0000000000000000e+00" type="solid" weight="standard" color="standard" width="1.2000000000000000e-01" laneChange="none" height="1.9999999552965164e-02">
+              <type name="solid" width="1.2000000000000000e-01">
+                <line length="0.0000000000000000e+00" space="0.0000000000000000e+00" tOffset="0.0000000000000000e+00" sOffset="0.0000000000000000e+00" rule="no passing" width="1.2000000000000000e-01"/>
+              </type>
+            </roadMark>
+          </lane>
+          <lane id="-2" type="parking" level="false">
+            <link>
+                        </link>
+            <width sOffset="0.0000000000000000e+00" a="0.0000000000000000e+00" b="0.0000000000000000e+00" c="1.4999999999999999e-01" d="-1.0000000000000000e-02"/>
+            <width sOffset="1.0000000000000000e+01" a="5.0000000000000000e+00" b="0.0000000000000000e+00" c="0.0000000000000000e+00" d="-0.0000000000000000e+00"/>
+            <width sOffset="7.0000000000000000e+01" a="5.0000000000000000e+00" b="0.0000000000000000e+00" c="-1.4999999999999999e-01" d="1.0000000000000000e-02"/>
+          </lane>
+          <lane id="-3" type="border" level="false">
+            <link>
+              <successor id="-2"/>
+            </link>
+            <width sOffset="0.0000000000000000e+00" a="1.6799999999999999e+00" b="0.0000000000000000e+00" c="0.0000000000000000e+00" d="0.0000000000000000e+00"/>
+          </lane>
+          <lane id="-4" type="border" level="false">
+            <link>
+              <successor id="-3"/>
+            </link>
+            <width sOffset="0.0000000000000000e+00" a="6.0000000000000000e+00" b="0.0000000000000000e+00" c="0.0000000000000000e+00" d="0.0000000000000000e+00"/>
+          </lane>
+        </right>
+      </laneSection>
+      <laneSection s="8.0000000000000000e+01">
+        <left>
+          <lane id="3" type="border" level="false">
+            <link>
+              <predecessor id="3"/>
+            </link>
+            <width sOffset="0.0000000000000000e+00" a="6.0000000000000000e+00" b="0.0000000000000000e+00" c="0.0000000000000000e+00" d="0.0000000000000000e+00"/>
+          </lane>
+          <lane id="2" type="border" level="false">
+            <link>
+              <predecessor id="2"/>
+            </link>
+            <width sOffset="0.0000000000000000e+00" a="1.6799999999999999e+00" b="0.0000000000000000e+00" c="0.0000000000000000e+00" d="0.0000000000000000e+00"/>
+          </lane>
+          <lane id="1" type="driving" level="false">
+            <link>
+              <predecessor id="1"/>
+            </link>
+            <width sOffset="0.0000000000000000e+00" a="3.5699999999999998e+00" b="0.0000000000000000e+00" c="0.0000000000000000e+00" d="0.0000000000000000e+00"/>
+            <roadMark sOffset="0.0000000000000000e+00" type="solid" weight="standard" color="standard" width="1.2000000000000000e-01" laneChange="none" height="1.9999999552965164e-02">
+              <type name="solid" width="1.2000000000000000e-01">
+                <line length="0.0000000000000000e+00" space="0.0000000000000000e+00" tOffset="0.0000000000000000e+00" sOffset="0.0000000000000000e+00" rule="no passing" width="1.2000000000000000e-01"/>
+              </type>
+            </roadMark>
+          </lane>
+        </left>
+        <center>
+          <lane id="0">
+            <link>
+                        </link>
+            <roadMark sOffset="0.0000000000000000e+00" type="broken" weight="standard" color="standard" width="1.2000000000000000e-01" laneChange="both" height="1.9999999552965164e-02">
+              <type name="broken" width="1.2000000000000000e-01">
+                <line length="4.0000000000000000e+00" space="8.0000000000000000e+00" tOffset="0.0000000000000000e+00" sOffset="0.0000000000000000e+00" rule="caution" width="1.2000000000000000e-01"/>
+              </type>
+            </roadMark>
+          </lane>
+        </center>
+        <right>
+          <lane id="-1" type="driving" level="false">
+            <link>
+              <predecessor id="-1"/>
+            </link>
+            <width sOffset="0.0000000000000000e+00" a="3.5699999999999998e+00" b="0.0000000000000000e+00" c="0.0000000000000000e+00" d="0.0000000000000000e+00"/>
+            <roadMark sOffset="0.0000000000000000e+00" type="solid" weight="standard" color="standard" width="1.2000000000000000e-01" laneChange="none" height="1.9999999552965164e-02">
+              <type name="solid" width="1.2000000000000000e-01">
+                <line length="0.0000000000000000e+00" space="0.0000000000000000e+00" tOffset="0.0000000000000000e+00" sOffset="0.0000000000000000e+00" rule="no passing" width="1.2000000000000000e-01"/>
+              </type>
+            </roadMark>
+          </lane>
+          <lane id="-2" type="border" level="false">
+            <link>
+              <predecessor id="-3"/>
+            </link>
+            <width sOffset="0.0000000000000000e+00" a="1.6799999999999999e+00" b="0.0000000000000000e+00" c="0.0000000000000000e+00" d="0.0000000000000000e+00"/>
+          </lane>
+          <lane id="-3" type="border" level="false">
+            <link>
+              <predecessor id="-4"/>
+            </link>
+            <width sOffset="0.0000000000000000e+00" a="6.0000000000000000e+00" b="0.0000000000000000e+00" c="0.0000000000000000e+00" d="0.0000000000000000e+00"/>
+          </lane>
+        </right>
+      </laneSection>
+    </lanes>
+    <objects>
+      <object type="building" subtype="building" name="house" id="0" s="2.4028125000000038e+01" t="1.2802136334240046e+01" zOffset="4.9999999999998934e-03" orientation="none" length="1.1300000000000001e+01" width="9.9900000000000002e+00" height="1.2230000000000000e+01" hdg="2.6413812899682183e+00" pitch="0.0000000000000000e+00" roll="0.0000000000000000e+00">
+        <outlines>
+          <outline id="50" fillType="cobble" closed="true">
+            <cornerRoad s="52.5" t="1.5" dz="0.0" height="0.1"/>
+            <cornerRoad s="52.6" t="1.1" dz="0.0" height="0.1"/>
+            <cornerRoad s="52.7" t="0.7" dz="0.0" height="0.1"/>
+            <cornerRoad s="52.8" t="0.6" dz="0.0" height="0.1"/>
+            <cornerRoad s="52.9" t="0.55" dz="0.0" height="0.1"/>
+            <cornerRoad s="53.0" t="0.5" dz="0.0" height="0.1"/>
+            <cornerRoad s="57.0" t="0.5" dz="0.0" height="0.1"/>
+            <cornerRoad s="57.5" t="0.5" dz="0.0" height="0.01"/>
+            <cornerRoad s="61.5" t="0.5" dz="0.0" height="0.01"/>
+            <cornerRoad s="62.0" t="0.5" dz="0.0" height="0.1"/>
+            <cornerRoad s="66.0" t="0.5" dz="0.0" height="0.1"/>
+            <cornerRoad s="66.1" t="0.55" dz="0.0" height="0.1"/>
+            <cornerRoad s="66.2" t="0.6" dz="0.0" height="0.1"/>
+            <cornerRoad s="66.3" t="0.7" dz="0.0" height="0.1"/>
+            <cornerRoad s="66.4" t="1.1" dz="0.0" height="0.1"/>
+            <cornerRoad s="66.5" t="1.5" dz="0.0" height="0.1"/>
+            <cornerRoad s="66.4" t="1.9" dz="0.0" height="0.1"/>
+            <cornerRoad s="66.3" t="2.3" dz="0.0" height="0.1"/>
+            <cornerRoad s="66.2" t="2.4" dz="0.0" height="0.1"/>
+            <cornerRoad s="66.1" t="2.45" dz="0.0" height="0.1"/>
+            <cornerRoad s="66.0" t="2.5" dz="0.0" height="0.1"/>
+            <cornerRoad s="62.0" t="2.5" dz="0.0" height="0.1"/>
+            <cornerRoad s="61.5" t="2.5" dz="0.0" height="0.01"/>
+            <cornerRoad s="57.5" t="2.5" dz="0.0" height="0.01"/>
+            <cornerRoad s="57.0" t="2.5" dz="0.0" height="0.1"/>
+            <cornerRoad s="53.0" t="2.5" dz="0.0" height="0.1"/>
+            <cornerRoad s="52.9" t="2.45" dz="0.0" height="0.1"/>
+            <cornerRoad s="52.8" t="2.4" dz="0.0" height="0.1"/>
+            <cornerRoad s="52.7" t="2.3" dz="0.0" height="0.1"/>
+            <cornerRoad s="52.6" t="1.9" dz="0.0" height="0.1"/>
+          </outline>
+        </outlines>
+		<markings>
+          <marking side="left" width="0.1" color="white" zOffset="0.005" spaceLength="0.0" lineLength="1.0" startOffset="0.0" stopOffset="0.0"/>
+        </markings>
+        <borders>
+          <border width="0.1" type="curb" outlineId="50" useCompleteOutline="true"/>
+        </borders>
+		<material roadMarkColor="white"/>
+		<surface>
+          <CRG file="Rd_Damage_Patch_22_Center.crg" hideRoadSurfaceCRG="true" zScale="1"/>
+        </surface>
+		<parkingSpace access="all">
+        </parkingSpace>
+		<skeleton>
+          <polyline id="1">
+            <vertexLocal u="-0.2" v="1.0" z="1.120" radius="0.15" id="1" intersectionPoint="true" />
+            <vertexLocal u="-0.2" v="1.0" z="4.500" radius="0.12" id="2"/>
+          </polyline>
+        </skeleton>
+        <repeat s="7.4615629425e+01"
+          length="2.2248725912e+00"
+          distance="0.0000000000e+00"
+          tStart="-1.4796332056e+01"
+          tEnd="-1.4797490375e+01"
+          widthStart="1.0000000000e-01"
+          widthEnd="1.0000000000e-01"
+          heightStart="3.0000000000e-01"
+          heightEnd="3.0000000000e-01"
+          zOffsetStart="-3.2829728032e-01"
+          zOffsetEnd="-2.0316925494e-01" />
+        <repeat s="7.6840502016e+01"
+          length="1.9924939859e+00"
+          distance="0.0000000000e+00"
+          tStart="-1.4797490375e+01"
+          tEnd="-1.4799675135e+01"
+          widthStart="1.0000000000e-01"
+          widthEnd="1.0000000000e-01"
+          heightStart="3.0000000000e-01"
+          heightEnd="3.0000000000e-01"
+          zOffsetStart="-2.0316925494e-01"
+          zOffsetEnd="-9.9028462309e-02" />
+        <repeat s="7.8832996002e+01"
+          length="3.3472807403e+00"
+          distance="0.0000000000e+00"
+          tStart="-1.4799675135e+01"
+          tEnd="-1.4796827566e+01"
+          widthStart="1.0000000000e-01"
+          widthEnd="1.0000000000e-01"
+          heightStart="3.0000000000e-01"
+          heightEnd="3.0000000000e-01"
+          zOffsetStart="-9.9028462309e-02"
+          zOffsetEnd="5.4099928501e-02" />
+        <repeat s="8.2180276743e+01"
+          length="2.0283762167e+00"
+          distance="0.0000000000e+00"
+          tStart="-1.4796827566e+01"
+          tEnd="-1.4790365646e+01"
+          widthStart="1.0000000000e-01"
+          widthEnd="1.0000000000e-01"
+          heightStart="3.0000000000e-01"
+          heightEnd="3.0000000000e-01"
+          zOffsetStart="5.4099928501e-02"
+          zOffsetEnd="1.2659902980e-01" />
+        <repeat s="8.4208652959e+01"
+          length="8.1152058043e+00"
+          distance="0.0000000000e+00"
+          tStart="-1.4790365646e+01"
+          tEnd="-1.4802913672e+01"
+          widthStart="1.0000000000e-01"
+          widthEnd="1.0000000000e-01"
+          heightStart="3.0000000000e-01"
+          heightEnd="3.0000000000e-01"
+          zOffsetStart="1.2659902980e-01"
+          zOffsetEnd="1.7346901590e-01" />
+        <repeat s="9.2323858764e+01"
+          length="8.1137326328e+00"
+          distance="0.0000000000e+00"
+          tStart="-1.4802913672e+01"
+          tEnd="-1.4932009665e+01"
+          widthStart="1.0000000000e-01"
+          widthEnd="1.0000000000e-01"
+          heightStart="3.0000000000e-01"
+          heightEnd="3.0000000000e-01"
+          zOffsetStart="1.7346901590e-01"
+          zOffsetEnd="1.8665641186e-01" />
+        <repeat s="1.0043759140e+02"
+          length="8.1135361793e+00"
+          distance="0.0000000000e+00"
+          tStart="-1.4932009665e+01"
+          tEnd="-1.4813360696e+01"
+          widthStart="1.0000000000e-01"
+          widthEnd="1.0000000000e-01"
+          heightStart="3.0000000000e-01"
+          heightEnd="3.0000000000e-01"
+          zOffsetStart="1.8665641186e-01"
+          zOffsetEnd="1.7471050187e-01" />
+        <repeat s="1.0855112758e+02"
+          length="8.1144815334e+00"
+          distance="0.0000000000e+00"
+          tStart="-1.4813360696e+01"
+          tEnd="-1.4794688826e+01"
+          widthStart="1.0000000000e-01"
+          widthEnd="1.0000000000e-01"
+          heightStart="3.0000000000e-01"
+          heightEnd="3.0000000000e-01"
+          zOffsetStart="1.7471050187e-01"
+          zOffsetEnd="1.6260260750e-01" />
+        <repeat s="1.1666560911e+02"
+          length="8.1145989742e+00"
+          distance="0.0000000000e+00"
+          tStart="-1.4794688826e+01"
+          tEnd="-1.4789712834e+01"
+          widthStart="1.0000000000e-01"
+          widthEnd="1.0000000000e-01"
+          heightStart="3.0000000000e-01"
+          heightEnd="3.0000000000e-01"
+          zOffsetStart="1.6260260750e-01"
+          zOffsetEnd="1.5562310985e-01" />
+        <repeat s="1.2478020808e+02"
+          length="8.1144823549e+00"
+          distance="0.0000000000e+00"
+          tStart="-1.4789712834e+01"
+          tEnd="-1.4785309018e+01"
+          widthStart="1.0000000000e-01"
+          widthEnd="1.0000000000e-01"
+          heightStart="3.0000000000e-01"
+          heightEnd="3.0000000000e-01"
+          zOffsetStart="1.5562310985e-01"
+          zOffsetEnd="1.4723730991e-01" />
+        <repeat s="1.3289469044e+02"
+          length="8.1147823670e+00"
+          tStart="-1.4785309018e+01"
+          tEnd="-1.4796174945e+01"
+          widthStart="1.0000000000e-01"
+          widthEnd="1.0000000000e-01"
+          heightStart="3.0000000000e-01"
+          heightEnd="3.0000000000e-01"
+          zOffsetStart="1.4723730991e-01"
+          zOffsetEnd="1.7293727744e-01" />
+        <repeat s="1.4100947281e+02"
+          length="2.9774693217e+00"
+          distance="1.0000000000e+00"
+          tStart="-1.4796174945e+01"
+          tEnd="-1.4801054064e+01"
+          widthStart="1.0000000000e-01"
+          widthEnd="1.0000000000e-01"
+          heightStart="3.0000000000e-01"
+          heightEnd="3.0000000000e-01"
+          zOffsetStart="1.7293727744e-01"
+          zOffsetEnd="1.9761954152e-01" />
+      </object>
+    </objects>
+    <signals>
+    </signals>
+    <surface>
+    </surface>
+  </road>
+</OpenDRIVE>

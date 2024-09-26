@@ -1,10 +1,13 @@
 <?xml version="1.0" standalone="yes"?>
 <OpenDRIVE>
-  <header revMajor="1" revMinor="8" name="" version="1.00" date="Thu Feb 27 19:52:10 2020"
+  <header revMajor="1" revMinor="8" name="" version="1.00" date="Tue Mar 14 14:23:24 2023"
     north="0.0000000000000000e+00" south="0.0000000000000000e+00" east="0.0000000000000000e+00"
     west="0.0000000000000000e+00">
   </header>
-  <road name="" length="2.2312979554025290e+01" id="13" junction="44" rule="RHT">
+  <road name="" length="1.5250000000000000e+02" id="1" junction="-1" rule="RHT">
+    <link>
+    </link>
+    <type s="0.0000000000000000e+00" country="DE" type="town" />
     <planView>
       <geometry s="0.0000000000000000e+00" x="9.9724879887666887e+01" y="1.3217542150772269e+02"
         hdg="-2.1115927452268277e+00" length="4.0000000000000000e+00">
@@ -19,5 +22,42 @@
         <line />
       </geometry>
     </planView>
+    <elevationProfile>
+      <elevation s="0.0000000000000000e+00" a="0.0000000000000000e+00" b="0.0000000000000000e+00"
+        c="0.0000000000000000e+00" d="0.0000000000000000e+00" />
+      <elevation s="2.5000000000000000e+00" a="1.0000000000000000e+00" b="0.0000000000000000e+00"
+        c="0.0000000000000000e+00" d="0.0000000000000000e+00" />
+    </elevationProfile>
+    <lateralProfile>
+    </lateralProfile>
+    <lanes>
+      <laneSection s="0.0000000000000000e+00">
+          <left>
+              <lane id="1" type="driving" level="false">
+                  <link>
+                  </link>
+                  <width sOffset="0.0000000000000000e+00" a="3.0699999999999998e+00" b="0.0000000000000000e+00" c="0.0000000000000000e+00" d="0.0000000000000000e+00"/>
+              </lane>
+          </left>
+          <center>
+              <lane id="0" >
+                  <link>
+                  </link>
+                  <roadMark sOffset="0.0000000000000000e+00" type="broken" weight="standard" color="standard" width="1.2000000000000000e-01" laneChange="both" height="1.9999999552965164e-02">
+                      <type name="broken" width="1.2000000000000000e-01">
+                          <line length="4.0000000000000000e+00" space="8.0000000000000000e+00" tOffset="0.0000000000000000e+00" sOffset="0.0000000000000000e+00" rule="caution" width="1.2000000000000000e-01"/>
+                      </type>
+                  </roadMark>
+              </lane>
+          </center>
+          <right>
+              <lane id="-1" type="driving" level="false">
+                  <link>
+                  </link>
+                  <width sOffset="0.0000000000000000e+00" a="3.0699999999999998e+00" b="0.0000000000000000e+00" c="0.0000000000000000e+00" d="0.0000000000000000e+00"/>
+              </lane>
+          </right>
+      </laneSection>
+  </lanes>
   </road>
 </OpenDRIVE>

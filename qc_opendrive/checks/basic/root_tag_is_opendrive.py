@@ -1,11 +1,16 @@
 import logging
-from lxml import etree
-from qc_baselib import IssueSeverity, Result
+from qc_baselib import IssueSeverity, StatusType
 from qc_opendrive import constants
-from qc_opendrive.checks.basic import basic_constants
+from qc_opendrive.checks.basic import valid_xml_document
+from qc_opendrive.base import models
+
+CHECKER_ID = "check_asam_xodr_xml_root_tag_is_opendrive"
+CHECKER_DESCRIPTION = "The root element of a valid XML document must be OpenSCENARIO."
+CHECKER_PRECONDITIONS = {valid_xml_document.CHECKER_ID}
+RULE_UID = "asam.net:xodr:1.0.0:xml.root_tag_is_opendrive"
 
 
-def check_rule(tree: etree._ElementTree, result: Result) -> bool:
+def check_rule(checker_data: models.CheckerData) -> bool:
     """
     The root element of a valid XML document must be OpenDRIVE
 
@@ -14,16 +19,7 @@ def check_rule(tree: etree._ElementTree, result: Result) -> bool:
     """
     logging.info("Executing root_tag_is_opendrive check")
 
-    rule_uid = result.register_rule(
-        checker_bundle_name=constants.BUNDLE_NAME,
-        checker_id=basic_constants.CHECKER_ID,
-        emanating_entity="asam.net",
-        standard="xodr",
-        definition_setting="1.0.0",
-        rule_full_name="xml.root_tag_is_opendrive",
-    )
-
-    root = tree.getroot()
+    root = checker_data.input_file_xml_root.getroot()
 
     is_valid = False
     if root.tag == "OpenDRIVE":
@@ -35,22 +31,18 @@ def check_rule(tree: etree._ElementTree, result: Result) -> bool:
 
     if not is_valid:
 
-        issue_id = result.register_issue(
+        issue_id = checker_data.result.register_issue(
             checker_bundle_name=constants.BUNDLE_NAME,
-            checker_id=basic_constants.CHECKER_ID,
+            checker_id=CHECKER_ID,
             description="Issue flagging when root tag is not OpenDRIVE",
             level=IssueSeverity.ERROR,
-            rule_uid=rule_uid,
+            rule_uid=RULE_UID,
         )
 
-        result.add_xml_location(
+        checker_data.result.add_xml_location(
             checker_bundle_name=constants.BUNDLE_NAME,
-            checker_id=basic_constants.CHECKER_ID,
+            checker_id=CHECKER_ID,
             issue_id=issue_id,
-            xpath=tree.getpath(root),
+            xpath=checker_data.input_file_xml_root.getpath(root),
             description=f"Root is not OpenDRIVE",
         )
-
-        return False
-
-    return True

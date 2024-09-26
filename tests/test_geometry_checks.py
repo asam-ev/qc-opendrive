@@ -1,10 +1,10 @@
 import os
-import sys
 import pytest
 
 from typing import List
 
 from qc_baselib import IssueSeverity
+from qc_opendrive.checks import geometry
 
 from test_setup import *
 
@@ -49,7 +49,13 @@ def test_road_geometry_param_poly3_length_match(
     target_file_path = os.path.join(base_path, target_file_name)
     create_test_config(target_file_path)
     launch_main(monkeypatch)
-    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
+    check_issues(
+        rule_uid,
+        issue_count,
+        issue_xpath,
+        issue_severity,
+        geometry.road_geometry_parampoly3_length_match.CHECKER_ID,
+    )
     cleanup_files()
 
 
@@ -100,7 +106,13 @@ def test_road_lane_border_overlap_with_inner_lanes(
     target_file_path = os.path.join(base_path, target_file_name)
     create_test_config(target_file_path)
     launch_main(monkeypatch)
-    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
+    check_issues(
+        rule_uid,
+        issue_count,
+        issue_xpath,
+        issue_severity,
+        geometry.road_lane_border_overlap_with_inner_lanes.CHECKER_ID,
+    )
     cleanup_files()
 
 
@@ -137,7 +149,13 @@ def test_road_geometry_parampoly3_arclength_range(
     target_file_path = os.path.join(base_path, target_file_name)
     create_test_config(target_file_path)
     launch_main(monkeypatch)
-    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
+    check_issues(
+        rule_uid,
+        issue_count,
+        issue_xpath,
+        issue_severity,
+        geometry.road_geometry_parampoly3_arclength_range.CHECKER_ID,
+    )
     cleanup_files()
 
 
@@ -172,5 +190,11 @@ def test_road_geometry_param_poly3_normalized_range(
     target_file_path = os.path.join(base_path, target_file_name)
     create_test_config(target_file_path)
     launch_main(monkeypatch)
-    check_issues(rule_uid, issue_count, issue_xpath, issue_severity)
+    check_issues(
+        rule_uid,
+        issue_count,
+        issue_xpath,
+        issue_severity,
+        geometry.road_geometry_parampoly3_normalized_range.CHECKER_ID,
+    )
     cleanup_files()

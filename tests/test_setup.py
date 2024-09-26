@@ -6,7 +6,7 @@ from typing import List
 import qc_opendrive.main as main
 
 from qc_opendrive import constants
-from qc_baselib import Configuration, Result, IssueSeverity
+from qc_baselib import Configuration, Result, IssueSeverity, StatusType
 
 CONFIG_FILE_PATH = "bundle_config.xml"
 REPORT_FILE_PATH = "xodr_bundle_report.xqar"
@@ -26,10 +26,16 @@ def create_test_config(target_file_path: str):
 
 
 def check_issues(
-    rule_uid: str, issue_count: int, issue_xpath: List[str], severity: IssueSeverity
+    rule_uid: str,
+    issue_count: int,
+    issue_xpath: List[str],
+    severity: IssueSeverity,
+    checker_id: str,
 ):
     result = Result()
     result.load_from_file(REPORT_FILE_PATH)
+
+    assert result.get_checker_status(checker_id) == StatusType.COMPLETED
 
     issues = result.get_issues_by_rule_uid(rule_uid)
 
@@ -46,6 +52,20 @@ def check_issues(
 
     for issue in issues:
         assert issue.level == severity
+
+
+def check_skipped(
+    rule_uid: str,
+    checker_id: str,
+):
+    result = Result()
+    result.load_from_file(REPORT_FILE_PATH)
+
+    assert result.get_checker_status(checker_id) == StatusType.SKIPPED
+
+    issues = result.get_issues_by_rule_uid(rule_uid)
+
+    assert len(issues) == 0
 
 
 def launch_main(monkeypatch):
