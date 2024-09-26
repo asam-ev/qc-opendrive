@@ -253,3 +253,7 @@ You need to have pre-commit installed and install the hooks:
 ```
 pre-commit install
 ```
+
+[This folder](tests/data/examples/) contains the valid and invalid sample OpenDrive files of the
+rules that need to be implemented in the future. It can be used as a reference for anyone who
+wants to contribute to the implementation of the rules.
