@@ -213,7 +213,6 @@ def main():
     result = Result()
     result.register_checker_bundle(
         name=constants.BUNDLE_NAME,
-        build_date="2024-06-05",
         description="OpenDrive checker bundle",
         version=constants.BUNDLE_VERSION,
         summary="",

@@ -13,7 +13,7 @@ files = [
 
 [[package]]
 name = "asam-qc-baselib"
-version = "0.1.0"
+version = "1.0.0rc1"
 description = "Python base library for ASAM Quality Checker Framework"
 optional = false
 python-versions = "^3.10"
@@ -29,7 +29,7 @@ pydantic-xml = "^2.11.0"
 type = "git"
 url = "https://github.com/asam-ev/qc-baselib-py.git"
 reference = "develop"
-resolved_reference = "bfed12fc6f1bbd2cab97f74a6c9aa0e0faaef7b3"
+resolved_reference = "8183d1cef7346e3c1c1972e31a98b89ea1876e10"
 
 [[package]]
 name = "black"
@@ -611,13 +611,13 @@ typing-extensions = ">=4.6.0,<4.7.0 || >4.7.0"
 
 [[package]]
 name = "pydantic-xml"
-version = "2.12.1"
+version = "2.13.0"
 description = "pydantic xml extension"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pydantic_xml-2.12.1-py3-none-any.whl", hash = "sha256:5de8394dde00d00a899b85fd8e0b915e6f144a068675d8efcbaa225fdcce3880"},
-    {file = "pydantic_xml-2.12.1.tar.gz", hash = "sha256:31623e9b287ef9eb1dda4caa92e893e3ac977f0327e1d76fd8a36879e455cea1"},
+    {file = "pydantic_xml-2.13.0-py3-none-any.whl", hash = "sha256:da6f59041c5f9ef8b33115739e3dfca55d6f8388b89fc6c234406c1c3cbe3acd"},
+    {file = "pydantic_xml-2.13.0.tar.gz", hash = "sha256:92737661c644681054bb06ed86bac492a905bfda99eaac0659ef470c8589a290"},
 ]
 
 [package.dependencies]
@@ -702,13 +702,13 @@ test = ["Cython", "array-api-strict (>=2.0)", "asv", "gmpy2", "hypothesis (>=6.3
 
 [[package]]
 name = "tomli"
-version = "2.0.1"
+version = "2.0.2"
 description = "A lil' TOML parser"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "tomli-2.0.1-py3-none-any.whl", hash = "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc"},
-    {file = "tomli-2.0.1.tar.gz", hash = "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"},
+    {file = "tomli-2.0.2-py3-none-any.whl", hash = "sha256:2ebe24485c53d303f690b0ec092806a085f07af5a5aa1464f3931eec36caaa38"},
+    {file = "tomli-2.0.2.tar.gz", hash = "sha256:d46d457a85337051c36524bc5349dd91b1877838e2979ac5ced3e710ed8a60ed"},
 ]
 
 [[package]]

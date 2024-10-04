@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "asam-qc-opendrive"
-version = "0.1.0"
+version = "1.0.0rc1"
 description = "This project implements the OpenDrive Checker for the ASAM Quality Checker project."
 authors = ["Patrick Abrahão <patrick@ivex.ai>", "Tung Dinh <tung@ivex.ai>"]
 license = "MPL-2.0"
