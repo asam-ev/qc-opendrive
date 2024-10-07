@@ -28,11 +28,21 @@ asam-qc-opendrive can be installed using pip or from source.
 asam-qc-opendrive can be installed using pip, so that it can be used as a library or
 as an application.
 
+**From PyPi**
+
+```bash
+pip install asam-qc-opendrive
+```
+
+**From GitHub repository**
+
 ```bash
 pip install asam-qc-opendrive@git+https://github.com/asam-ev/qc-opendrive@main
 ```
 
-**Note:** The above command will install `asam-qc-opendrive` from the `main` branch. If you want to install `asam-qc-opendrive` from another branch or tag, replace `@main` with the desired branch or tag. It is also possible to install from a local directory.
+The above command will install `asam-qc-opendrive` from the `main` branch. If you want to install `asam-qc-opendrive` from another branch or tag, replace `@main` with the desired branch or tag. It is also possible to install from a local directory.
+
+**From a local repository**
 
 ```bash
 pip install /home/user/qc-opendrive
