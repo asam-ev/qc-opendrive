@@ -40,7 +40,7 @@ pip install asam-qc-opendrive
 pip install asam-qc-opendrive@git+https://github.com/asam-ev/qc-opendrive@main
 ```
 
-The above command will install `asam-qc-opendrive` from the `main` branch. If you want to install `asam-qc-opendrive` from another branch or tag, replace `@main` with the desired branch or tag. It is also possible to install from a local directory.
+The above command will install `asam-qc-opendrive` from the `main` branch. If you want to install `asam-qc-opendrive` from another branch or tag, replace `@main` with the desired branch or tag.
 
 **From a local repository**
 
