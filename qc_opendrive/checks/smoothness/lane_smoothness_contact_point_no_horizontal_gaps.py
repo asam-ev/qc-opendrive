@@ -1,6 +1,6 @@
 import logging
 
-from typing import Union, List, Dict
+from typing import List, Dict, Optional
 from lxml import etree
 from scipy.spatial import distance
 
@@ -40,7 +40,7 @@ def _raise_geometry_gap_issue(
     previous_geometry: etree._Element,
     geometry: etree._Element,
     distance: float,
-    inertial_point: Union[None, models.Point3D],
+    inertial_point: Optional[models.Point3D],
 ) -> None:
     issue_id = checker_data.result.register_issue(
         checker_bundle_name=constants.BUNDLE_NAME,
@@ -81,7 +81,7 @@ def _raise_lane_linkage_gap_issue(
     checker_data: models.CheckerData,
     previous_lane: etree._Element,
     current_lane: etree._Element,
-    inertial_point: Union[None, models.Point3D],
+    inertial_point: Optional[models.Point3D],
 ) -> None:
     issue_id = checker_data.result.register_issue(
         checker_bundle_name=constants.BUNDLE_NAME,
@@ -170,7 +170,7 @@ def _check_plan_view_gaps(
     checker_data: models.CheckerData,
 ) -> None:
     # we are assuming geometries is a sorted list on s position
-    previous_geometry: Union[etree._Element, None] = None
+    previous_geometry: Optional[etree._Element] = None
     for geometry in geometries:
         if previous_geometry is not None:
             _check_geometries_gap(
@@ -188,7 +188,7 @@ def _compute_inner_point(
     lane_id: int,
     road: etree._Element,
     road_s: float,
-) -> Union[None, models.Point3D]:
+) -> Optional[models.Point3D]:
     sign = -1 if lane_id < 0 else 1
     current_lane_t = lanes_outer_points.get(lane_id - 1 * sign)
     if current_lane_t is None:
@@ -201,7 +201,7 @@ def _compute_outer_point(
     lane_id: int,
     road: etree._Element,
     road_s: float,
-) -> Union[None, models.Point3D]:
+) -> Optional[models.Point3D]:
     current_lane_t = lanes_outer_points.get(lane_id)
     if current_lane_t is None:
         return None
@@ -213,7 +213,7 @@ def _compute_middle_point(
     lane_id: int,
     road: etree._Element,
     road_s: float,
-) -> Union[None, models.Point3D]:
+) -> Optional[models.Point3D]:
     outer_point = _compute_outer_point(lanes_outer_points, lane_id, road, road_s)
 
     inner_point = _compute_inner_point(lanes_outer_points, lane_id, road, road_s)
