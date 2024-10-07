@@ -16,20 +16,16 @@ name = "asam-qc-baselib"
 version = "1.0.0rc1"
 description = "Python base library for ASAM Quality Checker Framework"
 optional = false
-python-versions = "^3.10"
-files = []
-develop = false
+python-versions = "<4.0,>=3.10"
+files = [
+    {file = "asam_qc_baselib-1.0.0rc1-py3-none-any.whl", hash = "sha256:f946be44ccf31d94ba0e72d93e86888ed70925dc4d1d46287edf69c4b6c29581"},
+    {file = "asam_qc_baselib-1.0.0rc1.tar.gz", hash = "sha256:6631bd0ca6b9126fe9244d4bd0092d1a108429c773afcb43a6e6dd3c78cde76f"},
+]
 
 [package.dependencies]
-lxml = "^5.2.2"
-pydantic = "^2.7.2"
-pydantic-xml = "^2.11.0"
-
-[package.source]
-type = "git"
-url = "https://github.com/asam-ev/qc-baselib-py.git"
-reference = "develop"
-resolved_reference = "8183d1cef7346e3c1c1972e31a98b89ea1876e10"
+lxml = ">=5.2.2,<6.0.0"
+pydantic = ">=2.7.2,<3.0.0"
+pydantic-xml = ">=2.11.0,<3.0.0"
 
 [[package]]
 name = "black"
@@ -611,13 +607,13 @@ typing-extensions = ">=4.6.0,<4.7.0 || >4.7.0"
 
 [[package]]
 name = "pydantic-xml"
-version = "2.13.0"
+version = "2.13.1"
 description = "pydantic xml extension"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pydantic_xml-2.13.0-py3-none-any.whl", hash = "sha256:da6f59041c5f9ef8b33115739e3dfca55d6f8388b89fc6c234406c1c3cbe3acd"},
-    {file = "pydantic_xml-2.13.0.tar.gz", hash = "sha256:92737661c644681054bb06ed86bac492a905bfda99eaac0659ef470c8589a290"},
+    {file = "pydantic_xml-2.13.1-py3-none-any.whl", hash = "sha256:f880394e090cef43e55aa848b285ea9807011f768d682188807a741b978d7326"},
+    {file = "pydantic_xml-2.13.1.tar.gz", hash = "sha256:225d96ce8288abf84d34aa5c70cd4a834c389a7efb071f95301cbba41bfbec15"},
 ]
 
 [package.dependencies]
@@ -758,4 +754,4 @@ docs = ["Sphinx", "elementpath (>=4.4.0,<5.0.0)", "jinja2", "sphinx-rtd-theme"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "3a048b66fad82cdc6da151947aef4285f7d4f4b11af6cc3f2155c1f1d4fb71e7"
+content-hash = "da96639686a715680bfa09499b7751aebce60067618f09ae60405e034ec0bc77"
