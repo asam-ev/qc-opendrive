@@ -647,6 +647,7 @@ def test_road_lane_link_zero_width_at_start(
     "target_file,issue_count,issue_xpath",
     [
         ("valid", 0, []),
+        ("valid_1", 0, []),
         (
             "invalid",
             1,
@@ -760,6 +761,7 @@ def test_road_lane_link_zero_width_at_end(
     "target_file,issue_count,issue_xpath",
     [
         ("valid", 0, []),
+        ("valid_1", 0, []),
         (
             "invalid",
             1,
@@ -882,6 +884,7 @@ def test_road_lane_link_new_lane_appear(
     "target_file,issue_count,issue_xpath",
     [
         ("valid", 0, []),
+        ("valid_1", 0, []),
         (
             "invalid",
             1,
