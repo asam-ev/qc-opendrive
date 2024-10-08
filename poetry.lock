@@ -13,23 +13,19 @@ files = [
 
 [[package]]
 name = "asam-qc-baselib"
-version = "0.1.0"
+version = "1.0.0rc1"
 description = "Python base library for ASAM Quality Checker Framework"
 optional = false
-python-versions = "^3.10"
-files = []
-develop = false
+python-versions = "<4.0,>=3.10"
+files = [
+    {file = "asam_qc_baselib-1.0.0rc1-py3-none-any.whl", hash = "sha256:f946be44ccf31d94ba0e72d93e86888ed70925dc4d1d46287edf69c4b6c29581"},
+    {file = "asam_qc_baselib-1.0.0rc1.tar.gz", hash = "sha256:6631bd0ca6b9126fe9244d4bd0092d1a108429c773afcb43a6e6dd3c78cde76f"},
+]
 
 [package.dependencies]
-lxml = "^5.2.2"
-pydantic = "^2.7.2"
-pydantic-xml = "^2.11.0"
-
-[package.source]
-type = "git"
-url = "https://github.com/asam-ev/qc-baselib-py.git"
-reference = "develop"
-resolved_reference = "bfed12fc6f1bbd2cab97f74a6c9aa0e0faaef7b3"
+lxml = ">=5.2.2,<6.0.0"
+pydantic = ">=2.7.2,<3.0.0"
+pydantic-xml = ">=2.11.0,<3.0.0"
 
 [[package]]
 name = "black"
@@ -611,13 +607,13 @@ typing-extensions = ">=4.6.0,<4.7.0 || >4.7.0"
 
 [[package]]
 name = "pydantic-xml"
-version = "2.12.1"
+version = "2.13.1"
 description = "pydantic xml extension"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pydantic_xml-2.12.1-py3-none-any.whl", hash = "sha256:5de8394dde00d00a899b85fd8e0b915e6f144a068675d8efcbaa225fdcce3880"},
-    {file = "pydantic_xml-2.12.1.tar.gz", hash = "sha256:31623e9b287ef9eb1dda4caa92e893e3ac977f0327e1d76fd8a36879e455cea1"},
+    {file = "pydantic_xml-2.13.1-py3-none-any.whl", hash = "sha256:f880394e090cef43e55aa848b285ea9807011f768d682188807a741b978d7326"},
+    {file = "pydantic_xml-2.13.1.tar.gz", hash = "sha256:225d96ce8288abf84d34aa5c70cd4a834c389a7efb071f95301cbba41bfbec15"},
 ]
 
 [package.dependencies]
@@ -702,13 +698,13 @@ test = ["Cython", "array-api-strict (>=2.0)", "asv", "gmpy2", "hypothesis (>=6.3
 
 [[package]]
 name = "tomli"
-version = "2.0.1"
+version = "2.0.2"
 description = "A lil' TOML parser"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "tomli-2.0.1-py3-none-any.whl", hash = "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc"},
-    {file = "tomli-2.0.1.tar.gz", hash = "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"},
+    {file = "tomli-2.0.2-py3-none-any.whl", hash = "sha256:2ebe24485c53d303f690b0ec092806a085f07af5a5aa1464f3931eec36caaa38"},
+    {file = "tomli-2.0.2.tar.gz", hash = "sha256:d46d457a85337051c36524bc5349dd91b1877838e2979ac5ced3e710ed8a60ed"},
 ]
 
 [[package]]
@@ -758,4 +754,4 @@ docs = ["Sphinx", "elementpath (>=4.4.0,<5.0.0)", "jinja2", "sphinx-rtd-theme"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "3a048b66fad82cdc6da151947aef4285f7d4f4b11af6cc3f2155c1f1d4fb71e7"
+content-hash = "da96639686a715680bfa09499b7751aebce60067618f09ae60405e034ec0bc77"

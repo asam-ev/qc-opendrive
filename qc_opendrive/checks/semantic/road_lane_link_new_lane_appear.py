@@ -227,7 +227,7 @@ def _check_appearing_predecessor_road(
     if current_road is None or predecessor_road is None:
         return
 
-    current_road_last_lane_section = utils.get_last_lane_section(current_road)
+    current_road_first_lane_section = utils.get_first_lane_section(current_road)
 
     predecessor_linkage = utils.get_road_linkage(
         current_road, models.LinkageTag.PREDECESSOR
@@ -253,7 +253,7 @@ def _check_appearing_predecessor_road(
 
     _check_predecessor_with_width_zero_between_lane_sections(
         checker_data,
-        current_road_last_lane_section,
+        current_road_first_lane_section,
         predecessor_road_target_lane_section.lane_section,
         predecessor_linkage.contact_point,
         next_lane_section_length,

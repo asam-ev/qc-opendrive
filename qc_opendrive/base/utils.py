@@ -1,7 +1,7 @@
 import re
 import numpy as np
 from io import BytesIO
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Optional
 from lxml import etree
 import pyclothoids as pc
 import transforms3d
@@ -56,7 +56,7 @@ def get_lane_sections(road: etree._ElementTree) -> List[etree._ElementTree]:
     return lane_sections
 
 
-def get_last_lane_section(road: etree._ElementTree) -> Union[None, etree._ElementTree]:
+def get_last_lane_section(road: etree._ElementTree) -> Optional[etree._ElementTree]:
     lane_sections = get_lane_sections(road)
     if len(lane_sections) > 0:
         return lane_sections[-1]
@@ -64,7 +64,7 @@ def get_last_lane_section(road: etree._ElementTree) -> Union[None, etree._Elemen
         return None
 
 
-def get_first_lane_section(road: etree._ElementTree) -> Union[None, etree._ElementTree]:
+def get_first_lane_section(road: etree._ElementTree) -> Optional[etree._ElementTree]:
     lane_sections = get_lane_sections(road)
     if len(lane_sections) > 0:
         return lane_sections[0]
@@ -161,7 +161,7 @@ def get_standard_schema_version(root: etree._ElementTree) -> str:
 
 def get_road_linkage(
     road: etree._ElementTree, linkage_tag: models.LinkageTag
-) -> Union[None, models.RoadLinkage]:
+) -> Optional[models.RoadLinkage]:
     road_link = road.find("link")
     if road_link is None:
         return None
@@ -185,7 +185,7 @@ def get_road_linkage(
 
 def get_linked_junction_id(
     road: etree._ElementTree, linkage_tag: models.LinkageTag
-) -> Union[None, int]:
+) -> Optional[int]:
     road_link = road.find("link")
     if road_link is None:
         return None
@@ -201,7 +201,7 @@ def get_linked_junction_id(
         return None
 
 
-def get_predecessor_road_id(road: etree._ElementTree) -> Union[None, int]:
+def get_predecessor_road_id(road: etree._ElementTree) -> Optional[int]:
     linkage = get_road_linkage(road, models.LinkageTag.PREDECESSOR)
     if linkage is None:
         return None
@@ -209,7 +209,7 @@ def get_predecessor_road_id(road: etree._ElementTree) -> Union[None, int]:
         return linkage.id
 
 
-def get_successor_road_id(road: etree._ElementTree) -> Union[None, int]:
+def get_successor_road_id(road: etree._ElementTree) -> Optional[int]:
     linkage = get_road_linkage(road, models.LinkageTag.SUCCESSOR)
     if linkage is None:
         return None
@@ -247,7 +247,7 @@ def get_successor_lane_ids(lane: etree._ElementTree) -> List[int]:
 
 def get_lane_link_element(
     lane: etree._ElementTree, link_id: int, linkage_tag: models.LinkageTag
-) -> Union[None, etree._ElementTree]:
+) -> Optional[etree._ElementTree]:
     links = lane.findall("link")
     if linkage_tag == models.LinkageTag.PREDECESSOR:
         for link in links:
@@ -273,7 +273,7 @@ def get_lane_link_element(
 
 def get_lane_from_lane_section(
     lane_section: etree._ElementTree, lane_id: int
-) -> Union[None, etree._ElementTree]:
+) -> Optional[etree._ElementTree]:
     lanes = get_left_and_right_lanes_from_lane_section(lane_section)
 
     for lane in lanes:
@@ -288,7 +288,7 @@ def get_lane_level_from_lane(lane: etree._ElementTree) -> bool:
     return lane.get("level") == "true"
 
 
-def get_type_from_lane(lane: etree._Element) -> Union[str, None]:
+def get_type_from_lane(lane: etree._Element) -> Optional[str]:
     return lane.get("type")
 
 
@@ -308,17 +308,17 @@ def get_connections_from_junction(
     return list(junction.iter("connection"))
 
 
-def get_lane_id(lane: etree._ElementTree) -> Union[None, int]:
+def get_lane_id(lane: etree._ElementTree) -> Optional[int]:
     return to_int(lane.get("id"))
 
 
-def get_road_junction_id(road: etree._ElementTree) -> Union[None, int]:
+def get_road_junction_id(road: etree._ElementTree) -> Optional[int]:
     return to_int(road.get("junction"))
 
 
 def get_road_link_element(
     road: etree._ElementTree, link_id: int, linkage_tag: models.LinkageTag
-) -> Union[None, etree._ElementTree]:
+) -> Optional[etree._ElementTree]:
     links = road.findall("link")
     if linkage_tag == models.LinkageTag.PREDECESSOR:
         for link in links:
@@ -352,19 +352,19 @@ def road_belongs_to_junction(road: etree._Element) -> bool:
 
 def get_incoming_road_id_from_connection(
     connection: etree._Element,
-) -> Union[None, int]:
+) -> Optional[int]:
     return to_int(connection.get("incomingRoad"))
 
 
 def get_connecting_road_id_from_connection(
     connection: etree._Element,
-) -> Union[None, int]:
+) -> Optional[int]:
     return to_int(connection.get("connectingRoad"))
 
 
 def get_contact_point_from_connection(
     connection: etree._Element,
-) -> Union[None, models.ContactPoint]:
+) -> Optional[models.ContactPoint]:
     contact_point_str = connection.get("contactPoint")
     if contact_point_str is None:
         return None
@@ -372,15 +372,15 @@ def get_contact_point_from_connection(
         return models.ContactPoint(contact_point_str)
 
 
-def get_from_attribute_from_lane_link(lane_link: etree._Element) -> Union[int, None]:
+def get_from_attribute_from_lane_link(lane_link: etree._Element) -> Optional[int]:
     return to_int(lane_link.get("from"))
 
 
-def get_to_attribute_from_lane_link(lane_link: etree._Element) -> Union[int, None]:
+def get_to_attribute_from_lane_link(lane_link: etree._Element) -> Optional[int]:
     return to_int(lane_link.get("to"))
 
 
-def get_length_from_geometry(geometry: etree._ElementTree) -> Union[None, float]:
+def get_length_from_geometry(geometry: etree._ElementTree) -> Optional[float]:
     return to_float(geometry.get("length"))
 
 
@@ -405,7 +405,7 @@ def is_valid_param_poly3(param_poly3: models.ParamPoly3) -> bool:
 
 def get_normalized_param_poly3_from_geometry(
     geometry: etree._ElementTree,
-) -> Union[None, models.ParamPoly3]:
+) -> Optional[models.ParamPoly3]:
     param_poly3 = None
 
     for element in geometry.iter("paramPoly3"):
@@ -445,7 +445,7 @@ def poly3_to_polynomial(poly3: models.Poly3) -> np.polynomial.Polynomial:
 
 def get_arclen_param_poly3_from_geometry(
     geometry: etree._ElementTree,
-) -> Union[None, models.ParamPoly3]:
+) -> Optional[models.ParamPoly3]:
     param_poly3 = None
 
     for element in geometry.iter("paramPoly3"):
@@ -494,7 +494,7 @@ def arc_length_integrand(
 
 def get_contact_lane_section_from_linked_road(
     linkage: etree._ElementTree, road_id_map: Dict[int, etree._ElementTree]
-) -> Union[None, models.ContactingLaneSection]:
+) -> Optional[models.ContactingLaneSection]:
     linked_road = road_id_map.get(linkage.id)
     if linked_road is None:
         return
@@ -517,7 +517,7 @@ def get_contact_lane_section_from_linked_road(
 
 def get_contact_lane_section_from_junction_connection_road(
     connection_road: etree._ElementTree, contact_point: models.ContactPoint
-) -> Union[None, etree._ElementTree]:
+) -> Optional[etree._ElementTree]:
     contact_lane_section = None
 
     if contact_point == models.ContactPoint.START:
@@ -530,7 +530,7 @@ def get_contact_lane_section_from_junction_connection_road(
 
 def get_incoming_and_connection_contacting_lane_sections(
     connection: etree._ElementTree, road_id_map: Dict[int, etree._ElementTree]
-) -> Union[None, models.ContactingLaneSections]:
+) -> Optional[models.ContactingLaneSections]:
     connection_road_id = get_connecting_road_id_from_connection(connection)
     incoming_road_id = get_incoming_road_id_from_connection(connection)
 
@@ -634,7 +634,7 @@ def get_lane_width_poly3_list(lane: etree._Element) -> List[models.OffsetPoly3]:
 
 def evaluate_lane_width(
     lane: etree._Element, s_start_from_lane_section: float
-) -> Union[None, float]:
+) -> Optional[float]:
     # This function follows the assumption that the width elements for a given
     # lane follow the standard rules for width elements.
     #
@@ -774,13 +774,13 @@ def get_traffic_hand_rule_from_road(road: etree._Element) -> models.TrafficHandR
         return models.TrafficHandRule(rule)
 
 
-def get_road_length(road: etree._ElementTree) -> Union[None, float]:
+def get_road_length(road: etree._ElementTree) -> Optional[float]:
     return to_float(road.get("length"))
 
 
 def get_s_from_lane_section(
     lane_section: etree._ElementTree,
-) -> Union[None, float]:
+) -> Optional[float]:
     return to_float(lane_section.get("s"))
 
 
@@ -991,7 +991,7 @@ def is_line_geometry(geometry: etree._ElementTree) -> bool:
     return geometry.find("line") is not None
 
 
-def get_lane_direction(lane: etree._Element) -> Union[models.LaneDirection, None]:
+def get_lane_direction(lane: etree._Element) -> Optional[models.LaneDirection]:
     lane_direction = lane.get("direction")
 
     if lane_direction is None:
@@ -1004,25 +1004,25 @@ def get_lane_direction(lane: etree._Element) -> Union[models.LaneDirection, None
         return None
 
 
-def get_heading_from_geometry(geometry: etree._ElementTree) -> Union[None, float]:
+def get_heading_from_geometry(geometry: etree._ElementTree) -> Optional[float]:
     return to_float(geometry.get("hdg"))
 
 
-def get_s_from_geometry(geometry: etree._ElementTree) -> Union[None, float]:
+def get_s_from_geometry(geometry: etree._ElementTree) -> Optional[float]:
     return to_float(geometry.get("s"))
 
 
-def get_x_from_geometry(geometry: etree._ElementTree) -> Union[None, float]:
+def get_x_from_geometry(geometry: etree._ElementTree) -> Optional[float]:
     return to_float(geometry.get("x"))
 
 
-def get_y_from_geometry(geometry: etree._ElementTree) -> Union[None, float]:
+def get_y_from_geometry(geometry: etree._ElementTree) -> Optional[float]:
     return to_float(geometry.get("y"))
 
 
 def get_geometry_from_road_by_s(
     road: etree._ElementTree, s: float
-) -> Union[None, etree._ElementTree]:
+) -> Optional[etree._ElementTree]:
     length = get_road_length(road)
 
     if s < 0.0 or s > length:
@@ -1040,15 +1040,15 @@ def get_geometry_from_road_by_s(
     return geometries[geometry_index]
 
 
-def get_geometry_arc(geometry: etree._Element) -> Union[None, etree._Element]:
+def get_geometry_arc(geometry: etree._Element) -> Optional[etree._Element]:
     return geometry.find("arc")
 
 
-def get_geometry_line(geometry: etree._Element) -> Union[None, etree._Element]:
+def get_geometry_line(geometry: etree._Element) -> Optional[etree._Element]:
     return geometry.find("line")
 
 
-def get_geometry_spiral(geometry: etree._Element) -> Union[None, etree._Element]:
+def get_geometry_spiral(geometry: etree._Element) -> Optional[etree._Element]:
     return geometry.find("spiral")
 
 
@@ -1061,7 +1061,7 @@ def calculate_line_point(
     )
 
 
-def get_curvature_from_arc(arc: etree._Element) -> Union[None, float]:
+def get_curvature_from_arc(arc: etree._Element) -> Optional[float]:
     return to_float(arc.get("curvature"))
 
 
@@ -1084,11 +1084,11 @@ def calculate_arc_point(
     )
 
 
-def get_curv_start_from_spiral(spiral: etree._Element) -> Union[None, float]:
+def get_curv_start_from_spiral(spiral: etree._Element) -> Optional[float]:
     return to_float(spiral.get("curvStart"))
 
 
-def get_curv_end_from_spiral(spiral: etree._Element) -> Union[None, float]:
+def get_curv_end_from_spiral(spiral: etree._Element) -> Optional[float]:
     return to_float(spiral.get("curvEnd"))
 
 
@@ -1155,7 +1155,7 @@ def calculate_poly3_norm_point(
 
 def get_point_xy_from_geometry(
     geometry: etree._ElementTree, s: float
-) -> Union[None, models.Point2D]:
+) -> Optional[models.Point2D]:
     x0 = get_x_from_geometry(geometry)
     y0 = get_y_from_geometry(geometry)
     s0 = get_s_from_geometry(geometry)
@@ -1230,7 +1230,7 @@ def get_point_xy_from_geometry(
 
 def get_elevation_from_road_by_s(
     road: etree._ElementTree, s: float
-) -> Union[None, models.OffsetPoly3]:
+) -> Optional[models.OffsetPoly3]:
     length = get_road_length(road)
     if s < 0.0 or s > length:
         return None
@@ -1255,7 +1255,7 @@ def calculate_elevation_value(elevation: models.OffsetPoly3, s: float) -> float:
 
 def get_point_xy_from_road_reference_line(
     road: etree._ElementTree, s: float
-) -> Union[None, models.Point2D]:
+) -> Optional[models.Point2D]:
     geometry = get_geometry_from_road_by_s(road, s)
     if geometry is None:
         return None
@@ -1269,7 +1269,7 @@ def get_point_xy_from_road_reference_line(
 
 def get_point_xyz_from_road_reference_line(
     road: etree._ElementTree, s: float
-) -> Union[None, models.Point3D]:
+) -> Optional[models.Point3D]:
     point_2d = get_point_xy_from_road_reference_line(road, s)
 
     if point_2d is None:
@@ -1287,30 +1287,30 @@ def get_point_xyz_from_road_reference_line(
 
 def get_start_point_xyz_from_road_reference_line(
     road: etree._ElementTree,
-) -> Union[None, models.Point3D]:
+) -> Optional[models.Point3D]:
     start_s = 0.0
     return get_point_xyz_from_road_reference_line(road, start_s)
 
 
 def get_end_point_xyz_from_road_reference_line(
     road: etree._ElementTree,
-) -> Union[None, models.Point3D]:
+) -> Optional[models.Point3D]:
     end_s = get_road_length(road)
     return get_point_xyz_from_road_reference_line(road, end_s)
 
 
 def get_middle_point_xyz_from_road_reference_line(
     road: etree._ElementTree,
-) -> Union[None, models.Point3D]:
+) -> Optional[models.Point3D]:
     middle_s = get_road_length(road) / 2.0
     return get_point_xyz_from_road_reference_line(road, middle_s)
 
 
-def get_junction_id(junction: etree._ElementTree) -> Union[None, int]:
+def get_junction_id(junction: etree._ElementTree) -> Optional[int]:
     return to_int(junction.get("id"))
 
 
-def get_heading_from_geometry(geometry: etree._ElementTree) -> Union[None, float]:
+def get_heading_from_geometry(geometry: etree._ElementTree) -> Optional[float]:
     return to_float(geometry.get("hdg"))
 
 
@@ -1375,7 +1375,7 @@ def calculate_poly3_norm_heading(
 
 def get_heading_from_geometry_by_s(
     geometry: etree._Element, s: float
-) -> Union[None, float]:
+) -> Optional[float]:
     x0 = get_x_from_geometry(geometry)
     y0 = get_y_from_geometry(geometry)
     s0 = get_s_from_geometry(geometry)
@@ -1443,7 +1443,7 @@ def get_heading_from_geometry_by_s(
 
 def get_heading_from_road_reference_line(
     road: etree._ElementTree, s: float
-) -> Union[None, float]:
+) -> Optional[float]:
     geometry = get_geometry_from_road_by_s(road, s)
 
     if geometry is None:
@@ -1454,7 +1454,7 @@ def get_heading_from_road_reference_line(
 
 def calculate_elevation_angle(
     elevation: models.OffsetPoly3, s: float
-) -> Union[None, float]:
+) -> Optional[float]:
     ds = poly3_to_polynomial(elevation.poly3).deriv()(s - elevation.s_offset)
     if ds is None:
         return None
@@ -1464,7 +1464,7 @@ def calculate_elevation_angle(
 
 def get_pitch_from_road_reference_line(
     road: etree._ElementTree, s: float
-) -> Union[None, float]:
+) -> Optional[float]:
     elevation = get_elevation_from_road_by_s(road, s)
 
     if elevation is None:
@@ -1476,7 +1476,7 @@ def get_pitch_from_road_reference_line(
 
 def get_superelevation_from_road_by_s(
     road: etree._ElementTree, s: float
-) -> Union[None, models.OffsetPoly3]:
+) -> Optional[models.OffsetPoly3]:
     length = get_road_length(road)
     if s < 0.0 or s > length:
         return None
@@ -1496,7 +1496,7 @@ def get_superelevation_from_road_by_s(
 
 def get_roll_from_road_reference_line(
     road: etree._ElementTree, s: float
-) -> Union[None, float]:
+) -> Optional[float]:
     superelevation = get_superelevation_from_road_by_s(road, s)
 
     if superelevation is None:
@@ -1509,7 +1509,7 @@ def get_roll_from_road_reference_line(
 
 def get_point_xyz_from_road(
     road: etree._ElementTree, s: float, t: float, h: float
-) -> Union[None, models.Point3D]:
+) -> Optional[models.Point3D]:
     yaw = get_heading_from_road_reference_line(road, s)
     roll = get_roll_from_road_reference_line(road, s)
 
@@ -1534,7 +1534,7 @@ def get_point_xyz_from_road(
 
 def get_lane_section_from_road_by_s(
     road: etree._ElementTree, s: float
-) -> Union[None, etree._ElementTree]:
+) -> Optional[etree._ElementTree]:
     length = get_road_length(road)
 
     if s < 0.0 or s > length:
@@ -1554,7 +1554,7 @@ def get_lane_section_from_road_by_s(
 
 def get_lane_offset_from_road_by_s(
     road: etree._ElementTree, s: float
-) -> Union[None, models.OffsetPoly3]:
+) -> Optional[models.OffsetPoly3]:
     length = get_road_length(road)
 
     if s < 0.0 or s > length:
@@ -1579,7 +1579,7 @@ def get_lane_offset_from_road_by_s(
 
 def get_lane_offset_value_from_road_by_s(
     road: etree._ElementTree, s: float
-) -> Union[None, float]:
+) -> Optional[float]:
     lane_offset = get_lane_offset_from_road_by_s(road, s)
 
     if lane_offset is None:
@@ -1592,7 +1592,7 @@ def get_lane_offset_value_from_road_by_s(
 
 def evaluate_lane_border(
     lane: etree._Element, s_start_from_lane_section: float
-) -> Union[None, float]:
+) -> Optional[float]:
     """
     s_start_from_lane_section shall be greater than or equal to zero.
     s_start_from_lane_section = s - s_section
@@ -1673,7 +1673,7 @@ def get_t_middle_point_from_lane_by_s(
     lane_section: etree._ElementTree,
     lane: etree._ElementTree,
     s: float,
-) -> Union[None, float]:
+) -> Optional[float]:
     lane_id = get_lane_id(lane)
 
     if lane_id is None:
@@ -1739,7 +1739,7 @@ def get_middle_point_xyz_at_height_zero_from_lane_by_s(
     lane_section: etree._ElementTree,
     lane: etree._ElementTree,
     s: float,
-) -> Union[None, models.Point3D]:
+) -> Optional[models.Point3D]:
     t = get_t_middle_point_from_lane_by_s(road, lane_section, lane, s)
 
     if t is None:
@@ -1749,7 +1749,7 @@ def get_middle_point_xyz_at_height_zero_from_lane_by_s(
         return point_xyz
 
 
-def get_s_offset_from_access(access: etree._ElementTree) -> Union[None, float]:
+def get_s_offset_from_access(access: etree._ElementTree) -> Optional[float]:
     return to_float(access.get("sOffset"))
 
 
