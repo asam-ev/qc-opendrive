@@ -2,7 +2,7 @@ import logging
 
 from typing import Dict, List
 from lxml import etree
-from typing import Union
+from typing import Optional
 
 from qc_baselib import IssueSeverity, StatusType
 
@@ -20,7 +20,7 @@ def _raise_road_linkage_is_junction_needed_issue(
     checker_data: models.CheckerData,
     road_linkage_elements: List[etree._Element],
     linkage_tag: models.LinkageTag,
-    problematic_road: Union[None, etree._ElementTree],
+    problematic_road: Optional[etree._ElementTree],
 ) -> None:
     issue_id = checker_data.result.register_issue(
         checker_bundle_name=constants.BUNDLE_NAME,
