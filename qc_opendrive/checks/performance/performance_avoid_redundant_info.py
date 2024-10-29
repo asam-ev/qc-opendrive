@@ -27,7 +27,7 @@ def _check_road_superelevations(
             issue_id = checker_data.result.register_issue(
                 checker_bundle_name=constants.BUNDLE_NAME,
                 checker_id=CHECKER_ID,
-                description=f"Redudant superelevation declaration.",
+                description=f"Redundant superelevation declaration.",
                 level=IssueSeverity.WARNING,
                 rule_uid=RULE_UID,
             )
@@ -36,8 +36,20 @@ def _check_road_superelevations(
                 checker_bundle_name=constants.BUNDLE_NAME,
                 checker_id=CHECKER_ID,
                 issue_id=issue_id,
-                xpath=checker_data.input_file_xml_root.getpath(road),
-                description=f"",
+                xpath=checker_data.input_file_xml_root.getpath(
+                    current_superelevation.xml_element
+                ),
+                description=f"Redundant superelevation declaration.",
+            )
+
+            checker_data.result.add_xml_location(
+                checker_bundle_name=constants.BUNDLE_NAME,
+                checker_id=CHECKER_ID,
+                issue_id=issue_id,
+                xpath=checker_data.input_file_xml_root.getpath(
+                    next_superelevation.xml_element
+                ),
+                description=f"Redundant superelevation declaration.",
             )
 
             inertial_point = utils.get_point_xyz_from_road_reference_line(
@@ -51,7 +63,7 @@ def _check_road_superelevations(
                     x=inertial_point.x,
                     y=inertial_point.y,
                     z=inertial_point.z,
-                    description="Redudant superelevation declaration.",
+                    description="Redundant superelevation declaration.",
                 )
 
 
@@ -66,7 +78,7 @@ def _check_road_elevations(
             issue_id = checker_data.result.register_issue(
                 checker_bundle_name=constants.BUNDLE_NAME,
                 checker_id=CHECKER_ID,
-                description=f"Redudant elevation declaration.",
+                description=f"Redundant elevation declaration.",
                 level=IssueSeverity.WARNING,
                 rule_uid=RULE_UID,
             )
@@ -75,8 +87,20 @@ def _check_road_elevations(
                 checker_bundle_name=constants.BUNDLE_NAME,
                 checker_id=CHECKER_ID,
                 issue_id=issue_id,
-                xpath=checker_data.input_file_xml_root.getpath(road),
-                description=f"",
+                xpath=checker_data.input_file_xml_root.getpath(
+                    current_elevation.xml_element
+                ),
+                description=f"Redundant elevation declaration.",
+            )
+
+            checker_data.result.add_xml_location(
+                checker_bundle_name=constants.BUNDLE_NAME,
+                checker_id=CHECKER_ID,
+                issue_id=issue_id,
+                xpath=checker_data.input_file_xml_root.getpath(
+                    next_elevation.xml_element
+                ),
+                description=f"Redundant elevation declaration.",
             )
 
             inertial_point = utils.get_point_xyz_from_road_reference_line(
@@ -90,7 +114,7 @@ def _check_road_elevations(
                     x=inertial_point.x,
                     y=inertial_point.y,
                     z=inertial_point.z,
-                    description="Redudant elevation declaration.",
+                    description="Redundant elevation declaration.",
                 )
 
 
@@ -105,7 +129,7 @@ def _check_lane_offsets(
             issue_id = checker_data.result.register_issue(
                 checker_bundle_name=constants.BUNDLE_NAME,
                 checker_id=CHECKER_ID,
-                description=f"Redudant lane offset declaration.",
+                description=f"Redundant lane offset declaration.",
                 level=IssueSeverity.WARNING,
                 rule_uid=RULE_UID,
             )
@@ -114,8 +138,20 @@ def _check_lane_offsets(
                 checker_bundle_name=constants.BUNDLE_NAME,
                 checker_id=CHECKER_ID,
                 issue_id=issue_id,
-                xpath=checker_data.input_file_xml_root.getpath(road),
-                description=f"",
+                xpath=checker_data.input_file_xml_root.getpath(
+                    current_lane_offset.xml_element
+                ),
+                description=f"Redundant lane offset declaration.",
+            )
+
+            checker_data.result.add_xml_location(
+                checker_bundle_name=constants.BUNDLE_NAME,
+                checker_id=CHECKER_ID,
+                issue_id=issue_id,
+                xpath=checker_data.input_file_xml_root.getpath(
+                    next_lane_offset.xml_element
+                ),
+                description=f"Redundant lane offset declaration.",
             )
 
             s = next_lane_offset.s_offset
@@ -133,7 +169,7 @@ def _check_lane_offsets(
                     x=inertial_point.x,
                     y=inertial_point.y,
                     z=inertial_point.z,
-                    description="Redudant lane offset declaration.",
+                    description="Redundant lane offset declaration.",
                 )
 
 
@@ -159,7 +195,7 @@ def _check_road_plan_view(
             issue_id = checker_data.result.register_issue(
                 checker_bundle_name=constants.BUNDLE_NAME,
                 checker_id=CHECKER_ID,
-                description=f"Redudant line geometry declaration.",
+                description=f"Redundant line geometry declaration.",
                 level=IssueSeverity.WARNING,
                 rule_uid=RULE_UID,
             )
@@ -168,8 +204,16 @@ def _check_road_plan_view(
                 checker_bundle_name=constants.BUNDLE_NAME,
                 checker_id=CHECKER_ID,
                 issue_id=issue_id,
-                xpath=checker_data.input_file_xml_root.getpath(road),
-                description=f"",
+                xpath=checker_data.input_file_xml_root.getpath(current_geometry),
+                description=f"Redundant line geometry declaration.",
+            )
+
+            checker_data.result.add_xml_location(
+                checker_bundle_name=constants.BUNDLE_NAME,
+                checker_id=CHECKER_ID,
+                issue_id=issue_id,
+                xpath=checker_data.input_file_xml_root.getpath(next_geometry),
+                description=f"Redundant line geometry declaration.",
             )
 
             s_offset = utils.get_s_from_geometry(next_geometry)
@@ -203,7 +247,7 @@ def _check_lane_widths(
             issue_id = checker_data.result.register_issue(
                 checker_bundle_name=constants.BUNDLE_NAME,
                 checker_id=CHECKER_ID,
-                description=f"Redudant lane width declaration.",
+                description=f"Redundant lane width declaration.",
                 level=IssueSeverity.WARNING,
                 rule_uid=RULE_UID,
             )
@@ -212,8 +256,18 @@ def _check_lane_widths(
                 checker_bundle_name=constants.BUNDLE_NAME,
                 checker_id=CHECKER_ID,
                 issue_id=issue_id,
-                xpath=checker_data.input_file_xml_root.getpath(lane),
-                description=f"",
+                xpath=checker_data.input_file_xml_root.getpath(
+                    current_width.xml_element
+                ),
+                description=f"Redundant lane width declaration.",
+            )
+
+            checker_data.result.add_xml_location(
+                checker_bundle_name=constants.BUNDLE_NAME,
+                checker_id=CHECKER_ID,
+                issue_id=issue_id,
+                xpath=checker_data.input_file_xml_root.getpath(next_width.xml_element),
+                description=f"Redundant lane width declaration.",
             )
 
             s_section = utils.get_s_from_lane_section(lane_section)
@@ -235,7 +289,7 @@ def _check_lane_widths(
                     x=inertial_point.x,
                     y=inertial_point.y,
                     z=inertial_point.z,
-                    description="Redudant lane width declaration.",
+                    description="Redundant lane width declaration.",
                 )
 
 
@@ -253,7 +307,7 @@ def _check_lane_borders(
             issue_id = checker_data.result.register_issue(
                 checker_bundle_name=constants.BUNDLE_NAME,
                 checker_id=CHECKER_ID,
-                description=f"Redudant lane border declaration.",
+                description=f"Redundant lane border declaration.",
                 level=IssueSeverity.WARNING,
                 rule_uid=RULE_UID,
             )
@@ -262,8 +316,18 @@ def _check_lane_borders(
                 checker_bundle_name=constants.BUNDLE_NAME,
                 checker_id=CHECKER_ID,
                 issue_id=issue_id,
-                xpath=checker_data.input_file_xml_root.getpath(lane),
-                description=f"",
+                xpath=checker_data.input_file_xml_root.getpath(
+                    current_border.xml_element
+                ),
+                description=f"Redundant lane border declaration.",
+            )
+
+            checker_data.result.add_xml_location(
+                checker_bundle_name=constants.BUNDLE_NAME,
+                checker_id=CHECKER_ID,
+                issue_id=issue_id,
+                xpath=checker_data.input_file_xml_root.getpath(next_border.xml_element),
+                description=f"Redundant lane border declaration.",
             )
 
             s_section = utils.get_s_from_lane_section(lane_section)
@@ -285,7 +349,7 @@ def _check_lane_borders(
                     x=inertial_point.x,
                     y=inertial_point.y,
                     z=inertial_point.z,
-                    description="Redudant lane border declaration.",
+                    description="Redundant lane border declaration.",
                 )
 
 

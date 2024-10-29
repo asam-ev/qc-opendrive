@@ -274,7 +274,7 @@ def test_road_lane_true_level_one_side_road(
         ("valid", 0, []),
         (
             "invalid_incoming",
-            3,  # Two issues raised in junction, one issue raised in road
+            2,  # One issue raised in junction, one issue raised in road
             [
                 "/OpenDRIVE/road[1]/lanes/laneSection/right/lane",
                 "/OpenDRIVE/road[2]/lanes/laneSection/right/lane",

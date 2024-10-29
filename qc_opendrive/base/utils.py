@@ -617,6 +617,7 @@ def get_poly3_from_width(
             d=to_float(width.get("d")),
         ),
         s_offset=to_float(width.get("sOffset")),
+        xml_element=width,
     )
 
     if is_valid_offset_poly3(offset_poly3):
@@ -795,6 +796,7 @@ def get_borders_from_lane(lane: etree._ElementTree) -> List[models.OffsetPoly3]:
                 d=to_float(border.get("d")),
             ),
             s_offset=to_float(border.get("sOffset")),
+            xml_element=border,
         )
         if is_valid_offset_poly3(offset_poly3):
             border_list.append(offset_poly3)
@@ -868,6 +870,7 @@ def get_road_elevations(road: etree._ElementTree) -> List[models.OffsetPoly3]:
                 d=to_float(elevation.get("d")),
             ),
             s_offset=to_float(elevation.get("s")),
+            xml_element=elevation,
         )
 
         if is_valid_offset_poly3(offset_poly3):
@@ -892,6 +895,7 @@ def get_road_superelevations(road: etree._ElementTree) -> List[models.OffsetPoly
                 d=to_float(superelevation.get("d")),
             ),
             s_offset=to_float(superelevation.get("s")),
+            xml_element=superelevation,
         )
 
         if is_valid_offset_poly3(offset_poly3):
@@ -916,6 +920,7 @@ def get_lane_offsets_from_road(road: etree._ElementTree) -> List[models.OffsetPo
                 d=to_float(lane_offset.get("d")),
             ),
             s_offset=to_float(lane_offset.get("s")),
+            xml_element=lane_offset,
         )
 
         if is_valid_offset_poly3(offset_poly3):

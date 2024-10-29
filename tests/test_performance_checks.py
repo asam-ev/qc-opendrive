@@ -21,14 +21,16 @@ from test_setup import *
             "elevation_invalid_1",
             1,
             [
-                "/OpenDRIVE/road",
+                "/OpenDRIVE/road/elevationProfile/elevation[1]",
+                "/OpenDRIVE/road/elevationProfile/elevation[2]",
             ],
         ),
         (
             "elevation_invalid_2",
             1,
             [
-                "/OpenDRIVE/road",
+                "/OpenDRIVE/road/elevationProfile/elevation[1]",
+                "/OpenDRIVE/road/elevationProfile/elevation[2]",
             ],
         ),
         (
@@ -40,7 +42,8 @@ from test_setup import *
             "superelevation_invalid",
             1,
             [
-                "/OpenDRIVE/road",
+                "/OpenDRIVE/road/lateralProfile/superelevation[2]",
+                "/OpenDRIVE/road/lateralProfile/superelevation[3]",
             ],
         ),
         (
@@ -52,14 +55,16 @@ from test_setup import *
             "lane_offset_invalid_1",
             1,
             [
-                "/OpenDRIVE/road",
+                "/OpenDRIVE/road/lanes/laneOffset[2]",
+                "/OpenDRIVE/road/lanes/laneOffset[3]",
             ],
         ),
         (
             "lane_offset_invalid_2",
             1,
             [
-                "/OpenDRIVE/road",
+                "/OpenDRIVE/road/lanes/laneOffset[2]",
+                "/OpenDRIVE/road/lanes/laneOffset[3]",
             ],
         ),
         (
@@ -71,7 +76,8 @@ from test_setup import *
             "lane_width_invalid",
             1,
             [
-                "/OpenDRIVE/road/lanes/laneSection[1]/left/lane[7]",
+                "/OpenDRIVE/road/lanes/laneSection[1]/left/lane[7]/width[1]",
+                "/OpenDRIVE/road/lanes/laneSection[1]/left/lane[7]/width[2]",
             ],
         ),
         (
@@ -83,7 +89,8 @@ from test_setup import *
             "lane_border_invalid",
             1,
             [
-                "/OpenDRIVE/road/lanes/laneSection[2]/right/lane[2]",
+                "/OpenDRIVE/road/lanes/laneSection[2]/right/lane[2]/border[1]",
+                "/OpenDRIVE/road/lanes/laneSection[2]/right/lane[2]/border[2]",
             ],
         ),
         (
@@ -95,7 +102,8 @@ from test_setup import *
             "line_geometry_invalid",
             1,
             [
-                "/OpenDRIVE/road",
+                "/OpenDRIVE/road/planView/geometry[2]",
+                "/OpenDRIVE/road/planView/geometry[3]",
             ],
         ),
     ],
