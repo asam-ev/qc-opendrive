@@ -19,6 +19,7 @@ CHECKER_ID = "check_asam_xodr_junctions_connection_one_connection_element"
 CHECKER_DESCRIPTION = "Each connecting road shall be represented by exactly one element. A connecting road may contain as many lanes as required."
 CHECKER_PRECONDITIONS = basic_preconditions.CHECKER_PRECONDITIONS
 RULE_UID = "asam.net:xodr:1.7.0:junctions.connection.one_connection_element"
+LAST_SUPPORTED_VERSION = "1.7.0"
 
 
 def _check_junctions_connection_one_connection_element(

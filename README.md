@@ -279,12 +279,13 @@ Contributions of valid and invalid OpenDrive sample files are also welcome. New 
 1. Create a new Python module for each checker.
 2. Specify the following global variables for the Python module
 
-| Variable | Meaning |
-| --- | --- |
-| `CHECKER_ID` | The ID of the checker |
-| `CHECKER_DESCRIPTION` | The description of the checker |
-| `CHECKER_PRECONDITIONS` | A set of other checkers in which if any of them raise an issue, the current checker will be skipped |
-| `RULE_UID` | The rule UID of the rule that the checker will check |
+| Variable | Presence | Meaning |
+| --- | --- | --- |
+| `CHECKER_ID` | Required | The ID of the checker |
+| `CHECKER_DESCRIPTION` | Required | The description of the checker |
+| `CHECKER_PRECONDITIONS` | Required | A set of other checkers in which if any of them raise an issue, the current checker will be skipped |
+| `RULE_UID` | Required | The rule UID of the rule that the checker will check |
+| `LAST_SUPPORTED_VERSION` | Optional | The last supported version of the standard. If the input file has a version higher than the last supported version, the checker will be skipped. Do not define this variable if the checker does not have a last supported version. |
 
 3. Implement the checker logic in the following function:
 

@@ -495,6 +495,32 @@ def test_junctions_connection_one_connection_element(
 @pytest.mark.parametrize(
     "target_file,issue_count,issue_xpath",
     [
+        ("v1_8_0_valid", 0, []),
+    ],
+)
+def test_junctions_connection_one_connection_element_last_supported_version(
+    target_file: str,
+    issue_count: int,
+    issue_xpath: List[str],
+    monkeypatch,
+) -> None:
+    base_path = "tests/data/junctions_connection_one_connection_element/"
+    target_file_name = f"junctions_connection_one_connection_element_{target_file}.xodr"
+    rule_uid = "asam.net:xodr:1.7.0:junctions.connection.one_connection_element"
+
+    target_file_path = os.path.join(base_path, target_file_name)
+    create_test_config(target_file_path)
+    launch_main(monkeypatch)
+    check_skipped(
+        rule_uid,
+        semantic.junctions_connection_one_connection_element.CHECKER_ID,
+    )
+    cleanup_files()
+
+
+@pytest.mark.parametrize(
+    "target_file,issue_count,issue_xpath",
+    [
         ("valid", 0, []),
         (
             "invalid",

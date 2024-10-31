@@ -73,7 +73,7 @@ def execute_checker(
 
         return
 
-    # Checker definition setting. If not satisfied then set status as SKIPPED and return
+    # Check definition setting. If not satisfied then set status as SKIPPED and return
     if required_definition_setting:
         schema_version = checker_data.schema_version
 
@@ -96,6 +96,28 @@ def execute_checker(
                 constants.BUNDLE_NAME,
                 checker.CHECKER_ID,
                 f"Version {schema_version} is lower than definition setting {definition_setting}. Skip the check.",
+            )
+
+            return
+
+    # Check last supported version. If not satisfied then set status as SKIPPED and return
+    if hasattr(checker, "LAST_SUPPORTED_VERSION"):
+        schema_version = checker_data.schema_version
+        if (
+            schema_version is None
+            or utils.compare_versions(schema_version, checker.LAST_SUPPORTED_VERSION)
+            > 0
+        ):
+            checker_data.result.set_checker_status(
+                checker_bundle_name=constants.BUNDLE_NAME,
+                checker_id=checker.CHECKER_ID,
+                status=StatusType.SKIPPED,
+            )
+
+            checker_data.result.add_checker_summary(
+                constants.BUNDLE_NAME,
+                checker.CHECKER_ID,
+                f"Version {schema_version} is higher than the last supported version {checker.LAST_SUPPORTED_VERSION}. Skip the check.",
             )
 
             return
