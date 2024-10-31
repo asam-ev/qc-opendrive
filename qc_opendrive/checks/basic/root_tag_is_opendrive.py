@@ -1,3 +1,9 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright 2024, ASAM e.V.
+# This Source Code Form is subject to the terms of the Mozilla
+# Public License, v. 2.0. If a copy of the MPL was not distributed
+# with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 import logging
 from qc_baselib import IssueSeverity, StatusType
 from qc_opendrive import constants
@@ -30,7 +36,6 @@ def check_rule(checker_data: models.CheckerData) -> bool:
         is_valid = False
 
     if not is_valid:
-
         issue_id = checker_data.result.register_issue(
             checker_bundle_name=constants.BUNDLE_NAME,
             checker_id=CHECKER_ID,

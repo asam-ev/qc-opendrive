@@ -1,3 +1,9 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright 2024, ASAM e.V.
+# This Source Code Form is subject to the terms of the Mozilla
+# Public License, v. 2.0. If a copy of the MPL was not distributed
+# with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 from . import (
     road_lane_access_no_mix_of_deny_or_allow as road_lane_access_no_mix_of_deny_or_allow,
 )
