@@ -165,7 +165,7 @@ def _check_level_change_between_lane_sections(
             checker_id=CHECKER_ID,
             issue_id=issue_id,
             xpath=warning,
-            description="",
+            description="Lane levels are not the same in two consecutive lane sections",
         )
 
 
@@ -229,7 +229,15 @@ def _check_level_change_linkage_roads(
                     checker_id=CHECKER_ID,
                     issue_id=issue_id,
                     xpath=root.getpath(lane),
-                    description="",
+                    description="Lane levels are not the same between two connected roads.",
+                )
+
+                result.add_xml_location(
+                    checker_bundle_name=constants.BUNDLE_NAME,
+                    checker_id=CHECKER_ID,
+                    issue_id=issue_id,
+                    xpath=root.getpath(other_lane),
+                    description="Lane levels are not the same between two connected roads.",
                 )
 
                 s = None
@@ -398,15 +406,7 @@ def _check_level_among_junctions(
                         checker_id=CHECKER_ID,
                         issue_id=issue_id,
                         xpath=checker_data.input_file_xml_root.getpath(incoming_lane),
-                        description="",
-                    )
-
-                    issue_id = checker_data.result.register_issue(
-                        checker_bundle_name=constants.BUNDLE_NAME,
-                        checker_id=CHECKER_ID,
-                        description="Lane levels are not the same between junction and incoming road.",
-                        level=IssueSeverity.WARNING,
-                        rule_uid=RULE_UID,
+                        description="Lane levels are not the same between incoming road and junction.",
                     )
 
                     checker_data.result.add_xml_location(
@@ -414,7 +414,7 @@ def _check_level_among_junctions(
                         checker_id=CHECKER_ID,
                         issue_id=issue_id,
                         xpath=checker_data.input_file_xml_root.getpath(connection_lane),
-                        description="",
+                        description="Lane levels are not the same between incoming road and junction.",
                     )
 
 

@@ -7,7 +7,7 @@
 from dataclasses import dataclass
 from enum import Enum
 from lxml import etree
-from typing import Union, Optional
+from typing import Optional
 
 from qc_baselib import Configuration, Result
 
@@ -84,6 +84,7 @@ class LaneSectionWithLength:
 class OffsetPoly3:
     poly3: Poly3
     s_offset: float
+    xml_element: Optional[etree._ElementTree] = None
 
 
 class LaneDirection(str, Enum):

@@ -129,7 +129,7 @@ def _raise_issue(
         checker_id=CHECKER_ID,
         issue_id=issue_id,
         xpath=checker_data.input_file_xml_root.getpath(left_lane),
-        description=f"",
+        description=f"Outer lane border intersects or stays within inner lane border.",
     )
 
     checker_data.result.add_xml_location(
@@ -137,7 +137,7 @@ def _raise_issue(
         checker_id=CHECKER_ID,
         issue_id=issue_id,
         xpath=checker_data.input_file_xml_root.getpath(right_lane),
-        description=f"",
+        description=f"Outer lane border intersects or stays within inner lane border.",
     )
 
     s_section = utils.get_s_from_lane_section(lane_section_with_length.lane_section)
