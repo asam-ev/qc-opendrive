@@ -496,9 +496,10 @@ def test_junctions_connection_one_connection_element(
     "target_file,issue_count,issue_xpath",
     [
         ("v1_8_0_valid", 0, []),
+        ("v1_6_0_skipped", 0, []),
     ],
 )
-def test_junctions_connection_one_connection_element_last_supported_version(
+def test_junctions_connection_one_connection_element_applicable_version(
     target_file: str,
     issue_count: int,
     issue_xpath: List[str],
