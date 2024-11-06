@@ -94,9 +94,9 @@ def _raise_lane_linkage_gap_issue(
         checker_data.input_file_xml_root.getpath(previous_lane),
         checker_data.input_file_xml_root.getpath(current_lane),
     ]
-    issue_xpaths = sorted(issue_xpaths)
+    sorted_issue_xpaths = sorted(issue_xpaths)
 
-    issue_xpaths_key = "-".join(issue_xpaths)
+    issue_xpaths_key = "-".join(sorted_issue_xpaths)
 
     if issue_xpaths_key in raised_issue_xpaths:
         logging.debug(
@@ -118,14 +118,14 @@ def _raise_lane_linkage_gap_issue(
         checker_bundle_name=constants.BUNDLE_NAME,
         checker_id=CHECKER_ID,
         issue_id=issue_id,
-        xpath=checker_data.input_file_xml_root.getpath(previous_lane),
+        xpath=issue_xpaths[0],
         description=f"First lane element",
     )
     checker_data.result.add_xml_location(
         checker_bundle_name=constants.BUNDLE_NAME,
         checker_id=CHECKER_ID,
         issue_id=issue_id,
-        xpath=checker_data.input_file_xml_root.getpath(current_lane),
+        xpath=issue_xpaths[1],
         description=f"Next lane element",
     )
 
