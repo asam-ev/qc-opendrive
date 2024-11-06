@@ -87,6 +87,11 @@ from test_setup import *
             0,
             [],
         ),
+        (
+            "lane_gap_example_issue_119",
+            0,
+            [],
+        ),
     ],
 )
 def test_road_lane_access_no_mix_of_deny_or_allow_examples(
