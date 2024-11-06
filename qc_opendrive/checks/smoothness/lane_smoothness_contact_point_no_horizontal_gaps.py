@@ -6,11 +6,11 @@
 
 import logging
 
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Set
 from lxml import etree
 from scipy.spatial import distance
 
-from qc_baselib import IssueSeverity, StatusType
+from qc_baselib import IssueSeverity
 
 from qc_opendrive import constants
 from qc_opendrive.base import utils, models
@@ -87,8 +87,25 @@ def _raise_lane_linkage_gap_issue(
     checker_data: models.CheckerData,
     previous_lane: etree._Element,
     current_lane: etree._Element,
+    raised_issue_xpaths: Set[str],
     inertial_point: Optional[models.Point3D],
 ) -> None:
+    issue_xpaths = [
+        checker_data.input_file_xml_root.getpath(previous_lane),
+        checker_data.input_file_xml_root.getpath(current_lane),
+    ]
+    issue_xpaths = sorted(issue_xpaths)
+
+    issue_xpaths_key = "-".join(issue_xpaths)
+
+    if issue_xpaths_key in raised_issue_xpaths:
+        logging.debug(
+            f"Issue already raised for xpaths: {issue_xpaths} // inertial_point = {inertial_point}"
+        )
+        return
+
+    raised_issue_xpaths.add(issue_xpaths_key)
+
     issue_id = checker_data.result.register_issue(
         checker_bundle_name=constants.BUNDLE_NAME,
         checker_id=CHECKER_ID,
@@ -297,6 +314,7 @@ def _validate_same_road_lane_successors(
     successor_road_s: float,
     successor_lanes: List[etree._Element],
     checker_data: models.CheckerData,
+    raised_issue_xpaths: Set[str],
 ) -> None:
     successors = utils.get_successor_lane_ids(lane)
     lane_id = utils.get_lane_id(lane)
@@ -337,6 +355,7 @@ def _validate_same_road_lane_successors(
                     checker_data,
                     lane,
                     next_lane[0],
+                    raised_issue_xpaths,
                     inertial_point,
                 )
 
@@ -371,6 +390,7 @@ def _validate_same_road_lane_successors(
                     checker_data,
                     lane,
                     next_lane[0],
+                    raised_issue_xpaths,
                     inertial_point,
                 )
 
@@ -399,6 +419,7 @@ def _validate_same_road_lane_successors(
                     checker_data,
                     lane,
                     next_lane[0],
+                    raised_issue_xpaths,
                     inertial_point,
                 )
 
@@ -420,6 +441,7 @@ def _validate_same_road_lane_successors(
                     checker_data,
                     lane,
                     next_lane[0],
+                    raised_issue_xpaths,
                     inertial_point,
                 )
 
@@ -433,6 +455,7 @@ def _validate_same_road_lane_predecessors(
     current_road_s: float,
     prev_lanes: List[etree._Element],
     checker_data: models.CheckerData,
+    raised_issue_xpaths: Set[str],
 ) -> None:
     lane_id = utils.get_lane_id(lane)
     predecessors = utils.get_predecessor_lane_ids(lane)
@@ -473,6 +496,7 @@ def _validate_same_road_lane_predecessors(
                     checker_data,
                     prev_lane[0],
                     lane,
+                    raised_issue_xpaths,
                     inertial_point,
                 )
 
@@ -506,6 +530,8 @@ def _validate_same_road_lane_predecessors(
                 _raise_lane_linkage_gap_issue(
                     checker_data,
                     prev_lane[0],
+                    lane,
+                    raised_issue_xpaths,
                     inertial_point,
                 )
 
@@ -534,6 +560,7 @@ def _validate_same_road_lane_predecessors(
                     checker_data,
                     prev_lane[0],
                     lane,
+                    raised_issue_xpaths,
                     inertial_point,
                 )
 
@@ -555,6 +582,7 @@ def _validate_same_road_lane_predecessors(
                     checker_data,
                     prev_lane[0],
                     lane,
+                    raised_issue_xpaths,
                     inertial_point,
                 )
 
@@ -562,6 +590,7 @@ def _validate_same_road_lane_predecessors(
 def _check_road_lane_sections_gaps(
     road: etree._ElementTree,
     checker_data: models.CheckerData,
+    raised_issue_xpaths: Set[str],
 ) -> None:
     lane_sections = utils.get_sorted_lane_sections_with_length_from_road(road)
 
@@ -620,6 +649,7 @@ def _check_road_lane_sections_gaps(
                 next_lane_section_s,
                 next_lanes,
                 checker_data,
+                raised_issue_xpaths,
             )
 
         for lane in next_lanes:
@@ -634,10 +664,13 @@ def _check_road_lane_sections_gaps(
                 next_lane_section_s,
                 current_lanes,
                 checker_data,
+                raised_issue_xpaths,
             )
 
 
 def _check_roads_internal_smoothness(checker_data: models.CheckerData) -> None:
+    raised_issue_xpaths = set()
+
     road_id_map = utils.get_road_id_map(checker_data.input_file_xml_root)
 
     for road in road_id_map.values():
@@ -647,7 +680,7 @@ def _check_roads_internal_smoothness(checker_data: models.CheckerData) -> None:
         if len(geometries) > 2:
             _check_plan_view_gaps(road, geometries, checker_data)
 
-        _check_road_lane_sections_gaps(road, checker_data)
+        _check_road_lane_sections_gaps(road, checker_data, raised_issue_xpaths)
 
 
 def _validate_inter_road_smoothness(
@@ -658,6 +691,7 @@ def _validate_inter_road_smoothness(
     road_s: float,
     road_id_map: Dict[int, etree._ElementTree],
     checker_data: models.CheckerData,
+    raised_issue_xpaths: Set[str],
 ):
     lane_section = road_lane_section
 
@@ -806,6 +840,7 @@ def _validate_inter_road_smoothness(
                         checker_data,
                         target_lane,
                         lane,
+                        raised_issue_xpaths,
                         inertial_point,
                     )
 
@@ -820,6 +855,7 @@ def _validate_inter_road_smoothness(
                         checker_data,
                         lane,
                         target_lane,
+                        raised_issue_xpaths,
                         inertial_point,
                     )
 
@@ -832,6 +868,7 @@ def _validate_junction_connection_gaps(
     road_relation: models.ContactPoint,
     road_id_map: Dict[int, etree._ElementTree],
     checker_data: models.CheckerData,
+    raised_issue_xpaths: Set[str],
 ):
     connection_contact_point = utils.get_contact_point_from_connection(connection)
     connection_road_id = utils.get_connecting_road_id_from_connection(connection)
@@ -988,6 +1025,7 @@ def _validate_junction_connection_gaps(
                     checker_data,
                     from_lane,
                     target_lane,
+                    raised_issue_xpaths,
                     inertial_point,
                 )
             elif road_relation == models.LinkageTag.SUCCESSOR:
@@ -1001,11 +1039,14 @@ def _validate_junction_connection_gaps(
                     checker_data,
                     from_lane,
                     target_lane,
+                    raised_issue_xpaths,
                     inertial_point,
                 )
 
 
 def _check_inter_roads_smoothness(checker_data: models.CheckerData) -> None:
+    raised_issue_xpaths = set()
+
     road_id_map = utils.get_road_id_map(checker_data.input_file_xml_root)
     junction_id_map = utils.get_junction_id_map(checker_data.input_file_xml_root)
 
@@ -1025,6 +1066,7 @@ def _check_inter_roads_smoothness(checker_data: models.CheckerData) -> None:
                 road_s=road_length,
                 road_id_map=road_id_map,
                 checker_data=checker_data,
+                raised_issue_xpaths=raised_issue_xpaths,
             )
 
         if predecessor is not None:
@@ -1036,6 +1078,7 @@ def _check_inter_roads_smoothness(checker_data: models.CheckerData) -> None:
                 road_s=0.0,
                 road_id_map=road_id_map,
                 checker_data=checker_data,
+                raised_issue_xpaths=raised_issue_xpaths,
             )
 
         successor_junction_id = utils.get_linked_junction_id(
@@ -1065,6 +1108,7 @@ def _check_inter_roads_smoothness(checker_data: models.CheckerData) -> None:
                     road_relation=models.LinkageTag.SUCCESSOR,
                     road_id_map=road_id_map,
                     checker_data=checker_data,
+                    raised_issue_xpaths=raised_issue_xpaths,
                 )
 
         if predecessor_junction_id is not None:
@@ -1087,6 +1131,7 @@ def _check_inter_roads_smoothness(checker_data: models.CheckerData) -> None:
                     road_relation=models.LinkageTag.PREDECESSOR,
                     road_id_map=road_id_map,
                     checker_data=checker_data,
+                    raised_issue_xpaths=raised_issue_xpaths,
                 )
 
 
