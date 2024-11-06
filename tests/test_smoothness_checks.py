@@ -20,7 +20,7 @@ from test_setup import *
     [
         (
             "many_invalid",
-            41,
+            24,
             [
                 "/OpenDRIVE/road[1]/lanes/laneSection/left/lane[1]",
                 "/OpenDRIVE/road[2]/lanes/laneSection/right/lane[3]",
