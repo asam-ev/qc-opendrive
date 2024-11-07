@@ -9,6 +9,7 @@ import logging
 import types
 
 from qc_baselib import Configuration, Result, StatusType
+from qc_baselib.models.result import RuleType
 
 from qc_opendrive import constants
 from qc_opendrive import version
@@ -69,20 +70,14 @@ def check_version(checker: types.ModuleType, checker_data: models.CheckerData) -
     """
     schema_version = checker_data.schema_version
 
-    splitted_rule_uid = checker.RULE_UID.split(":")
-    if len(splitted_rule_uid) != 4:
-        raise RuntimeError(f"Invalid rule uid: {checker.RULE_UID}")
-
-    definition_setting = splitted_rule_uid[2]
-    definition_setting_expr = f">={definition_setting}"
+    rule_uid = RuleType(rule_uid=checker.RULE_UID)
+    definition_setting_expr = f">={rule_uid.definition_setting}"
     match_definition_setting = version.match(schema_version, definition_setting_expr)
 
-    applicable_version = (
-        checker.APPLICABLE_VERSION if hasattr(checker, "APPLICABLE_VERSION") else None
-    )
+    applicable_version = getattr(checker, "APPLICABLE_VERSION", "")
 
     # Check whether applicable version specification is valid
-    if applicable_version is not None and not version.is_valid_version_expression(
+    if applicable_version and not version.is_valid_version_expression(
         applicable_version
     ):
         checker_data.result.set_checker_status(
@@ -110,14 +105,14 @@ def check_version(checker: types.ModuleType, checker_data: models.CheckerData) -
         checker_data.result.add_checker_summary(
             constants.BUNDLE_NAME,
             checker.CHECKER_ID,
-            f"The definition setting {definition_setting} is not valid. Skip the check.",
+            f"The definition setting {rule_uid.definition_setting} is not valid. Skip the check.",
         )
 
         return False
 
     match_applicable_version = (
         version.match(schema_version, applicable_version)
-        if applicable_version is not None
+        if applicable_version
         else True
     )
 
@@ -138,7 +133,7 @@ def check_version(checker: types.ModuleType, checker_data: models.CheckerData) -
         return False
 
     # Check definition setting if there is no applicable version or applicable version has no lower bound
-    if applicable_version is None or not version.has_lower_bound(applicable_version):
+    if not version.has_lower_bound(applicable_version):
         if not match_definition_setting:
             checker_data.result.set_checker_status(
                 checker_bundle_name=constants.BUNDLE_NAME,

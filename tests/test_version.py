@@ -23,6 +23,7 @@ from qc_opendrive import version as qc_version
         ("<2.0.0", False),
         ("<=2.0.0,<=3.0.0", False),
         ("<2.0.0,<3.0.0", False),
+        ("", False),
     ],
 )
 def test_has_lower_bound(applicable_version: str, has_lower_bound: bool) -> None:
@@ -43,6 +44,7 @@ def test_has_lower_bound(applicable_version: str, has_lower_bound: bool) -> None
         ("1.7.0", "<=1.7.0,>1.8.0", False),
         ("1.7.0", "<=1.7.0,<1.8.0", True),
         ("1.7.0", "<=1.7.0,<1.6.0", False),
+        ("1.7.0", "<=1.7.0,<1.8", False),
     ],
 )
 def test_match(version: str, applicable_version: str, match: bool) -> None:

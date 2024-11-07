@@ -5,50 +5,52 @@
 # with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import re
-from typing import List, Optional
+from typing import List
 from semver.version import Version
 
 
+_is_lower_bound_pattern = re.compile(r"^>")
+
+
 def _is_lower_bound(expression: str) -> bool:
-    pattern = r"^(>=|>)"
-    match = re.match(pattern, expression)
-    if match:
-        return True
-    else:
-        return False
+    return bool(_is_lower_bound_pattern.match(expression))
 
 
-def _get_version_clause(applicable_version: str) -> bool:
-    version_clauses = applicable_version.split(",")
-    version_clauses = [clause.replace(" ", "") for clause in version_clauses]
-    return version_clauses
+_re_split_clauses = re.compile(r"\s*,\s*")
+_re_remove_spaces = re.compile(r"\s+")
+
+
+def _get_version_clauses(applicable_versions: str) -> List[str]:
+    version_clauses = _re_split_clauses.split(applicable_versions)
+    return [_re_remove_spaces.sub("", vc) for vc in version_clauses]
+
+
+_is_valid_clause_pattern = re.compile(r"^([<>]=?)(\d+)\.(\d+)\.(\d+)$")
+
+
+def _is_valid_clause(clause: str) -> bool:
+    return bool(_is_valid_clause_pattern.match(clause))
 
 
 def is_valid_version_expression(version_expression: str) -> bool:
-    version_clauses = _get_version_clause(version_expression)
-    pattern = r"^(>=|<=|>|<)(\d+)\.(\d+)\.(\d+)$"
-    for clause in version_clauses:
-        match = re.match(pattern, clause)
-        if not match:
-            return False
-
-    return True
+    return all(
+        _is_valid_clause(clause) for clause in _get_version_clauses(version_expression)
+    )
 
 
-def has_lower_bound(applicable_version: str) -> bool:
+def has_lower_bound(applicable_versions: str) -> bool:
     """
     Check if there is at least one lower bound in an applicable version string.
     Example:
         "<1.0.0,>0.0.1" returns True
         "<1.0.0" returns False
     """
-    expressions = applicable_version.split(",")
-
-    for expr in expressions:
-        if _is_lower_bound(expr):
-            return True
-
-    return False
+    return any(
+        (
+            _is_lower_bound(clause)
+            for clause in _get_version_clauses(applicable_versions)
+        )
+    )
 
 
 def match(version: str, applicable_version: str) -> bool:
@@ -65,7 +67,7 @@ def match(version: str, applicable_version: str) -> bool:
     :param version: The version to be checked.
     :param applicable_version: Comma separated applicable version.
     """
-    version_clauses = _get_version_clause(applicable_version)
+    version_clauses = _get_version_clauses(applicable_version)
 
     parsed_version = Version.parse(version)
 
@@ -75,3 +77,22 @@ def match(version: str, applicable_version: str) -> bool:
             return False
 
     return True
+
+
+def match(version: str, applicable_versions: str) -> bool:
+    """
+    Check if the version is valid, given an applicable version.
+    Applicable version is comma separated. The comma acts as a logical AND.
+    A candidate version must match all given version clauses in order to match
+    the applicable_version as a whole.
+    The validity check follows the concept of Python version specifiers.
+    See: https://packaging.python.org/en/latest/specifications/version-specifiers/#id5
+
+    :param version: The version to be checked.
+    :param applicable_version: Comma separated applicable version. Invalid version clauses will force the check to fail
+    :return: a boolean for the match
+    """
+    version = Version.parse(version)
+    clauses = _get_version_clauses(applicable_versions)
+
+    return all(_is_valid_clause(clause) and version.match(clause) for clause in clauses)
