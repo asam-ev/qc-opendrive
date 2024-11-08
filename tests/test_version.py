@@ -45,6 +45,7 @@ def test_has_lower_bound(applicable_version: str, has_lower_bound: bool) -> None
         ("1.7.0", "<=1.7.0,<1.8.0", True),
         ("1.7.0", "<=1.7.0,<1.6.0", False),
         ("1.7.0", "<=1.7.0,<1.8", False),
+        ("1.7.0", "", True),
     ],
 )
 def test_match(version: str, applicable_version: str, match: bool) -> None:
@@ -62,6 +63,7 @@ def test_match(version: str, applicable_version: str, match: bool) -> None:
         ("==1.7.0", False),
         ("!=1.7.0", False),
         ("<1.7", False),
+        ("", True),
     ],
 )
 def test_is_valid_version_expression(version_expression: str, is_valid: bool) -> None:

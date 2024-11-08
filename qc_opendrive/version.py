@@ -22,14 +22,15 @@ _re_remove_spaces = re.compile(r"\s+")
 
 def _get_version_clauses(applicable_versions: str) -> List[str]:
     version_clauses = _re_split_clauses.split(applicable_versions)
-    return [_re_remove_spaces.sub("", vc) for vc in version_clauses]
+    version_clauses = [_re_remove_spaces.sub("", vc) for vc in version_clauses]
+    return [vc for vc in version_clauses if vc != ""]
 
 
-_is_valid_clause_pattern = re.compile(r"^([<>]=?)(\d+)\.(\d+)\.(\d+)$")
+_re_is_valid_clause = re.compile(r"^([<>]=?)(\d+)\.(\d+)\.(\d+)$")
 
 
 def _is_valid_clause(clause: str) -> bool:
-    return bool(_is_valid_clause_pattern.match(clause))
+    return bool(_re_is_valid_clause.match(clause))
 
 
 def is_valid_version_expression(version_expression: str) -> bool:
@@ -51,32 +52,6 @@ def has_lower_bound(applicable_versions: str) -> bool:
             for clause in _get_version_clauses(applicable_versions)
         )
     )
-
-
-def match(version: str, applicable_version: str) -> bool:
-    """
-    Check if the version is valid, given an applicable version.
-
-    Applicable version is comma separated. The comma acts as a logical AND.
-    A candidate version must match all given version clauses in order to match
-    the applicable_version as a whole.
-
-    The validity check follows the concept of Python version specifiers.
-    See: https://packaging.python.org/en/latest/specifications/version-specifiers/#id5
-
-    :param version: The version to be checked.
-    :param applicable_version: Comma separated applicable version.
-    """
-    version_clauses = _get_version_clauses(applicable_version)
-
-    parsed_version = Version.parse(version)
-
-    for clause in version_clauses:
-        is_matched = parsed_version.match(clause)
-        if not is_matched:
-            return False
-
-    return True
 
 
 def match(version: str, applicable_versions: str) -> bool:

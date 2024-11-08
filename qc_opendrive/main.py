@@ -77,9 +77,7 @@ def check_version(checker: types.ModuleType, checker_data: models.CheckerData) -
     applicable_version = getattr(checker, "APPLICABLE_VERSION", "")
 
     # Check whether applicable version specification is valid
-    if applicable_version and not version.is_valid_version_expression(
-        applicable_version
-    ):
+    if not version.is_valid_version_expression(applicable_version):
         checker_data.result.set_checker_status(
             checker_bundle_name=constants.BUNDLE_NAME,
             checker_id=checker.CHECKER_ID,
@@ -110,14 +108,8 @@ def check_version(checker: types.ModuleType, checker_data: models.CheckerData) -
 
         return False
 
-    match_applicable_version = (
-        version.match(schema_version, applicable_version)
-        if applicable_version
-        else True
-    )
-
     # First, check applicable version
-    if not match_applicable_version:
+    if not version.match(schema_version, applicable_version):
         checker_data.result.set_checker_status(
             checker_bundle_name=constants.BUNDLE_NAME,
             checker_id=checker.CHECKER_ID,
