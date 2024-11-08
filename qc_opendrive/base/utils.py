@@ -1363,7 +1363,7 @@ def calculate_poly3_arclen_heading(
     x = x_poly3_deriv(s - s0)
     y = y_poly3_deriv(s - s0)
 
-    heading = np.arctan2(y, x)
+    heading = heading + np.arctan2(y, x)
     return heading
 
 
@@ -1380,7 +1380,7 @@ def calculate_poly3_norm_heading(
     x = x_poly3_deriv((s - s0) / length)
     y = y_poly3_deriv((s - s0) / length)
 
-    heading = np.arctan2(y, x)
+    heading = heading + np.arctan2(y, x)
     return heading
 
 

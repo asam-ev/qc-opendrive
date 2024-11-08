@@ -20,7 +20,7 @@ from test_setup import *
     [
         (
             "many_invalid",
-            41,
+            24,
             [
                 "/OpenDRIVE/road[1]/lanes/laneSection/left/lane[1]",
                 "/OpenDRIVE/road[2]/lanes/laneSection/right/lane[3]",
@@ -84,6 +84,11 @@ from test_setup import *
         ),
         (
             "multiple_successor_valid",
+            0,
+            [],
+        ),
+        (
+            "lane_gap_example_issue_119",
             0,
             [],
         ),
