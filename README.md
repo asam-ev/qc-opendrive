@@ -279,14 +279,15 @@ Contributions of valid and invalid OpenDrive sample files are also welcome. New 
 1. Create a new Python module for each checker.
 2. Specify the following global variables for the Python module
 
-| Variable | Meaning |
-| --- | --- |
-| `CHECKER_ID` | The ID of the checker |
-| `CHECKER_DESCRIPTION` | The description of the checker |
-| `CHECKER_PRECONDITIONS` | A set of other checkers in which if any of them raise an issue, the current checker will be skipped |
-| `RULE_UID` | The rule UID of the rule that the checker will check |
+| Variable | Presence | Meaning |
+| --- | --- | --- |
+| `CHECKER_ID` | Required | The ID of the checker |
+| `CHECKER_DESCRIPTION` | Required | The description of the checker |
+| `CHECKER_PRECONDITIONS` | Required | A set of other checkers in which if any of them raise an issue, the current checker will be skipped |
+| `RULE_UID` | Required | The rule UID of the rule that the checker will check |
+| `APPLICABLE_VERSIONS` | Optional | An optional variable to define extra constraints on the applicable version. See details below. |
 
-3. Implement the checker logic in the following function:
+1. Implement the checker logic in the following function:
 
 ```python
 def check_rule(checker_data: models.CheckerData) -> None:
@@ -304,3 +305,41 @@ def run_checks(config: Configuration, result: Result) -> None:
 ```
 
 All the checkers in this checker bundle are implemented in this way. Take a look at some of them before implementing your first checker.
+
+**A note on `APPLICABLE_VERSIONS`**
+
+The `APPLICABLE_VERSIONS` variable can be used to define additional constraints on the versions of the input files that a rule supports, in addition to the **definition setting** in the rule UID. It can be specified in the same way as the [Python Version Specifiers](https://packaging.python.org/en/latest/specifications/version-specifiers/#id5). For example:
+
+```python
+APPLICABLE_VERSIONS = "<1.8.0"
+APPLICABLE_VERSIONS = ">=1.6.0"
+APPLICABLE_VERSIONS = "<1.8.0,>=1.6.0"
+```
+
+The specification consists of a series of version clauses, separated by commas. The comma is equivalent to a logical "AND" operator: a candidate version must match all given version clauses in order to match the **applicable versions** as a whole.
+
+The **applicable versions** only supports versions of in the full semantic form `major.minor.patch`. Elision of `minor` or `patch` elements are not supported. For example, `1.7.0rc1` and `1.7` are not supported, but `1.7.0` is supported.
+
+The **applicable versions** only supports the following comparison operators.
+
+* `<` smaller than **(upper bound)**
+* `<=` smaller or equal than **(upper bound)**
+* `>` greater than **(lower bound)**
+* `>=` greater or equal than **(lower bound)**
+
+The **definition setting** in rule UID and the **applicable versions** together define the versions of the input file in which a rule can be applied. For example, let's consider a rule UID for ASAM OpenDRIVE `asam.net:xodr:1.6.0:*`. The **definition setting** in this case is `1.6.0`.
+
+1. If no **applicable versions** is specified, a rule will be applied starting from the **definition setting** version, up to the most recent one.
+    * For the example, if the `APPLICABLE_VERSIONS` variable does not exist, then the rule is applied to OpenDRIVE versions 1.6.0, 1.6.1, 1.7.0, 1.8.0: the internal representation of the version specifier is `>=1.6.0`.
+
+2. If the **applicable versions** is specified, and defines only **upper bounds**, then the **definition setting** defines the lower bound
+    * For the example, if `APPLICABLE_VERSIONS = "<1.8.0"`, then the rule is applied to OpenDRIVE versions 1.6.0, 1.6.1, 1.7.0: the internal representation of the version specifier is `>=1.6.0,<1.8.0`.
+
+3. If the **applicable versions** is specified, and defines at least one **lower bound**, then the **definition setting** is ignored. Only the **lower bounds** defined in the **applicable versions** are taken into account.
+    * For the example, if `APPLICABLE_VERSIONS = ">=1.5.0"`, then the rule is applied to OpenDRIVE versions 1.5.0, 1.6.0, 1.6.1, 1.7.0, 1.8.0: the internal representation of the version specifier is `>=1.5.0`.
+
+| Case Number | Example Rule            | `APPLICABLE_VERSIONS` | Internal Representation          | File versions to be checked       |
+|-------------|-------------------------|----------------------|----------------------------------|-----------------------------------|
+| 1           | `asam.net:xodr:1.6.0:*` | `""`                 | `">=1.6.0"`                      | 1.6.0, 1.6.1, 1.7.0, 1.8.0        |
+| 2           | `asam.net:xodr:1.6.0:*` | `"<1.8.0"`             | `">=1.6.0,<1.8.0"`           | 1.6.0, 1.6.1, 1.7.0               |
+| 3           | `asam.net:xodr:1.6.0:*` | `">=1.5.0"`            | `">=1.5.0"` | 1.5.0, 1.6.0, 1.6.1, 1.7.0, 1.8.0 |
