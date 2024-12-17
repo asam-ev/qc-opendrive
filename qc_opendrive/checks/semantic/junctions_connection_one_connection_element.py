@@ -66,6 +66,7 @@ def _check_junctions_connection_one_connection_element(
                     issue_id=issue_id,
                     xpath=checker_data.input_file_xml_root.getpath(connection),
                     description="Connection with reused connecting road id.",
+                    lines=connection.sourceline,
                 )
 
             connecting_road = road_id_map.get(connecting_road_id)

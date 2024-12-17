@@ -44,6 +44,7 @@ def _raise_issue(
         issue_id=issue_id,
         xpath=checker_data.input_file_xml_root.getpath(lane),
         description="Lane with width zero and successors.",
+        lines=lane.sourceline,
     )
 
     s_section = utils.get_s_from_lane_section(lane_section_with_length.lane_section)

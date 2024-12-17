@@ -51,6 +51,7 @@ def _check_junctions_connection_connect_road_no_incoming_road(
                     issue_id=issue_id,
                     xpath=checker_data.input_file_xml_root.getpath(connection),
                     description="Connection with connecting road found as incoming road.",
+                    lines=connection.sourceline,
                 )
 
                 successor_junction_id = utils.get_linked_junction_id(

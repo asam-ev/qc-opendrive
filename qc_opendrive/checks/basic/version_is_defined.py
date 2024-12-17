@@ -100,4 +100,5 @@ def check_rule(checker_data: models.CheckerData) -> bool:
             issue_id=issue_id,
             xpath=checker_data.input_file_xml_root.getpath(file_header_tag),
             description=f"Header tag has invalid or missing version info",
+            lines=file_header_tag.sourceline,
         )

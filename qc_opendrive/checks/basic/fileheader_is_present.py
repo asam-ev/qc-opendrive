@@ -55,4 +55,5 @@ def check_rule(checker_data: models.CheckerData) -> None:
             issue_id=issue_id,
             xpath=checker_data.input_file_xml_root.getpath(root),
             description=f"No child element header",
+            lines=root.sourceline,
         )

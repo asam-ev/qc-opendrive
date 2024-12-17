@@ -44,6 +44,7 @@ def _raise_issue(
         issue_id=issue_id,
         xpath=checker_data.input_file_xml_root.getpath(lane),
         description=f"Lane with {linkage_tag.value} with width zero.",
+        lines=lane.sourceline,
     )
 
     checker_data.result.add_xml_location(
@@ -52,6 +53,7 @@ def _raise_issue(
         issue_id=issue_id,
         xpath=checker_data.input_file_xml_root.getpath(width_zero_lane),
         description=f"{linkage_tag.value.capitalize()} lane with width zero.",
+        lines=width_zero_lane.sourceline,
     )
 
 

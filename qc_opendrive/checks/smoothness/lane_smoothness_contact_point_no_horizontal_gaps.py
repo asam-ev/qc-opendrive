@@ -62,6 +62,7 @@ def _raise_geometry_gap_issue(
         issue_id=issue_id,
         xpath=checker_data.input_file_xml_root.getpath(previous_geometry),
         description=f"First geometry element",
+        lines=previous_geometry.sourceline,
     )
     checker_data.result.add_xml_location(
         checker_bundle_name=constants.BUNDLE_NAME,
@@ -69,6 +70,7 @@ def _raise_geometry_gap_issue(
         issue_id=issue_id,
         xpath=checker_data.input_file_xml_root.getpath(geometry),
         description=f"Second geometry element",
+        lines=geometry.sourceline,
     )
 
     if inertial_point is not None:
@@ -120,6 +122,7 @@ def _raise_lane_linkage_gap_issue(
         issue_id=issue_id,
         xpath=issue_xpaths[0],
         description=f"First lane element",
+        lines=previous_lane.sourceline,
     )
     checker_data.result.add_xml_location(
         checker_bundle_name=constants.BUNDLE_NAME,
@@ -127,6 +130,7 @@ def _raise_lane_linkage_gap_issue(
         issue_id=issue_id,
         xpath=issue_xpaths[1],
         description=f"Next lane element",
+        lines=current_lane.sourceline,
     )
 
     if inertial_point is not None:

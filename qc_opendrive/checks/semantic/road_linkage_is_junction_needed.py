@@ -43,6 +43,7 @@ def _raise_road_linkage_is_junction_needed_issue(
             issue_id=issue_id,
             xpath=checker_data.input_file_xml_root.getpath(element),
             description=f"Road cannot have ambiguous {linkage_tag.value}, a junction is needed.",
+            lines=element.sourceline,
         )
 
     if problematic_road is not None:

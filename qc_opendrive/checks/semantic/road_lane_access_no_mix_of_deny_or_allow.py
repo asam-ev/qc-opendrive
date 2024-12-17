@@ -84,6 +84,7 @@ def _check_all_roads(checker_data: models.CheckerData) -> None:
                                 issue_id=issue_id,
                                 xpath=path,
                                 description=f"First encounter of {current_rule} having {previous_rule} before.",
+                                lines=access.sourceline,
                             )
 
                             if s_section is None:

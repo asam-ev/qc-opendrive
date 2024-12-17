@@ -38,6 +38,7 @@ def _raise_issue(
         issue_id=issue_id,
         xpath=checker_data.input_file_xml_root.getpath(connection),
         description=f"Contact point 'start' not used on predecessor road connection.",
+        lines=connection.sourceline,
     )
 
     inertial_point = utils.get_start_point_xyz_from_road_reference_line(connection_road)
