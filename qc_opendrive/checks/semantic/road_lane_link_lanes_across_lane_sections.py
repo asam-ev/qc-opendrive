@@ -64,7 +64,15 @@ def _check_two_lane_sections_one_direction(
                     issue_id=issue_id,
                     xpath=checker_data.input_file_xml_root.getpath(connecting_lane),
                     description="Missing lane link.",
-                    lines=connecting_lane.sourceline,
+                )
+
+                checker_data.result.add_file_location(
+                    checker_bundle_name=constants.BUNDLE_NAME,
+                    checker_id=CHECKER_ID,
+                    issue_id=issue_id,
+                    row=connecting_lane.sourceline,
+                    column=0,
+                    description=f"Missing lane link.",
                 )
 
 

@@ -50,5 +50,13 @@ def check_rule(checker_data: models.CheckerData) -> bool:
             issue_id=issue_id,
             xpath=checker_data.input_file_xml_root.getpath(root),
             description=f"Root is not OpenDRIVE",
-            lines=root.sourceline,
+        )
+
+        checker_data.result.add_file_location(
+            checker_bundle_name=constants.BUNDLE_NAME,
+            checker_id=CHECKER_ID,
+            issue_id=issue_id,
+            row=root.sourceline,
+            column=0,
+            description="Root is not OpenDRIVE",
         )

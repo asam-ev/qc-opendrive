@@ -64,7 +64,15 @@ def _check_true_level_on_side(
                 issue_id=issue_id,
                 xpath=path,
                 description=f"Lane id {index} @level=False where previous lane id @level=True.",
-                lines=lane.sourceline,
+            )
+
+            result.add_file_location(
+                checker_bundle_name=constants.BUNDLE_NAME,
+                checker_id=CHECKER_ID,
+                issue_id=issue_id,
+                row=lane.sourceline,
+                column=0,
+                description=f"Lane id {index} @level=False where previous lane id @level=True.",
             )
 
             s_section = utils.get_s_from_lane_section(
@@ -170,7 +178,15 @@ def _check_level_change_between_lane_sections(
             issue_id=issue_id,
             xpath=warning,
             description="Lane levels are not the same in two consecutive lane sections",
-            lines=warning_linenr,
+        )
+
+        result.add_file_location(
+            checker_bundle_name=constants.BUNDLE_NAME,
+            checker_id=CHECKER_ID,
+            issue_id=issue_id,
+            row=warning_linenr,
+            column=0,
+            description="Lane levels are not the same in two consecutive lane sections",
         )
 
 
@@ -235,7 +251,15 @@ def _check_level_change_linkage_roads(
                     issue_id=issue_id,
                     xpath=root.getpath(lane),
                     description="Lane levels are not the same between two connected roads.",
-                    lines=lane.sourceline,
+                )
+
+                result.add_file_location(
+                    checker_bundle_name=constants.BUNDLE_NAME,
+                    checker_id=CHECKER_ID,
+                    issue_id=issue_id,
+                    row=lane.sourceline,
+                    column=0,
+                    description=f"Lane levels are not the same between two connected roads.",
                 )
 
                 result.add_xml_location(
@@ -244,7 +268,15 @@ def _check_level_change_linkage_roads(
                     issue_id=issue_id,
                     xpath=root.getpath(other_lane),
                     description="Lane levels are not the same between two connected roads.",
-                    lines=other_lane.sourceline,
+                )
+
+                result.add_file_location(
+                    checker_bundle_name=constants.BUNDLE_NAME,
+                    checker_id=CHECKER_ID,
+                    issue_id=issue_id,
+                    row=other_lane.sourceline,
+                    column=0,
+                    description=f"Lane levels are not the same between two connected roads.",
                 )
 
                 s = None
@@ -414,7 +446,15 @@ def _check_level_among_junctions(
                         issue_id=issue_id,
                         xpath=checker_data.input_file_xml_root.getpath(incoming_lane),
                         description="Lane levels are not the same between incoming road and junction.",
-                        lines=incoming_lane.sourceline,
+                    )
+
+                    checker_data.result.add_file_location(
+                        checker_bundle_name=constants.BUNDLE_NAME,
+                        checker_id=CHECKER_ID,
+                        issue_id=issue_id,
+                        row=incoming_lane.sourceline,
+                        column=0,
+                        description=f"Lane levels are not the same between incoming road and junction.",
                     )
 
                     checker_data.result.add_xml_location(
@@ -423,7 +463,15 @@ def _check_level_among_junctions(
                         issue_id=issue_id,
                         xpath=checker_data.input_file_xml_root.getpath(connection_lane),
                         description="Lane levels are not the same between incoming road and junction.",
-                        lines=connection_lane.sourceline,
+                    )
+
+                    checker_data.result.add_file_location(
+                        checker_bundle_name=constants.BUNDLE_NAME,
+                        checker_id=CHECKER_ID,
+                        issue_id=issue_id,
+                        row=connection_lane.sourceline,
+                        column=0,
+                        description=f"Lane levels are not the same between incoming road and junction.",
                     )
 
 

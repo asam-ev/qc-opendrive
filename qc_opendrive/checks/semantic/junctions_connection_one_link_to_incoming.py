@@ -44,7 +44,15 @@ def _raise_lane_linkage_issue(
         issue_id=issue_id,
         xpath=checker_data.input_file_xml_root.getpath(lane_link),
         description=f"Lane link in opposite direction.",
-        lines=lane_link.sourceline,
+    )
+
+    checker_data.result.add_file_location(
+        checker_bundle_name=constants.BUNDLE_NAME,
+        checker_id=CHECKER_ID,
+        issue_id=issue_id,
+        row=lane_link.sourceline,
+        column=0,
+        description=f"Lane link in opposite direction.",
     )
 
     s = None
@@ -563,7 +571,15 @@ def _check_junctions_connection_one_link_to_incoming(
                         issue_id=issue_id,
                         xpath=checker_data.input_file_xml_root.getpath(connection),
                         description=f"Connection with reused (incoming_road_id, connecting_road_id) = ({incoming_road_id}, {connecting_road_id}) pair.",
-                        lines=connection.sourceline,
+                    )
+
+                    checker_data.result.add_file_location(
+                        checker_bundle_name=constants.BUNDLE_NAME,
+                        checker_id=CHECKER_ID,
+                        issue_id=issue_id,
+                        row=connection.sourceline,
+                        column=0,
+                        description=f"Connection with reused (incoming_road_id, connecting_road_id) = ({incoming_road_id}, {connecting_road_id}) pair.",
                     )
 
                 has_start_contact_point = False

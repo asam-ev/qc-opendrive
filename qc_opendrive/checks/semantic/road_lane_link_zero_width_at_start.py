@@ -44,7 +44,15 @@ def _raise_issue(
         issue_id=issue_id,
         xpath=checker_data.input_file_xml_root.getpath(lane),
         description="Lane with width zero and predecessors.",
-        lines=lane.sourceline,
+    )
+
+    checker_data.result.add_file_location(
+        checker_bundle_name=constants.BUNDLE_NAME,
+        checker_id=CHECKER_ID,
+        issue_id=issue_id,
+        row=lane.sourceline,
+        column=0,
+        description=f"Lane with width zero and predecessors.",
     )
 
     s = utils.get_s_from_lane_section(lane_section)

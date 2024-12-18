@@ -84,7 +84,15 @@ def _check_all_roads(checker_data: models.CheckerData) -> None:
                                 issue_id=issue_id,
                                 xpath=path,
                                 description=f"First encounter of {current_rule} having {previous_rule} before.",
-                                lines=access.sourceline,
+                            )
+
+                            checker_data.result.add_file_location(
+                                checker_bundle_name=constants.BUNDLE_NAME,
+                                checker_id=CHECKER_ID,
+                                issue_id=issue_id,
+                                row=access.sourceline,
+                                column=0,
+                                description=f"First encounter of {current_rule} having {previous_rule} before.",
                             )
 
                             if s_section is None:

@@ -38,7 +38,15 @@ def _raise_issue(
         issue_id=issue_id,
         xpath=checker_data.input_file_xml_root.getpath(connection),
         description=f"Contact point 'end' not used on successor road connection.",
-        lines=connection.sourceline,
+    )
+
+    checker_data.result.add_file_location(
+        checker_bundle_name=constants.BUNDLE_NAME,
+        checker_id=CHECKER_ID,
+        issue_id=issue_id,
+        row=connection.sourceline,
+        column=0,
+        description=f"Contact point 'end' not used on successor road connection.",
     )
 
     inertial_point = utils.get_end_point_xyz_from_road_reference_line(connection_road)

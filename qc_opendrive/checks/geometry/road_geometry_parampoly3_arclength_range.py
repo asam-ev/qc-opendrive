@@ -64,7 +64,15 @@ def _check_all_roads(checker_data: models.CheckerData) -> None:
                     issue_id=issue_id,
                     xpath=checker_data.input_file_xml_root.getpath(geometry),
                     description=f"Length does not match the actual curve length. The estimated absolute error from numerical integration is {estimated_error}",
-                    lines=geometry.sourceline,
+                )
+
+                checker_data.result.add_file_location(
+                    checker_bundle_name=constants.BUNDLE_NAME,
+                    checker_id=CHECKER_ID,
+                    issue_id=issue_id,
+                    row=geometry.sourceline,
+                    column=0,
+                    description=f"Length does not match the actual curve length. The estimated absolute error from numerical integration is {estimated_error}",
                 )
 
                 s_coordinate = utils.get_s_from_geometry(geometry)

@@ -43,7 +43,15 @@ def _raise_road_linkage_is_junction_needed_issue(
             issue_id=issue_id,
             xpath=checker_data.input_file_xml_root.getpath(element),
             description=f"Road cannot have ambiguous {linkage_tag.value}, a junction is needed.",
-            lines=element.sourceline,
+        )
+
+        checker_data.result.add_file_location(
+            checker_bundle_name=constants.BUNDLE_NAME,
+            checker_id=CHECKER_ID,
+            issue_id=issue_id,
+            row=element.sourceline,
+            column=0,
+            description=f"Road cannot have ambiguous {linkage_tag.value}, a junction is needed.",
         )
 
     if problematic_road is not None:
