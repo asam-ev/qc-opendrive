@@ -40,6 +40,15 @@ def _raise_issue(
         description=f"Contact point 'start' not used on predecessor road connection.",
     )
 
+    checker_data.result.add_file_location(
+        checker_bundle_name=constants.BUNDLE_NAME,
+        checker_id=CHECKER_ID,
+        issue_id=issue_id,
+        row=connection.sourceline,
+        column=0,
+        description=f"Contact point 'start' not used on predecessor road connection.",
+    )
+
     inertial_point = utils.get_start_point_xyz_from_road_reference_line(connection_road)
     if inertial_point is not None:
         checker_data.result.add_inertial_location(

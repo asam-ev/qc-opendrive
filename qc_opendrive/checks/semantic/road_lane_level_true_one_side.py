@@ -66,6 +66,15 @@ def _check_true_level_on_side(
                 description=f"Lane id {index} @level=False where previous lane id @level=True.",
             )
 
+            result.add_file_location(
+                checker_bundle_name=constants.BUNDLE_NAME,
+                checker_id=CHECKER_ID,
+                issue_id=issue_id,
+                row=lane.sourceline,
+                column=0,
+                description=f"Lane id {index} @level=False where previous lane id @level=True.",
+            )
+
             s_section = utils.get_s_from_lane_section(
                 lane_section_with_length.lane_section
             )
@@ -95,7 +104,8 @@ def _get_linkage_level_warnings(
     target_lane_section: etree._ElementTree,
     linkage_tag: models.LinkageTag,
 ):
-    warnings: Set[str] = set()
+    warnings: List[str] = []
+    warnings_linenr: List[int] = []
 
     for lane in utils.get_left_and_right_lanes_from_lane_section(current_lane_section):
         lane_level = utils.get_lane_level_from_lane(lane)
@@ -114,9 +124,10 @@ def _get_linkage_level_warnings(
                 linkage_level = utils.get_lane_level_from_lane(linkage_lane)
 
                 if linkage_level != lane_level:
-                    warnings.add(root.getpath(lane))
+                    warnings.append(root.getpath(lane))
+                    warnings_linenr.append(lane.sourceline)
 
-    return warnings
+    return warnings, warnings_linenr
 
 
 def _check_level_change_between_lane_sections(
@@ -136,23 +147,24 @@ def _check_level_change_between_lane_sections(
     function will register the issue twice, one for each linkage.
     """
 
-    predecessor_warnings = _get_linkage_level_warnings(
+    predecessor_warnings, predecessor_warnings_linenr = _get_linkage_level_warnings(
         root=root,
         current_lane_section=current_lane_section,
         target_lane_section=previous_lane_section,
         linkage_tag=models.LinkageTag.PREDECESSOR,
     )
-    successor_warnings = _get_linkage_level_warnings(
+    successor_warnings, successor_warnings_linenr = _get_linkage_level_warnings(
         root=root,
         current_lane_section=previous_lane_section,
         target_lane_section=current_lane_section,
         linkage_tag=models.LinkageTag.SUCCESSOR,
     )
 
-    warnings = predecessor_warnings | successor_warnings
-    warnings = sorted(list(warnings))
+    warnings = predecessor_warnings + successor_warnings
+    warnings_linenr = predecessor_warnings_linenr + successor_warnings_linenr
+    warnings_sorted = sorted(zip(warnings, warnings_linenr), key=lambda x: x[1])
 
-    for warning in warnings:
+    for warning, warning_linenr in warnings_sorted:
         issue_id = result.register_issue(
             checker_bundle_name=constants.BUNDLE_NAME,
             checker_id=CHECKER_ID,
@@ -165,6 +177,15 @@ def _check_level_change_between_lane_sections(
             checker_id=CHECKER_ID,
             issue_id=issue_id,
             xpath=warning,
+            description="Lane levels are not the same in two consecutive lane sections",
+        )
+
+        result.add_file_location(
+            checker_bundle_name=constants.BUNDLE_NAME,
+            checker_id=CHECKER_ID,
+            issue_id=issue_id,
+            row=warning_linenr,
+            column=0,
             description="Lane levels are not the same in two consecutive lane sections",
         )
 
@@ -232,12 +253,30 @@ def _check_level_change_linkage_roads(
                     description="Lane levels are not the same between two connected roads.",
                 )
 
+                result.add_file_location(
+                    checker_bundle_name=constants.BUNDLE_NAME,
+                    checker_id=CHECKER_ID,
+                    issue_id=issue_id,
+                    row=lane.sourceline,
+                    column=0,
+                    description=f"Lane levels are not the same between two connected roads.",
+                )
+
                 result.add_xml_location(
                     checker_bundle_name=constants.BUNDLE_NAME,
                     checker_id=CHECKER_ID,
                     issue_id=issue_id,
                     xpath=root.getpath(other_lane),
                     description="Lane levels are not the same between two connected roads.",
+                )
+
+                result.add_file_location(
+                    checker_bundle_name=constants.BUNDLE_NAME,
+                    checker_id=CHECKER_ID,
+                    issue_id=issue_id,
+                    row=other_lane.sourceline,
+                    column=0,
+                    description=f"Lane levels are not the same between two connected roads.",
                 )
 
                 s = None
@@ -409,12 +448,30 @@ def _check_level_among_junctions(
                         description="Lane levels are not the same between incoming road and junction.",
                     )
 
+                    checker_data.result.add_file_location(
+                        checker_bundle_name=constants.BUNDLE_NAME,
+                        checker_id=CHECKER_ID,
+                        issue_id=issue_id,
+                        row=incoming_lane.sourceline,
+                        column=0,
+                        description=f"Lane levels are not the same between incoming road and junction.",
+                    )
+
                     checker_data.result.add_xml_location(
                         checker_bundle_name=constants.BUNDLE_NAME,
                         checker_id=CHECKER_ID,
                         issue_id=issue_id,
                         xpath=checker_data.input_file_xml_root.getpath(connection_lane),
                         description="Lane levels are not the same between incoming road and junction.",
+                    )
+
+                    checker_data.result.add_file_location(
+                        checker_bundle_name=constants.BUNDLE_NAME,
+                        checker_id=CHECKER_ID,
+                        issue_id=issue_id,
+                        row=connection_lane.sourceline,
+                        column=0,
+                        description=f"Lane levels are not the same between incoming road and junction.",
                     )
 
 

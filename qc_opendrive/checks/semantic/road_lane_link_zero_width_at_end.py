@@ -46,6 +46,15 @@ def _raise_issue(
         description="Lane with width zero and successors.",
     )
 
+    checker_data.result.add_file_location(
+        checker_bundle_name=constants.BUNDLE_NAME,
+        checker_id=CHECKER_ID,
+        issue_id=issue_id,
+        row=lane.sourceline,
+        column=0,
+        description=f"Lane with width zero and successors.",
+    )
+
     s_section = utils.get_s_from_lane_section(lane_section_with_length.lane_section)
 
     if s_section is None:
