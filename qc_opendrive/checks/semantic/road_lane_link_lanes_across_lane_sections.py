@@ -66,6 +66,15 @@ def _check_two_lane_sections_one_direction(
                     description="Missing lane link.",
                 )
 
+                checker_data.result.add_file_location(
+                    checker_bundle_name=constants.BUNDLE_NAME,
+                    checker_id=CHECKER_ID,
+                    issue_id=issue_id,
+                    row=connecting_lane.sourceline,
+                    column=0,
+                    description=f"Missing lane link.",
+                )
+
 
 def _check_two_lane_sections(
     checker_data: models.CheckerData,

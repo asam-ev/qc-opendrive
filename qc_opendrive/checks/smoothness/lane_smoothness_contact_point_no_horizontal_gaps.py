@@ -63,11 +63,30 @@ def _raise_geometry_gap_issue(
         xpath=checker_data.input_file_xml_root.getpath(previous_geometry),
         description=f"First geometry element",
     )
+
+    checker_data.result.add_file_location(
+        checker_bundle_name=constants.BUNDLE_NAME,
+        checker_id=CHECKER_ID,
+        issue_id=issue_id,
+        row=previous_geometry.sourceline,
+        column=0,
+        description=f"First geometry element",
+    )
+
     checker_data.result.add_xml_location(
         checker_bundle_name=constants.BUNDLE_NAME,
         checker_id=CHECKER_ID,
         issue_id=issue_id,
         xpath=checker_data.input_file_xml_root.getpath(geometry),
+        description=f"Second geometry element",
+    )
+
+    checker_data.result.add_file_location(
+        checker_bundle_name=constants.BUNDLE_NAME,
+        checker_id=CHECKER_ID,
+        issue_id=issue_id,
+        row=geometry.sourceline,
+        column=0,
         description=f"Second geometry element",
     )
 
@@ -121,11 +140,30 @@ def _raise_lane_linkage_gap_issue(
         xpath=issue_xpaths[0],
         description=f"First lane element",
     )
+
+    checker_data.result.add_file_location(
+        checker_bundle_name=constants.BUNDLE_NAME,
+        checker_id=CHECKER_ID,
+        issue_id=issue_id,
+        row=previous_lane.sourceline,
+        column=0,
+        description=f"First lane element",
+    )
+
     checker_data.result.add_xml_location(
         checker_bundle_name=constants.BUNDLE_NAME,
         checker_id=CHECKER_ID,
         issue_id=issue_id,
         xpath=issue_xpaths[1],
+        description=f"Next lane element",
+    )
+
+    checker_data.result.add_file_location(
+        checker_bundle_name=constants.BUNDLE_NAME,
+        checker_id=CHECKER_ID,
+        issue_id=issue_id,
+        row=current_lane.sourceline,
+        column=0,
         description=f"Next lane element",
     )
 

@@ -132,11 +132,29 @@ def _raise_issue(
         description=f"Outer lane border intersects or stays within inner lane border.",
     )
 
+    checker_data.result.add_file_location(
+        checker_bundle_name=constants.BUNDLE_NAME,
+        checker_id=CHECKER_ID,
+        issue_id=issue_id,
+        row=left_lane.sourceline,
+        column=0,
+        description=f"Outer lane border intersects or stays within inner lane border.",
+    )
+
     checker_data.result.add_xml_location(
         checker_bundle_name=constants.BUNDLE_NAME,
         checker_id=CHECKER_ID,
         issue_id=issue_id,
         xpath=checker_data.input_file_xml_root.getpath(right_lane),
+        description=f"Outer lane border intersects or stays within inner lane border.",
+    )
+
+    checker_data.result.add_file_location(
+        checker_bundle_name=constants.BUNDLE_NAME,
+        checker_id=CHECKER_ID,
+        issue_id=issue_id,
+        row=right_lane.sourceline,
+        column=0,
         description=f"Outer lane border intersects or stays within inner lane border.",
     )
 

@@ -45,6 +45,15 @@ def _raise_road_linkage_is_junction_needed_issue(
             description=f"Road cannot have ambiguous {linkage_tag.value}, a junction is needed.",
         )
 
+        checker_data.result.add_file_location(
+            checker_bundle_name=constants.BUNDLE_NAME,
+            checker_id=CHECKER_ID,
+            issue_id=issue_id,
+            row=element.sourceline,
+            column=0,
+            description=f"Road cannot have ambiguous {linkage_tag.value}, a junction is needed.",
+        )
+
     if problematic_road is not None:
         inertial_point = None
         if linkage_tag == models.LinkageTag.PREDECESSOR:

@@ -48,6 +48,15 @@ def _check_road_superelevations(
                 description=f"Redundant superelevation declaration.",
             )
 
+            checker_data.result.add_file_location(
+                checker_bundle_name=constants.BUNDLE_NAME,
+                checker_id=CHECKER_ID,
+                issue_id=issue_id,
+                row=current_superelevation.xml_element.sourceline,
+                column=0,
+                description=f"Redundant superelevation declaration.",
+            )
+
             checker_data.result.add_xml_location(
                 checker_bundle_name=constants.BUNDLE_NAME,
                 checker_id=CHECKER_ID,
@@ -55,6 +64,15 @@ def _check_road_superelevations(
                 xpath=checker_data.input_file_xml_root.getpath(
                     next_superelevation.xml_element
                 ),
+                description=f"Redundant superelevation declaration.",
+            )
+
+            checker_data.result.add_file_location(
+                checker_bundle_name=constants.BUNDLE_NAME,
+                checker_id=CHECKER_ID,
+                issue_id=issue_id,
+                row=next_superelevation.xml_element.sourceline,
+                column=0,
                 description=f"Redundant superelevation declaration.",
             )
 
@@ -99,6 +117,15 @@ def _check_road_elevations(
                 description=f"Redundant elevation declaration.",
             )
 
+            checker_data.result.add_file_location(
+                checker_bundle_name=constants.BUNDLE_NAME,
+                checker_id=CHECKER_ID,
+                issue_id=issue_id,
+                row=current_elevation.xml_element.sourceline,
+                column=0,
+                description=f"Redundant superelevation declaration.",
+            )
+
             checker_data.result.add_xml_location(
                 checker_bundle_name=constants.BUNDLE_NAME,
                 checker_id=CHECKER_ID,
@@ -106,6 +133,15 @@ def _check_road_elevations(
                 xpath=checker_data.input_file_xml_root.getpath(
                     next_elevation.xml_element
                 ),
+                description=f"Redundant elevation declaration.",
+            )
+
+            checker_data.result.add_file_location(
+                checker_bundle_name=constants.BUNDLE_NAME,
+                checker_id=CHECKER_ID,
+                issue_id=issue_id,
+                row=next_elevation.xml_element.sourceline,
+                column=0,
                 description=f"Redundant elevation declaration.",
             )
 
@@ -150,6 +186,15 @@ def _check_lane_offsets(
                 description=f"Redundant lane offset declaration.",
             )
 
+            checker_data.result.add_file_location(
+                checker_bundle_name=constants.BUNDLE_NAME,
+                checker_id=CHECKER_ID,
+                issue_id=issue_id,
+                row=current_lane_offset.xml_element.sourceline,
+                column=0,
+                description=f"Redundant lane offset declaration.",
+            )
+
             checker_data.result.add_xml_location(
                 checker_bundle_name=constants.BUNDLE_NAME,
                 checker_id=CHECKER_ID,
@@ -157,6 +202,15 @@ def _check_lane_offsets(
                 xpath=checker_data.input_file_xml_root.getpath(
                     next_lane_offset.xml_element
                 ),
+                description=f"Redundant lane offset declaration.",
+            )
+
+            checker_data.result.add_file_location(
+                checker_bundle_name=constants.BUNDLE_NAME,
+                checker_id=CHECKER_ID,
+                issue_id=issue_id,
+                row=next_lane_offset.xml_element.sourceline,
+                column=0,
                 description=f"Redundant lane offset declaration.",
             )
 
@@ -214,11 +268,29 @@ def _check_road_plan_view(
                 description=f"Redundant line geometry declaration.",
             )
 
+            checker_data.result.add_file_location(
+                checker_bundle_name=constants.BUNDLE_NAME,
+                checker_id=CHECKER_ID,
+                issue_id=issue_id,
+                row=current_geometry.sourceline,
+                column=0,
+                description=f"Redundant line geometry declaration.",
+            )
+
             checker_data.result.add_xml_location(
                 checker_bundle_name=constants.BUNDLE_NAME,
                 checker_id=CHECKER_ID,
                 issue_id=issue_id,
                 xpath=checker_data.input_file_xml_root.getpath(next_geometry),
+                description=f"Redundant line geometry declaration.",
+            )
+
+            checker_data.result.add_file_location(
+                checker_bundle_name=constants.BUNDLE_NAME,
+                checker_id=CHECKER_ID,
+                issue_id=issue_id,
+                row=next_geometry.sourceline,
+                column=0,
                 description=f"Redundant line geometry declaration.",
             )
 
@@ -268,11 +340,29 @@ def _check_lane_widths(
                 description=f"Redundant lane width declaration.",
             )
 
+            checker_data.result.add_file_location(
+                checker_bundle_name=constants.BUNDLE_NAME,
+                checker_id=CHECKER_ID,
+                issue_id=issue_id,
+                row=current_width.xml_element.sourceline,
+                column=0,
+                description=f"Redundant lane width declaration.",
+            )
+
             checker_data.result.add_xml_location(
                 checker_bundle_name=constants.BUNDLE_NAME,
                 checker_id=CHECKER_ID,
                 issue_id=issue_id,
                 xpath=checker_data.input_file_xml_root.getpath(next_width.xml_element),
+                description=f"Redundant lane width declaration.",
+            )
+
+            checker_data.result.add_file_location(
+                checker_bundle_name=constants.BUNDLE_NAME,
+                checker_id=CHECKER_ID,
+                issue_id=issue_id,
+                row=next_width.xml_element.sourceline,
+                column=0,
                 description=f"Redundant lane width declaration.",
             )
 
@@ -328,11 +418,29 @@ def _check_lane_borders(
                 description=f"Redundant lane border declaration.",
             )
 
+            checker_data.result.add_file_location(
+                checker_bundle_name=constants.BUNDLE_NAME,
+                checker_id=CHECKER_ID,
+                issue_id=issue_id,
+                row=current_border.xml_element.sourceline,
+                column=0,
+                description=f"Redundant lane border declaration.",
+            )
+
             checker_data.result.add_xml_location(
                 checker_bundle_name=constants.BUNDLE_NAME,
                 checker_id=CHECKER_ID,
                 issue_id=issue_id,
                 xpath=checker_data.input_file_xml_root.getpath(next_border.xml_element),
+                description=f"Redundant lane border declaration.",
+            )
+
+            checker_data.result.add_file_location(
+                checker_bundle_name=constants.BUNDLE_NAME,
+                checker_id=CHECKER_ID,
+                issue_id=issue_id,
+                row=next_border.xml_element.sourceline,
+                column=0,
                 description=f"Redundant lane border declaration.",
             )
 

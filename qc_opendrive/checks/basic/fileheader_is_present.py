@@ -56,3 +56,12 @@ def check_rule(checker_data: models.CheckerData) -> None:
             xpath=checker_data.input_file_xml_root.getpath(root),
             description=f"No child element header",
         )
+
+        checker_data.result.add_file_location(
+            checker_bundle_name=constants.BUNDLE_NAME,
+            checker_id=CHECKER_ID,
+            issue_id=issue_id,
+            row=root.sourceline,
+            column=0,
+            description="No child element header",
+        )
