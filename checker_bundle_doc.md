@@ -112,6 +112,12 @@
 * Addressed rules:
   * asam.net:xodr:1.7.0:junctions.connection.end_opposite_linkage
 
+### check_asam_xodr_road_geometry_contact_point
+
+* Description: If two roads are connected without a junction, the road reference line of a new road shall always begin at the <contactPoint> element of its successor or predecessor road. The road reference lines may be directed in opposite directions.
+* Addressed rules:
+  * asam.net:xodr:1.7.0:road.geometry.contact_point
+
 ### check_asam_xodr_road_geometry_parampoly3_length_match
 
 * Description: The actual curve length, as determined by numerical integration over the parameter range, should match '@Length'.

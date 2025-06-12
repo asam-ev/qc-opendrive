@@ -204,3 +204,55 @@ def test_road_geometry_param_poly3_normalized_range(
         geometry.road_geometry_parampoly3_normalized_range.CHECKER_ID,
     )
     cleanup_files()
+
+
+# Examples from https://publications.pages.asam.net/standards/ASAM_OpenDRIVE/ASAM_OpenDRIVE_Specification/latest/specification/10_roads/10_03_road_linkage.html#top-86fc414c-6211-4777-b40e-466d4551d23e
+@pytest.mark.parametrize(
+    "target_file,issue_count,issue_xpath",
+    [
+        (
+            "valid_1",
+            0,
+            [],
+        ),
+        (
+            "valid_2",
+            0,
+            [],
+        ),
+        (
+            "valid_3",
+            0,
+            [],
+        ),
+        (
+            "invalid",
+            1,
+            [
+                "/OpenDRIVE/road[2]",
+            ],
+        ),
+    ],
+)
+def test_road_geometry_contact_point(
+    target_file: str,
+    issue_count: int,
+    issue_xpath: List[str],
+    monkeypatch,
+) -> None:
+    base_path = "tests/data/road_geometry_contact_point/"
+    target_file_name = f"{target_file}.xodr"
+    rule_uid = "asam.net:xodr:1.7.0:road.geometry.contact_point"
+    issue_severity = IssueSeverity.ERROR
+
+    target_file_path = os.path.join(base_path, target_file_name)
+    create_test_config(target_file_path)
+    launch_main(monkeypatch)
+    check_issues(
+        rule_uid,
+        issue_count,
+        issue_xpath,
+        issue_severity,
+        geometry.road_geometry_contact_point.CHECKER_ID,
+    )
+    cleanup_files()
