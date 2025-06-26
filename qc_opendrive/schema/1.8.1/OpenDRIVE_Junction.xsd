@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <!--ASAM OpenDRIVE V1.8.0
 
-© by ASAM e.V., 2023
+© by ASAM e.V., 2024
 
 ASAM OpenDRIVE defines a file format for the precise analytical description of road networks
 
 
-Any use is limited to the scope described in the ASAM license terms. 
-This file is distributable in accordance with the ASAM license terms. 
+Any use is limited to the scope described in the ASAM license terms.
+This file is distributable in accordance with the ASAM license terms.
 See www.asam.net/license.html for further details.
 --><xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
     <xs:include schemaLocation="OpenDRIVE_Core.xsd"/>
@@ -117,8 +117,8 @@ See www.asam.net/license.html for further details.
         <xs:complexContent>
             <xs:extension base="_OpenDriveElement">
                 <xs:sequence>
-                    <!--To ensure backward compatibility the associations of t_junction are applied to each 
-				 child class complex type explicitly to comply with the sequence order of earlier OpenDRIVE versions. 
+                    <!--To ensure backward compatibility the associations of t_junction are applied to each
+				 child class complex type explicitly to comply with the sequence order of earlier OpenDRIVE versions.
 				Thus the extension according to the UML is implemented (only) formaly: - ->
 					<!- -<xs:element maxOccurs="unbounded" minOccurs="0" name="priority" type="t_junction_priority"/>- ->
 					<!- -<xs:element maxOccurs="unbounded" minOccurs="0" name="controller" type="t_junction_controller"/>- ->
@@ -259,6 +259,7 @@ See www.asam.net/license.html for further details.
                         <xs:documentation>Common junctions are of type "default". If the attribute is not specified, the junction type is "default". This attribute is mandatory for all other junction types.</xs:documentation>
                     </xs:annotation>
                 </xs:attribute>
+                <xs:assert test="count(connection/@id) = count(distinct-values(connection/@id))"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
@@ -509,6 +510,7 @@ See www.asam.net/license.html for further details.
                         <xs:documentation>Common junctions are of type "default". If the attribute is not specified, the junction type is "default". This attribute is mandatory for all other junction types.</xs:documentation>
                     </xs:annotation>
                 </xs:attribute>
+                <xs:assert test="count(connection/@id) = count(distinct-values(connection/@id))"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
@@ -595,12 +597,12 @@ See www.asam.net/license.html for further details.
                 <xs:sequence>
                     <xs:group maxOccurs="unbounded" minOccurs="0" ref="g_additionalData"/>
                 </xs:sequence>
-                <xs:attribute name="high" type="xs:string" use="optional">
+                <xs:attribute name="high" type="xs:string" use="required">
                     <xs:annotation>
                         <xs:documentation>ID of the prioritized road</xs:documentation>
                     </xs:annotation>
                 </xs:attribute>
-                <xs:attribute name="low" type="xs:string" use="optional">
+                <xs:attribute name="low" type="xs:string" use="required">
                     <xs:annotation>
                         <xs:documentation>ID of the road with lower priority</xs:documentation>
                     </xs:annotation>
@@ -684,6 +686,7 @@ See www.asam.net/license.html for further details.
                         <xs:documentation>Common junctions are of type "default". If the attribute is not specified, the junction type is "default". This attribute is mandatory for all other junction types.</xs:documentation>
                     </xs:annotation>
                 </xs:attribute>
+                <xs:assert test="count(connection/@id) = count(distinct-values(connection/@id))"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>

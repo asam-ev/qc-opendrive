@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <!--ASAM OpenDRIVE V1.8.0
 
-© by ASAM e.V., 2023
+© by ASAM e.V., 2024
 
 ASAM OpenDRIVE defines a file format for the precise analytical description of road networks
 
 
-Any use is limited to the scope described in the ASAM license terms. 
-This file is distributable in accordance with the ASAM license terms. 
+Any use is limited to the scope described in the ASAM license terms.
+This file is distributable in accordance with the ASAM license terms.
 See www.asam.net/license.html for further details.
 --><xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
     <xs:include schemaLocation="OpenDRIVE_Core.xsd"/>
@@ -347,6 +347,7 @@ Lanes contain a series of lane section elements that define the characteristics 
                     <xs:element maxOccurs="unbounded" minOccurs="1" name="laneSection" type="t_road_lanes_laneSection"/>
                     <xs:group maxOccurs="unbounded" minOccurs="0" ref="g_additionalData"/>
                 </xs:sequence>
+                <xs:assert test="if (count(laneOffset) &gt; 0) then count(laneSection//border) = 0 else true()"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
@@ -863,7 +864,7 @@ Lane width and lane border elements are mutually exclusive within the same lane 
     </xs:complexType>
     <xs:complexType name="t_road_lanes_laneSection_lr_lane_height">
         <xs:annotation>
-            <xs:documentation>Lane heights elevate lanes along the h-coordinate within a lane section independent from the road elevation. 
+            <xs:documentation>Lane heights elevate lanes along the h-coordinate within a lane section independent from the road elevation.
 Lane height is used to implement small-scale elevation such as raising pedestrian walkways. Lane height is specified as offset from the road (including elevation, superelevation, shape, cross section surface) in h-direction.</xs:documentation>
         </xs:annotation>
         <xs:complexContent>

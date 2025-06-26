@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <!--ASAM OpenDRIVE V1.8.0
 
-© by ASAM e.V., 2023
+© by ASAM e.V., 2024
 
 ASAM OpenDRIVE defines a file format for the precise analytical description of road networks
 
 
-Any use is limited to the scope described in the ASAM license terms. 
-This file is distributable in accordance with the ASAM license terms. 
+Any use is limited to the scope described in the ASAM license terms.
+This file is distributable in accordance with the ASAM license terms.
 See www.asam.net/license.html for further details.
 --><xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
     <xs:include schemaLocation="OpenDRIVE_Railroad.xsd"/>
@@ -37,10 +37,6 @@ See www.asam.net/license.html for further details.
         </xs:complexType>
         <xs:key name="k_junctionId">
             <xs:selector xpath="junction"/>
-            <xs:field xpath="@id"/>
-        </xs:key>
-        <xs:key name="k_junction_connectionId">
-            <xs:selector xpath="connection"/>
             <xs:field xpath="@id"/>
         </xs:key>
         <xs:keyref name="r_junction_connection_incomingRoad" refer="k_roadId">
@@ -233,9 +229,9 @@ See www.asam.net/license.html for further details.
         <xs:sequence>
             <!--For compatibility with XSD 1.0 the next line is commented out: - ->
             <!- - <xs:group ref="g_additionalData" minOccurs="0" maxOccurs="unbounded"/> - ->
-            <!- - 
-				To ensure backward compatibility the "additionalData" is applied to each 
-				complex type explicitly to comply with the sequence order of earlier OpenDRIVE versions. 
+            <!- -
+				To ensure backward compatibility the "additionalData" is applied to each
+				complex type explicitly to comply with the sequence order of earlier OpenDRIVE versions.
 				Thus the extension according to the UML is implemented (only) formaly.-->
         </xs:sequence>
     </xs:complexType>

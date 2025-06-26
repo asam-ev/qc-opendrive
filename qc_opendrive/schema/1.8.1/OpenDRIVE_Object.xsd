@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <!--ASAM OpenDRIVE V1.8.0
 
-© by ASAM e.V., 2023
+© by ASAM e.V., 2024
 
 ASAM OpenDRIVE defines a file format for the precise analytical description of road networks
 
 
-Any use is limited to the scope described in the ASAM license terms. 
-This file is distributable in accordance with the ASAM license terms. 
+Any use is limited to the scope described in the ASAM license terms.
+This file is distributable in accordance with the ASAM license terms.
 See www.asam.net/license.html for further details.
 --><xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
     <xs:include schemaLocation="OpenDRIVE_Core.xsd"/>
@@ -220,7 +220,16 @@ If the crosswalk is defined as an object only, it will not be used for pedestria
         <xs:complexContent>
             <xs:extension base="_OpenDriveElement">
                 <xs:sequence>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="object" type="t_road_objects_object"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="object" type="t_road_objects_object">
+                        <xs:keyref name="r_road_objects_object_borders_border_outlineRef" refer="k_road_objects_object_outlines_outlineId">
+                            <xs:selector xpath="road/objects/object/borders/border"/>
+                            <xs:field xpath="@outlineId"/>
+                        </xs:keyref>
+                        <xs:key name="k_road_objects_object_outlines_outlineId">
+                            <xs:selector xpath="road/objects/object/outlines/outline | road/objects/object/outline"/>
+                            <xs:field xpath="@id"/>
+                        </xs:key>
+                    </xs:element>
                     <xs:element maxOccurs="unbounded" minOccurs="0" name="objectReference" type="t_road_objects_objectReference"/>
                     <xs:element maxOccurs="unbounded" minOccurs="0" name="tunnel" type="t_road_objects_tunnel"/>
                     <xs:element maxOccurs="unbounded" minOccurs="0" name="bridge" type="t_road_objects_bridge"/>
@@ -301,7 +310,7 @@ There are two ways to describe the bounding box of objects.
                 </xs:attribute>
                 <xs:attribute name="height" type="t_grEqZero" use="optional">
                     <xs:annotation>
-                        <xs:documentation>Height of the object's bounding box. 
+                        <xs:documentation>Height of the object's bounding box.
 @height is defined in the local coordinate system u/v along the z-axis</xs:documentation>
                     </xs:annotation>
                 </xs:attribute>
@@ -385,6 +394,19 @@ There are two ways to describe the bounding box of objects.
                         <xs:documentation>z-offset of object's origin relative to the elevation of the road reference line</xs:documentation>
                     </xs:annotation>
                 </xs:attribute>
+                <xs:assert test="not(@radius or @width or @length) or (@radius and not(@width or @length)) or  (@width and @length and not(@radius))"/>
+                <xs:assert test="if (@type = 'barrier') then (not(@radius) and not(marking) and not(border) and not(material) and not(surface) and not(parkingSpace) and not(skeleton) and (not(repeat/@distance) or repeat/@distance = 0)) else true()"/>
+                <xs:assert test="if (@type = 'building') then (not(marking) and not(border) and not(material) and not(surface) and not(parkingSpace) and not(skeleton) and (not(repeat/@distance) or repeat/@distance &gt; 0)) else true()"/>
+                <xs:assert test="if (@type = 'crosswalk') then (not(skeleton) and not(border) and not(parkingSpace) and not(@radius) and (not(repeat/@distance) or repeat/@distance != 0)) else true()"/>
+                <xs:assert test="if (@type = 'gantry') then (not(@radius) and not(marking) and not(border) and not(material) and not(surface) and not(parkingSpace) and (not(repeat/@distance) or repeat/@distance &gt; 0)) else true()"/>
+                <xs:assert test="if (@type = 'obstacle') then (not(skeleton) and not(marking) and not(border) and not(material) and not(surface) and not(parkingSpace) and (not(repeat/@distance) or repeat/@distance &gt; 0)) else true()"/>
+                <xs:assert test="if (@type = 'parkingSpace') then (not(@radius) and not(skeleton) and not(border) and (not(repeat/@distance) or repeat/@distance &gt; 0)) else true()"/>
+                <xs:assert test="if (@type = 'pole') then (not(border) and not(parkingSpace) and not(material) and not(marking) and not(surface) and (not(repeat/@distance) or repeat/@distance &gt; 0)) else true()"/>
+                <xs:assert test="if (@type = 'roadMark') then (not(@radius) and not(skeleton) and not(border) and not(parkingSpace) and (not(repeat/@distance) or repeat/@distance &gt; 0)) else true()"/>
+                <xs:assert test="if (@type = 'roadSurface') then (not(skeleton) and not(border) and not(parkingSpace) and not(marking) and (not(repeat/@distance) or repeat/@distance &gt; 0)) else true()"/>
+                <xs:assert test="if (@type = 'trafficIsland') then (not(skeleton) and not(surface) and not(parkingSpace)) else true()"/>
+                <xs:assert test="if (@type = 'tree') then (not(material) and not(surface) and not(border) and not(parkingSpace) and not(marking) and (not(repeat/@distance) or repeat/@distance &gt; 0)) else true()"/>
+                <xs:assert test="if (@type = 'vegetation') then (not(skeleton) and not(material) and not(surface) and not(border) and not(parkingSpace) and not(marking) and (not(repeat/@distance) or repeat/@distance &gt; 0)) else true()"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
@@ -432,6 +454,7 @@ Different border types are available.</xs:documentation>
                         <xs:documentation>Border width</xs:documentation>
                     </xs:annotation>
                 </xs:attribute>
+                <xs:assert test="if (@useCompleteOutline) then not(cornerReference) else count(cornerReference) gt 1"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
@@ -578,9 +601,9 @@ ASAM OpenDRIVE 1.4 outline definitions (without &lt;outlines&gt; parent element)
         <xs:complexContent>
             <xs:extension base="_OpenDriveElement">
                 <xs:sequence>
-                    <xs:choice maxOccurs="1" minOccurs="0">
-                        <xs:element maxOccurs="unbounded" minOccurs="1" name="cornerRoad" type="t_road_objects_object_outlines_outline_cornerRoad"/>
-                        <xs:element maxOccurs="unbounded" minOccurs="1" name="cornerLocal" type="t_road_objects_object_outlines_outline_cornerLocal"/>
+                    <xs:choice maxOccurs="1" minOccurs="1">
+                        <xs:element maxOccurs="unbounded" minOccurs="2" name="cornerRoad" type="t_road_objects_object_outlines_outline_cornerRoad"/>
+                        <xs:element maxOccurs="unbounded" minOccurs="2" name="cornerLocal" type="t_road_objects_object_outlines_outline_cornerLocal"/>
                     </xs:choice>
                     <xs:group maxOccurs="unbounded" minOccurs="0" ref="g_additionalData"/>
                 </xs:sequence>
@@ -812,13 +835,13 @@ If this value is zero, then the object is treated like a continuous feature, for
     </xs:complexType>
     <xs:complexType name="t_road_objects_object_skeleton_polyline">
         <xs:annotation>
-            <xs:documentation>Defines a series of points relative to the road reference line. 
+            <xs:documentation>Defines a series of points relative to the road reference line.
 An &lt;polyline&gt; element shall be followed by either two or more &lt;vertexRoad&gt; elements or by two or more &lt;vertexLocal&gt; elements.</xs:documentation>
         </xs:annotation>
         <xs:sequence>
-            <xs:choice maxOccurs="1" minOccurs="0">
-                <xs:element maxOccurs="unbounded" minOccurs="1" name="vertexRoad" type="t_road_objects_object_skeleton_polyline_vertexRoad"/>
-                <xs:element maxOccurs="unbounded" minOccurs="1" name="vertexLocal" type="t_road_objects_object_skeleton_polyline_vertexLocal"/>
+            <xs:choice maxOccurs="1" minOccurs="1">
+                <xs:element maxOccurs="unbounded" minOccurs="2" name="vertexRoad" type="t_road_objects_object_skeleton_polyline_vertexRoad"/>
+                <xs:element maxOccurs="unbounded" minOccurs="2" name="vertexLocal" type="t_road_objects_object_skeleton_polyline_vertexLocal"/>
             </xs:choice>
             <xs:group maxOccurs="unbounded" minOccurs="0" ref="g_additionalData"/>
         </xs:sequence>

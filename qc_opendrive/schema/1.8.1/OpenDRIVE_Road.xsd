@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <!--ASAM OpenDRIVE V1.8.0
 
-© by ASAM e.V., 2023
+© by ASAM e.V., 2024
 
 ASAM OpenDRIVE defines a file format for the precise analytical description of road networks
 
 
-Any use is limited to the scope described in the ASAM license terms. 
-This file is distributable in accordance with the ASAM license terms. 
+Any use is limited to the scope described in the ASAM license terms.
+This file is distributable in accordance with the ASAM license terms.
 See www.asam.net/license.html for further details.
 --><xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
     <xs:include schemaLocation="OpenDRIVE_Junction.xsd"/>
@@ -220,6 +220,7 @@ ASAM OpenDRIVE roads may be roads in the real road network or artificial road ne
                     <xs:element maxOccurs="1" minOccurs="0" name="crossSectionSurface" type="t_road_lateralProfile_crossSectionSurface"/>
                     <xs:group maxOccurs="unbounded" minOccurs="0" ref="g_additionalData"/>
                 </xs:sequence>
+                <xs:assert test="not(exists(crossSectionSurface)) or (not(exists(superelevation)) and not(exists(shape)))"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
@@ -715,7 +716,7 @@ Positive curvature: left curve (counter-clockwise motion) Negative curvature: ri
                 </xs:attribute>
                 <xs:attribute name="curvStart" type="xs:double" use="required">
                     <xs:annotation>
-                        <xs:documentation>Curvature at the start of the element. 
+                        <xs:documentation>Curvature at the start of the element.
 Positive curvature: left curve (counter-clockwise motion) Negative curvature: right curve (clockwise motion)</xs:documentation>
                     </xs:annotation>
                 </xs:attribute>
@@ -777,7 +778,7 @@ Positive curvature: left curve (counter-clockwise motion) Negative curvature: ri
                 </xs:attribute>
                 <xs:attribute name="sOffset" type="xs:double" use="optional">
                     <xs:annotation>
-                        <xs:documentation>s-offset between CRG center line and reference line of the road 
+                        <xs:documentation>s-offset between CRG center line and reference line of the road
 (default = 0.0)</xs:documentation>
                     </xs:annotation>
                 </xs:attribute>
