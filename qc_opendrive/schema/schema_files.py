@@ -12,5 +12,5 @@ SCHEMA_FILES = {
     "1.5.0": "1.5/OpenDRIVE_1.5M.xsd",
     "1.6.0": "1.6.1/opendrive_16_core.xsd",
     "1.7.0": "1.7.0/opendrive_17_core.xsd",
-    "1.8.0": "1.8.0/OpenDRIVE_Core.xsd",
+    "1.8.0": "1.8.1/OpenDRIVE_Core.xsd",
 }
