@@ -112,6 +112,18 @@
 * Addressed rules:
   * asam.net:xodr:1.7.0:junctions.connection.end_opposite_linkage
 
+### check_asam_xodr_road_geometry_contact_point
+
+* Description: If two roads are connected without a junction, the road reference line of a new road shall always begin at the <contactPoint> element of its successor or predecessor road. The road reference lines may be directed in opposite directions.
+* Addressed rules:
+  * asam.net:xodr:1.7.0:road.geometry.contact_point
+
+### check_asam_xodr_road_geometry_elem_asc_order
+
+* Description: <geometry> elements shall be defined in ascending order along the road reference line according to the s-coordinate.
+* Addressed rules:
+  * asam.net:xodr:1.4.0:road.geometry.elem_asc_order
+
 ### check_asam_xodr_road_geometry_parampoly3_length_match
 
 * Description: The actual curve length, as determined by numerical integration over the parameter range, should match '@Length'.
@@ -135,6 +147,12 @@
 * Description: If @prange='normalized', p shall be chosen in [0, 1].
 * Addressed rules:
   * asam.net:xodr:1.7.0:road.geometry.parampoly3.normalized_range
+
+### check_asam_xodr_road_geometry_parampoly3_valid_parameters
+
+* Description: One <geometry> element shall contain only one element that further specifies the geometry of the road.
+* Addressed rules:
+  * asam.net:xodr:1.7.0:road.geometry.one_geom_elem_per_spec
 
 ### check_asam_xodr_performance_avoid_redundant_info
 
