@@ -256,3 +256,106 @@ def test_road_geometry_contact_point(
         geometry.road_geometry_contact_point.CHECKER_ID,
     )
     cleanup_files()
+
+
+@pytest.mark.parametrize(
+    "target_file,issue_count,issue_xpath",
+    [
+        (
+            "valid",
+            0,
+            [],
+        ),
+        (
+            "invalid",
+            1,
+            [
+                "/OpenDRIVE/road/planView/geometry[3]",
+            ],
+        ),
+    ],
+)
+def test_road_geometry_elem_asc_order(
+    target_file: str,
+    issue_count: int,
+    issue_xpath: List[str],
+    monkeypatch,
+) -> None:
+    base_path = "tests/data/road_geometry_elem_asc_order/"
+    target_file_name = f"{target_file}.xodr"
+    rule_uid = "asam.net:xodr:1.4.0:road.geometry.elem_asc_order"
+    issue_severity = IssueSeverity.ERROR
+
+    target_file_path = os.path.join(base_path, target_file_name)
+    create_test_config(target_file_path)
+    launch_main(monkeypatch)
+    check_issues(
+        rule_uid,
+        issue_count,
+        issue_xpath,
+        issue_severity,
+        geometry.road_geometry_elem_asc_order.CHECKER_ID,
+    )
+    cleanup_files()
+
+
+@pytest.mark.parametrize(
+    "target_file,issue_count,issue_xpath",
+    [
+        (
+            "valid",
+            0,
+            [],
+        ),
+        (
+            "aU_invalid",
+            1,
+            [
+                "/OpenDRIVE/road/planView/geometry[1]/paramPoly3",
+            ],
+        ),
+        (
+            "aV_invalid",
+            1,
+            [
+                "/OpenDRIVE/road/planView/geometry[1]/paramPoly3",
+            ],
+        ),
+        (
+            "bU_invalid",
+            1,
+            [
+                "/OpenDRIVE/road/planView/geometry[2]/paramPoly3",
+            ],
+        ),
+        (
+            "bV_invalid",
+            1,
+            [
+                "/OpenDRIVE/road/planView/geometry[2]/paramPoly3",
+            ],
+        ),
+    ],
+)
+def test_road_geometry_parampoly3_valid_parameters(
+    target_file: str,
+    issue_count: int,
+    issue_xpath: List[str],
+    monkeypatch,
+) -> None:
+    base_path = "tests/data/road_geometry_parampoly3_valid_parameters/"
+    target_file_name = f"{target_file}.xodr"
+    rule_uid = "asam.net:xodr:1.7.0:road.geometry.paramPoly3.valid_parameters"
+    issue_severity = IssueSeverity.ERROR
+
+    target_file_path = os.path.join(base_path, target_file_name)
+    create_test_config(target_file_path)
+    launch_main(monkeypatch)
+    check_issues(
+        rule_uid,
+        issue_count,
+        issue_xpath,
+        issue_severity,
+        geometry.road_geometry_parampoly3_valid_parameters.CHECKER_ID,
+    )
+    cleanup_files()

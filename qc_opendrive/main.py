@@ -265,6 +265,8 @@ def run_checks(config: Configuration, result: Result) -> None:
     execute_checker(geometry.road_geometry_parampoly3_arclength_range, checker_data)
     execute_checker(geometry.road_geometry_parampoly3_normalized_range, checker_data)
     execute_checker(geometry.road_geometry_contact_point, checker_data)
+    execute_checker(geometry.road_geometry_elem_asc_order, checker_data)
+    execute_checker(geometry.road_geometry_parampoly3_valid_parameters, checker_data)
 
     # 5. Run performance checks
     execute_checker(performance.performance_avoid_redundant_info, checker_data)

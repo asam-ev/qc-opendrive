@@ -19,3 +19,11 @@ from . import (
 from . import (
     road_geometry_contact_point as road_geometry_contact_point,
 )
+
+from . import (
+    road_geometry_elem_asc_order as road_geometry_elem_asc_order,
+)
+
+from . import (
+    road_geometry_parampoly3_valid_parameters as road_geometry_parampoly3_valid_parameters,
+)
