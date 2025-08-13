@@ -388,6 +388,14 @@ def test_road_lane_link_lanes_across_lane_sections(
                 "/OpenDRIVE/road[3]/link/predecessor",
             ],
         ),
+        (
+            "invalid_converge",
+            1,
+            [
+                "/OpenDRIVE/road[2]/link/successor",
+                "/OpenDRIVE/road[3]/link/successor",
+            ],
+        ),
     ],
 )
 def test_road_linkage_is_junction_needed(
