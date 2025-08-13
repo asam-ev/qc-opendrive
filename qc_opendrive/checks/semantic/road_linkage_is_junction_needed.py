@@ -132,7 +132,7 @@ def _check_road_linkage_is_junction_needed(checker_data: models.CheckerData) -> 
                 if contact_point_id not in road_contact_point_map:
                     road_contact_point_map[contact_point_id] = []
                 successor_link = utils.get_road_link_element(
-                    road, road_successor_linkage.id, models.LinkageTag.PREDECESSOR
+                    road, road_successor_linkage.id, models.LinkageTag.SUCCESSOR
                 )
 
                 road_contact_point_map[contact_point_id].append(successor_link)
