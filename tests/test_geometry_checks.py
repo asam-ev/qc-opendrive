@@ -227,9 +227,16 @@ def test_road_geometry_param_poly3_normalized_range(
         ),
         (
             "invalid",
-            1,
+            2,
             [
                 "/OpenDRIVE/road[2]",
+            ],
+        ),
+        (
+            "invalid_2",
+            1,
+            [
+                "/OpenDRIVE/road[1]",
             ],
         ),
     ],

@@ -5,8 +5,10 @@
 # with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import logging
+from typing import Optional
 
 from lxml import etree
+from numpy.ma.core import true_divide
 from qc_baselib import IssueSeverity
 
 from qc_opendrive import basic_preconditions
@@ -55,6 +57,37 @@ def _raise_issue(
             description="The road reference line does not begin at the contact point of its predecessor or successor.",
         )
 
+
+def _xcessor_contact_point_has_issue(xcessor, road_contact_point_xyz, road_id_map) -> Optional[models.Point3D]:
+    if xcessor is None:
+        return None
+
+    if xcessor.get("elementType") == "junction":
+        return None
+
+    xcessor_road = road_id_map.get(utils.to_int(xcessor.get("elementId")))
+    if xcessor_road is None:
+        return None
+
+    contact_point = xcessor.get("contactPoint")
+    if contact_point is None:
+        return None
+
+    xcessor_contact_point_xyz = utils.get_point_xyz_from_contact_point(xcessor_road, contact_point)
+    if xcessor_contact_point_xyz is None:
+        return None
+
+    # allow error in the order of 1e-6 for floating point comparison of coordinates
+    if any(
+            abs(getattr(road_contact_point_xyz, attr) - getattr(xcessor_contact_point_xyz, attr))
+            >= FLOAT_COMPARISON_THRESHOLD
+            for attr in ("x", "y", "z")
+    ):
+        return xcessor_contact_point_xyz
+
+    return None
+
+
 def _check_junctions_connection_lane_follow_direction(
         checker_data: models.CheckerData,
 ) -> None:
@@ -66,41 +99,15 @@ def _check_junctions_connection_lane_follow_direction(
         if utils.to_int(road.get("junction")) == 1:
             continue
 
-        road_start_point = utils.get_start_point_xyz_from_road_reference_line(road)
-        road_end_point = utils.get_end_point_xyz_from_road_reference_line(road)
+        road_start = (road.find("link").find("predecessor"),
+                      utils.get_start_point_xyz_from_road_reference_line(road))
+        road_end = (road.find("link").find("successor"),
+                    utils.get_end_point_xyz_from_road_reference_line(road))
 
-        predecessor = road.find("link").find("predecessor")
-        if predecessor is not None and predecessor.get("elementType") != "junction":
-            predecessor_road = road_id_map.get(utils.to_int(predecessor.get("elementId")))
-            if predecessor_road is not None and predecessor.get("elementType") != "junction":
-                contact_point = predecessor.get("contactPoint")
-                if contact_point:
-                    predecessor_contact_point_xyz = utils.get_point_xyz_from_contact_point(predecessor_road,
-                                                                                           contact_point)
-                    if predecessor_contact_point_xyz:
-                        # allow error in the order of 1e-6 for floating point comparison of coordinates
-                        if any(
-                                abs(getattr(road_start_point, attr) - getattr(predecessor_contact_point_xyz, attr))
-                                > FLOAT_COMPARISON_THRESHOLD
-                                for attr in ("x", "y", "z")
-                        ):
-                            _raise_issue(checker_data, road, predecessor_contact_point_xyz)
-
-        successor = road.find("link").find("successor")
-        if successor is not None and successor.get("elementType") != "junction":
-            successor_road = road_id_map.get(utils.to_int(successor.get("elementId")))
-            if successor_road is not None and successor.get("elementType") != "junction":
-                contact_point = successor.get("contactPoint")
-                if contact_point:
-                    successor_contact_point_xyz = utils.get_point_xyz_from_contact_point(successor_road, contact_point)
-                    if successor_contact_point_xyz:
-                        # allow error in the order of 1e-6 for floating point comparison of coordinates
-                        if any(
-                                (getattr(road_end_point, attr) - getattr(successor_contact_point_xyz, attr))
-                                > FLOAT_COMPARISON_THRESHOLD
-                                for attr in ("x", "y", "z")
-                        ):
-                            _raise_issue(checker_data, road, successor_contact_point_xyz)
+        for road_side in (road_start, road_end):
+            xcessor_contact_point_xyz_with_issue = _xcessor_contact_point_has_issue(*road_side, road_id_map)
+            if xcessor_contact_point_xyz_with_issue is not None:
+                _raise_issue(checker_data, road, xcessor_contact_point_xyz_with_issue)
 
 
 def check_rule(checker_data: models.CheckerData) -> None:
