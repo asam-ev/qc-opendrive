@@ -58,7 +58,11 @@ def _raise_issue(
         )
 
 
-def _xcessor_contact_point_has_issue(xcessor, road_contact_point_xyz, road_id_map) -> Optional[models.Point3D]:
+def _xcessor_contact_point_has_issue(
+        xcessor: etree._Element,
+        road_contact_point_xyz: models.Point3D,
+        road_id_map: dict
+) -> Optional[models.Point3D]:
     if xcessor is None:
         return None
 
