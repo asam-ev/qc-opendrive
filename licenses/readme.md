@@ -39,20 +39,6 @@ For calculating integrals, which are used to calculate length concepts in OpenDr
 - [Scipy_LICENSE](./3rd_party_terms_and_licenses/Scipy_LICENSE)
 - Download: <https://pypi.org/project/scipy/>
 
-## Pyclothoids
-
-For working with the spiral concept in OpenDrive.
-
-- [Pyclothoids_LICENSE](./3rd_party_terms_and_licenses/Pyclothoids_LICENSE)
-- Download: <https://pypi.org/project/pyclothoids/>
-
-## Transforms3d
-
-For computing rotation matrices, which are used OpenDrive coordinate transformation.
-
-- [Transforms3d_LICENSE](./3rd_party_terms_and_licenses/Transforms3d_LICENSE)
-- Download: <https://pypi.org/project/transforms3d/>
-
 ## Xmlschema
 
 For validating XML 1.1 schema.

@@ -16,8 +16,6 @@ asam-qc-baselib = "^1.0.0rc1"
 lxml = "^5.2.2"
 numpy = "^1.26.0"
 scipy = "^1.14.0"
-pyclothoids = "^0.1.5"
-transforms3d = "^0.4.2"
 xmlschema = "^3.3.1"
 semver = "^3.0.0"
 
