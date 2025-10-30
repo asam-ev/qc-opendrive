@@ -1762,3 +1762,13 @@ def get_middle_point_xyz_at_height_zero_from_lane_by_s(
 
 def get_s_offset_from_access(access: etree._ElementTree) -> Optional[float]:
     return to_float(access.get("sOffset"))
+
+def get_point_xyz_from_contact_point(
+        road: etree._ElementTree, contact_point: str
+) -> Optional[models.Point3D]:
+    if contact_point == models.ContactPoint.START:
+        return get_start_point_xyz_from_road_reference_line(road)
+    elif contact_point == models.ContactPoint.END:
+        return get_end_point_xyz_from_road_reference_line(road)
+    else:
+        return None
