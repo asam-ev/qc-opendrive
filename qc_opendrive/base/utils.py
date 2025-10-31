@@ -9,10 +9,10 @@ import numpy as np
 from io import BytesIO
 from typing import List, Dict, Union, Optional
 from lxml import etree
-import pyclothoids as pc
-import transforms3d
+from scipy.spatial.transform import Rotation as rotation_factory
 
 from qc_opendrive.base import models
+from .spiral import spiral
 
 EPSILON = 1.0e-6
 ZERO_OFFSET_POLY3 = models.OffsetPoly3(
@@ -1113,14 +1113,8 @@ def calculate_spiral_point(
     curv_end: float,
     length: float,
 ) -> models.Point2D:
-    # curvature rate given by
-    # A = (K1 - K0) / L
-    kd = (curv_end - curv_start) / length
-
-    # Standard clothoid for the given parameters
-    clothoid = pc.Clothoid.StandardParams(x0, y0, heading, curv_start, kd, length)
-
-    return models.Point2D(x=clothoid.X(s - s0), y=clothoid.Y(s - s0))
+    x, y, _ = spiral(s - s0, x0, y0, heading, curv_start, curv_end, length)
+    return models.Point2D(x, y)
 
 
 def calculate_poly3_arclen_point(
@@ -1345,10 +1339,8 @@ def calculate_spiral_point_heading(
     curv_end: float,
     length: float,
 ) -> float:
-    kd = (curv_end - curv_start) / length
-    clothoid = pc.Clothoid.StandardParams(x0, y0, heading, curv_start, kd, length)
-
-    return clothoid.Theta(s - s0)
+    _, _, theta = spiral(s - s0, x0, y0, heading, curv_start, curv_end, length)
+    return theta
 
 
 def calculate_poly3_arclen_heading(
@@ -1527,7 +1519,8 @@ def get_point_xyz_from_road(
     if yaw is None or roll is None:
         return None
 
-    rotation = transforms3d.euler.euler2mat(yaw, 0.0, roll, "rzyx")
+    rot = rotation_factory.from_euler('ZYX', [yaw, 0.0, roll], degrees=False)
+    rotation = rot.as_matrix()
     d_point = rotation.dot(np.array([0.0, t, h]))
 
     ref_line_point = get_point_xyz_from_road_reference_line(road, s)
