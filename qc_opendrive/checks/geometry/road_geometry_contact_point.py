@@ -103,10 +103,18 @@ def _check_junctions_connection_lane_follow_direction(
         if utils.to_int(road.get("junction")) == 1:
             continue
 
-        road_start = (road.find("link").find("predecessor"),
-                      utils.get_start_point_xyz_from_road_reference_line(road))
-        road_end = (road.find("link").find("successor"),
-                    utils.get_end_point_xyz_from_road_reference_line(road))
+        road_link = road.find("link")
+        if road_link is None:
+            continue
+
+        road_start = (
+            road_link.find("predecessor"),
+            utils.get_start_point_xyz_from_road_reference_line(road),
+        )
+        road_end = (
+            road_link.find("successor"),
+            utils.get_end_point_xyz_from_road_reference_line(road),
+        )
 
         for road_side in (road_start, road_end):
             xcessor_contact_point_xyz_with_issue = _xcessor_contact_point_has_issue(*road_side, road_id_map)
