@@ -335,6 +335,8 @@ def _check_appearing_successor_junction(
             connection_lane = utils.get_lane_from_lane_section(
                 contact_lane_sections.connection, to_lane_id
             )
+            if connection_lane is None:
+                continue
 
             connection_lane_contact_width = None
             if connection_contact_point == models.ContactPoint.START:
@@ -419,6 +421,8 @@ def _check_appearing_predecessor_junction(
             connection_lane = utils.get_lane_from_lane_section(
                 contact_lane_sections.connection, to_lane_id
             )
+            if connection_lane is None:
+                continue
 
             connection_lane_contact_width = None
             if connection_contact_point == models.ContactPoint.START:

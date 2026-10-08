@@ -689,6 +689,7 @@ def test_road_lane_link_zero_width_at_start(
     [
         ("valid", 0, []),
         ("valid_1", 0, []),
+        ("missing_target_lane", 0, []),
         (
             "invalid",
             1,

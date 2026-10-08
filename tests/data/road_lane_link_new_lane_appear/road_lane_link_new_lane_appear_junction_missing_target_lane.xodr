@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OpenDRIVE>
+    <header revMajor="1" revMinor="8" name="missing target lane" version="1.00" date="2026-10-08T00:00:00" north="10" south="-10" east="10" west="-10" vendor=""/>
+    <road name="incoming" length="10" id="1" junction="-1">
+        <link>
+            <successor elementType="junction" elementId="10"/>
+        </link>
+        <planView>
+            <geometry s="0" x="0" y="0" hdg="0" length="10">
+                <line/>
+            </geometry>
+        </planView>
+        <lanes>
+            <laneSection s="0">
+                <center>
+                    <lane id="0" type="none">
+                        <roadMark sOffset="0" type="none" color="standard"/>
+                    </lane>
+                </center>
+                <right>
+                    <lane id="-1" type="driving">
+                        <width sOffset="0" a="3" b="0" c="0" d="0"/>
+                    </lane>
+                </right>
+            </laneSection>
+        </lanes>
+    </road>
+    <road name="connecting" length="10" id="2" junction="10">
+        <link>
+            <predecessor elementType="road" elementId="1" contactPoint="end"/>
+        </link>
+        <planView>
+            <geometry s="0" x="10" y="0" hdg="0" length="10">
+                <line/>
+            </geometry>
+        </planView>
+        <lanes>
+            <laneSection s="0">
+                <center>
+                    <lane id="0" type="none">
+                        <roadMark sOffset="0" type="none" color="standard"/>
+                    </lane>
+                </center>
+                <right>
+                    <lane id="-1" type="driving">
+                        <width sOffset="0" a="3" b="0" c="0" d="0"/>
+                    </lane>
+                </right>
+            </laneSection>
+        </lanes>
+    </road>
+    <junction name="junction" id="10" type="default">
+        <connection id="0" incomingRoad="1" connectingRoad="2" contactPoint="start">
+            <laneLink from="-1" to="-3"/>
+        </connection>
+    </junction>
+</OpenDRIVE>
